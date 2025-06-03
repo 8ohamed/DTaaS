@@ -20,7 +20,7 @@ The package is available on
 Install the package with the following command:
 
 ```bash
-sudo npm install -g @into-cps-association/runner
+sudo npm install -g @into-cps-association/runner@0.3.3
 ```
 
 ### Github Registry
@@ -32,7 +32,7 @@ Set the registry and install the package with the following commands
 
 ```bash
 sudo npm config set @into-cps-association:registry https://npm.pkg.github.com
-sudo npm install -g @into-cps-association/runner
+sudo npm install -g @into-cps-association/runner@0.3.3
 ```
 
 The _npm install_ command asks for username and password. The username is

@@ -17,7 +17,7 @@ the following into the file:
 ```yml
 services:
   libms:
-    image: intocps/libms:latest
+    image: intocps/libms:0.5.4
     restart: unless-stopped
     volumes:
       - ./libms.yaml:/dtaas/libms/libms.yaml

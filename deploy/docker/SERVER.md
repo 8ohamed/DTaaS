@@ -181,7 +181,7 @@ please change,
 
 ```yaml
   libms:
-    image: intocps/libms:latest
+    image: intocps/libms:0.5.4
     restart: unless-stopped
     volumes:
       - ${DTAAS_DIR}/files/common:/dtaas/libms/files

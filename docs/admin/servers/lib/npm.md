@@ -44,7 +44,7 @@ the two following commands
 ### npmjs
 
 ``` bash
-sudo npm install -g @into-cps-association/libms  # requires no login
+sudo npm install -g @into-cps-association/libms@0.5.4  # requires no login
 ```
 
 ### Github

@@ -1,6 +1,6 @@
 services:
   libms:
-    image: intocps/libms:latest
+    image: intocps/libms:0.5.4
     restart: unless-stopped
     volumes:
       - ./config/libms.dev.yaml:/dtaas/libms/libms.yaml
