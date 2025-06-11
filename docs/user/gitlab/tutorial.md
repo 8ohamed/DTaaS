@@ -21,6 +21,14 @@ This user needs to have ownership permissions over the project.
 
 ![Project ownership](./repo-ownership.png)
 
+<!-- markdownlint-disable MD046 -->
+<!-- prettier-ignore -->
+!!! warning
+    The DTaaS website expects a default branch named
+    `main` to exist. The website client performs all the git
+    operations on this branch.
+<!-- markdownlint-enable MD046 -->
+
 ## Git commands
 
 The usual git commands and workflows should be used. There are two ways to
@@ -36,7 +44,12 @@ First step is to create PAT.
 
 ![Create PAT](create-PAT.png)
 
-Copy this token and use it to clone the git repository.
+Copy this token and use it to clone the git repository. For example, to clone
+git repository of `user1`, you can
+
+```bash
+git remote add https://user1:PAT-1@foo.com/gitlab/dtaas/user1.git
+```
 
 ## Library Assets
 

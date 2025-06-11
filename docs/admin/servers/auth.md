@@ -171,8 +171,14 @@ Use a simple command on the terminal.
 docker compose -f compose.server.yml --env-file .env up -d --force-recreate traefik-forward-auth
 ```
 
-- For a server instance:
+- For a server instance running in HTTP mode:
 
 ```bash
 docker compose -f compose.server.yml --env-file .env.server up -d --force-recreate traefik-forward-auth
+```
+
+- For a server instance running in HTTPS mode:
+
+```bash
+docker compose -f compose.server.secure.yml --env-file .env.server up -d --force-recreate traefik-forward-auth
 ```
