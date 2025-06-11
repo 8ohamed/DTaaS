@@ -202,7 +202,7 @@ docker compose -f compose.server.yml --env-file .env.server up -d
 docker compose -f compose.server.yml --env-file .env.server down
 ```
 
-To restart only a specific container, for example `client``
+To restart only a specific container, for example `client`
 
 ```bash
 docker compose -f compose.server.yml --env-file .env.server up -d --force-recreate client
@@ -257,7 +257,7 @@ docker compose -f compose.server.secure.yml --env-file .env.server up -d
 docker compose -f compose.server.secure.yml --env-file .env.server down
 ```
 
-To restart only a specific container, for example `client``
+To restart only a specific container, for example `client`
 
 ```bash
 docker compose -f compose.server.secure.yml --env-file .env.server up -d --force-recreate client
