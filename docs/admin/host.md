@@ -20,8 +20,7 @@ The installation requirements to run this docker version of the DTaaS are:
 ### Docker with Compose Plugin
 
 It is mandatory to have [Docker](https://www.docker.com/) installed
-on your computer. We highly recommend using
-[Docker Desktop](https://www.docker.com/products/docker-desktop/).
+on your computer.
 
 ### Domain name
 
@@ -74,12 +73,13 @@ Please see
 [gitlab oauth provider](https://docs.gitlab.com/ee/integration/oauth_provider.html)
 documentation for further help with creating these two OAuth applications.
 
-## Clone Codebase
+## Download Package
 
-```bash
-git clone https://github.com/INTO-CPS-Association/DTaaS.git
-cd DTaaS
-```
+The software is available for as
+[zip package](https://github.com/INTO-CPS-Association/DTaaS/releases/download/v0.7.0/DTaaS-v0.7.0.zip).
+Please download and unzip the same. A new **DTaaS-v0.7.0** folder gets created.
+The rest of the installation instructions assume that you are using
+Windows/Linux/MacOS terminal in **DTaaS-v0.7.0** folder.
 
 <!-- markdownlint-disable MD046 -->
 <!-- prettier-ignore -->
@@ -230,7 +230,7 @@ please change,
     image: intocps/libms:0.5.4
     restart: unless-stopped
     volumes:
-      - ${DTAAS_DIR}/deploy/config/lib.env:/dtaas/libms/.env
+      - ${DTAAS_DIR}/deploy/config/libms.yaml:/dtaas/libms/libms.yaml
       - ${DTAAS_DIR}/files/common:/dtaas/libms/files
 ```
 

@@ -10,6 +10,12 @@ Multiple runners can be active simultaneously on one computer.
 The commands are sent via the REST API and are executed on the computer
 with active runner.
 
+<!-- markdownlint-disable MD046 -->
+<!-- prettier-ignore -->
+!!! warning
+    This npm package works only on Linux platforms
+<!-- markdownlint-enable MD046 -->
+
 ## :arrow_down: Install
 
 ### NPM Registry
@@ -217,7 +223,7 @@ Shows the status of the command last executed.
     X-Powered-By: Express
 
     {
-      "name": "<command-name",
+      "name": "command-name",
       "status": "invalid",
       "logs": {
         "stdout": "",

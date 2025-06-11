@@ -23,6 +23,7 @@ nav:
       - Reusable Assets: 
           - Concept: user/servers/lib/assets.md
           - Microservice: user/servers/lib/LIB-MS.md
+          - DevOps Preview: user/library/devops/ui.md
       - Digital Twins:
           - Create: user/digital-twins/create.md
           - Lifecycle: user/digital-twins/lifecycle.md
@@ -71,7 +72,9 @@ nav:
       - Integrated Gitlab:
         - Installation: admin/gitlab/index.md
         - Integration: admin/gitlab/integration.md
-        - Gitlab Runner: admin/gitlab/runner.md
+        - Gitlab Runner:
+          - Linux: admin/gitlab/runner.md
+          - Windows: admin/gitlab/runner-Windows.md
       - CLI: admin/cli.md
       - Independent Packages:
         - Listing: admin/packages.md
@@ -83,7 +86,6 @@ nav:
         - Check Config: admin/guides/check_config.md
         - Add user: admin/guides/add_user.md
         - Remove user: admin/guides/remove_user.md
-        - Add Service: admin/guides/add_service.md
         - Link services: admin/guides/link_service.md
         - Common Assets: admin/guides/common_workspace_readonly.md
   - FAQ: FAQ.md

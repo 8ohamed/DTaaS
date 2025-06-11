@@ -26,9 +26,7 @@ their reusable assets.
 
 ![File System Layout](file-system-layout.png)
 
-There is a skeleton file structure in
-[DTaaS codebase](https://github.com/INTO-CPS-Association/DTaaS/tree/feature/distributed-demo/files).
-You can copy and create file system for your users.
+There is a skeleton file structure in `files` directory.
 
 ## :arrow_down: Install
 
@@ -65,12 +63,27 @@ needs to have _read:packages_ scope.
 Display help.
 
 ```bash
-libms -h
+$libms -h
+Usage: libms [options]
+
+The lib microservice is a file server. It supports file transfer
+over GraphQL and HTTP protocols.
+
+Options:
+  -c, --config <file>  provide the config file (default libms.yaml)
+  -H, --http <file>    enable the HTTP server with the specified config
+  -h, --help           display help for libms
 ```
+
+Both the options are not mandatory.
 
 Please see [configuration](config.md) for explanation of
 configuration conventions.
-To use `.env` as configuration file, run
+The config is saved `libms.yaml` file by convention. If `-c` is not specified
+The **libms** looks for
+`libms.yaml` file in the working directory from which it is run.
+If you want to run **libms** without explicitly specifying the configuration
+file, run
 
 ```bash
 libms
@@ -83,11 +96,11 @@ libms -c FILE-PATH
 libms --config FILE-PATH
 ```
 
-If the environment file is named something other than `.env`,
-for example as `.env.libms`, you can run
+If the environment file is named something other than `libms.yaml`,
+for example as `libms-config.yaml`, you can run
 
 ```sh
-libms -c ".env.libms"
+libms -c "config/libms-config.yaml"
 ```
 
 You can press `Ctl+C` to halt the application.
@@ -99,6 +112,9 @@ nohup libms [-c FILE-PATH] & disown
 
 The lib microservice is now running and ready to serve files.
 
+### Protocol Support
+
+The **libms** supports GraphQL protocol by default.
 This microservice can also serve files in a browser with files transferred
 over HTTP protocol.
 
