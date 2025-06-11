@@ -68,7 +68,7 @@ nav:
           - Base Box: admin/vagrant/base-box.md
           - Single Machine: admin/vagrant/single-machine.md
           - Two Machines: admin/vagrant/two-machines.md
-        - Services: admin/services.md
+        - Platform Services: admin/services.md
       - Integrated Gitlab:
         - Installation: admin/gitlab/index.md
         - Integration: admin/gitlab/integration.md

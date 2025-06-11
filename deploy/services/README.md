@@ -13,6 +13,23 @@ The following services can be installed:
   So, it can also be used as **MQTT** broker.
 * **MongoDB** database server
 
+## Pre-requisites
+
+All these services run on raw TCP/UDP ports. Thus a direct network
+access to these services is required for both the DTs running inside
+the DTaaS software and the PT located outside the DTaaS software.
+
+There are two possible choices here:
+
+* Configure Traefik gateway to permit TCP/UDP traffic
+* Bypass Traefik altogether
+
+Unless you are an informed user of Traefik, we recommend bypassing traefik
+and provide raw TCP/UDP access to these services from the Internet.
+
+_The InfluxDB service requires a dedicated hostname. The management
+interface of RabbitMQ service requires a dedicated hostname as well._
+
 ## Directory Structure
 
 * **config** is used for storing the service configuration
@@ -20,7 +37,7 @@ The following services can be installed:
 * **certs** is used for storing the TLS certificates needed by the services.
 * **script** contains scripts for creating user accounts
 
-## Installation steps
+## Configure and Install
 
 Please follow the steps outlined here for installation.
 The `services.foo.com` website hostname is used for illustration.
@@ -39,7 +56,7 @@ Please replace the same with your server's hostname.
 
   ```bash
   cat certs/services.foo.com/privkey.pem \
-    certs/services.foo.com/fullchain.pem > certs/foo.com/combined.pem
+    certs/services.foo.com/fullchain.pem > certs/services.foo.com/combined.pem
   chmod 600 certs/services.foo.com/combined.pem
   chown 999:999 certs/services.foo.com/combined.pem
   ```

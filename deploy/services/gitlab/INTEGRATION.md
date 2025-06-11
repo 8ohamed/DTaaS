@@ -22,7 +22,8 @@ Traefik Forward Auth backend authorization.
 
 ### 1. Set up the DTaaS server over HTTPS
 
-Follow the [existing guide](../../docker/README.md)
+Login as a non-root user and
+follow the [existing guide](../../docker/README.md)
 to set up the DTaaS web application over HTTPS connection on either
 localhost (<https://localhost>) or a custom domain (<https://foo.com>).
 
@@ -37,12 +38,18 @@ localhost (<https://localhost>) or a custom domain (<https://foo.com>).
 Follow the guide to set up a GitLab instance -
 [README](./README.md).
 
-After this step, and once you run `gitlab-ctl reconfigure`, you will have a
+After this step, you will have a
 functioning GitLab instance (at either <https://localhost/gitlab>
 or <https://foo.com/gitlab>).
 Login credentials of the root user.
 
-### 3. Create OAuth Tokens in GitLab
+### 3. Create Users
+
+The newly installed gitlab only contains `root` user. The users specified
+in ìnstallation configuration files (`.env.local` / `.env.server`) need
+to be created in this integrated Gitlab server.
+
+### 4. Create OAuth Tokens in GitLab
 
 Follow these guides to create OAuth Application Tokens for -
 [backend](../../../docs/admin/servers/auth.md) and
@@ -54,7 +61,7 @@ After this step you will have credentials for the application tokens titled
 "DTaaS Server Authorization" and "DTaaS Client Authorization", which we will use
 in the next step.
 
-### 4. Use Valid Oauth Application Tokens
+### 5. Use Valid Oauth Application Tokens
 
 We can now use the OAuth tokens generated on the GitLab instance to enable
 authorization.

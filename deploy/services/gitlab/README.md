@@ -1,15 +1,19 @@
 # Local GitLab Instance
 
-The DTaaS server can have a local GitLab instance as an OAuth2 authorization
-provider.
+This guide helps with installation of a dedicated
+[Gitlab](https://gitlab.com) service. This Gitlab installation can be used
+as OAuth2 authorization provider to the DTaaS software.
+In addition, it is also possible to use the integrated Gitlab for
+enabling the digital twin DevOps experimental features of the DTaaS.
 
-This directory contains files
-needed to set up the docker container containing the local GitLab instance.
+There are two possible ways you can install Gitlab:
 
-1. `./data`, `./config`, `./logs` are the directories that will contain data for
-   the GitLab instance
-1. `compose.gitlab.yml` and `.env` are the Docker compose and environment files
-   to manage the containerized instance of gitlab
+* At dedicated domain name (ex: <http:>_gitlab.foo.com_</http:>)
+* At a URL path on existing WWW server (ex: <http:>foo.com/gitlab</http>)
+
+This guide illustrates the installation of Gitlab at:
+<http:>foo.com/gitlab</http>. But the instructions can be
+adapted to install Gitlab at a dedicated domain name.
 
 ## Configure and Install
 
@@ -60,49 +64,15 @@ the progress with `watch docker ps` and check if the gitlab container is
 
 ## Post-Install Configuration
 
-Gitlab also requires post-installation configuration. Run this command to run
-bash within the container from your terminal:
-
-```bash
-docker exec -it gitlab bash
-```
-
-The configuration file to change is _/etc/gitlab/gitlab.rb_. The variables to
-change are:
-
-```rb
-external_url 'https://foo.com/gitlab'
-nginx['enable'] = true
-nginx['redirect_http_to_https'] = false
-
-nginx['listen_port'] = 80
-nginx['listen_https'] = false
-letsencrypt['enable'] = false
-```
-
-The `external_url` mentioned about indicates hosting of gitlab at
-<https://foo.com/gitlab>.
-If the gitlab needs to be available at <https://localhost/gitlab>, then
-the `external_url` should be <https://localhost/gitlab>.
-
-Save the changes and reconfigure gitlab by running:
-
-```bash
-# inside the gitlab docker container
-gitlab-ctl reconfigure
-exit
-```
-
 The administrator username for GitLab is: `root`. The password for this user
-account will be available in: _/etc/gitlab/initial_root_password_. Be sure to
+account will be available in: `config/initial_root_password`. Be sure to
 save this password somewhere, as **this file will be deleted after 24 hours**
 from the first time you start the local instance.
 
 ## Use
 
 After running the container, your local GitLab instance will be available at
-`external_url` specified in _gitlab.rb_, i.e., either at
-<https://foo.com/gitlab> or at <https://localhost/gitlab>.
+either at <https://foo.com/gitlab> or at <https://localhost/gitlab>.
 
 ### Create Users
 

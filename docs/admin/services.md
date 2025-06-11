@@ -30,9 +30,6 @@ and provide raw TCP/UDP access to these services from the Internet.
 _The InfluxDB service requires a dedicated hostname. The management
 interface of RabbitMQ service requires a dedicated hostname as well._
 
-Grafana service can run well behind Traefik gateway. The default Traefik
-configuration makes permits access to Grafana at URL: http(s): _foo.com/vis_.
-
 ## Directory Structure
 
 * **config** is used for storing the service configuration
@@ -65,7 +62,7 @@ Please replace the same with your server's hostname.
 
   ```bash
   cat certs/services.foo.com/privkey.pem \
-    certs/services.foo.com/fullchain.pem > certs/foo.com/combined.pem
+    certs/services.foo.com/fullchain.pem > certs/services.foo.com/combined.pem
   chmod 600 certs/services.foo.com/combined.pem
   chown 999:999 certs/services.foo.com/combined.pem
   ```
