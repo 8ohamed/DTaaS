@@ -105,6 +105,12 @@ vagrant box add --name dtaas ./dtaas.vagrant
 #config.vm.box = "dtaas"
 ```
 
+## Certificate Generation
+
+For development purposes, you may want to generate SSL/TLS certificates. 
+While openssl is installed by default, consider using [mkcert](https://github.com/FiloSottile/mkcert) 
+as an alternative for easier local development certificate management.
+
 ## TODO
 
 1. Write a script for automating the above steps

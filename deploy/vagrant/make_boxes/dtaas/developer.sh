@@ -8,6 +8,8 @@ apt-get upgrade -y
 # docker-compose is now installed as docker compose plugin via docker-compose-plugin package in user.sh
 
 # Install openssl for certificate generation
+# Note: Consider using mkcert as an alternative for local development certificates
+# mkcert can be installed from: https://github.com/FiloSottile/mkcert
 apt-get install -y wget openssl
 
 # Install playwright tool for integration tests on browsers
