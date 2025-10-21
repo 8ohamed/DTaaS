@@ -65,7 +65,7 @@ The upcoming instructions will help with the creation of
 base vagrant box.
 
 ```bash
-#create a key pair
+# create a key pair
 ssh-keygen -b 4096 -t rsa -f vagrant -q -N ""
 
 vagrant up
@@ -90,7 +90,7 @@ cp /vagrant/vagrant.pub /home/vagrant/.ssh/authorized_keys
 cp vagrant .vagrant/machines/default/virtualbox/private_key
 
 # check
-vagrant ssh #should work
+vagrant ssh # should work
 
 # exit vagrant guest machine and then
 vagrant halt
@@ -102,13 +102,13 @@ vagrant package --base dtaas \
 vagrant box add --name dtaas ./dtaas.vagrant
 
 # You can use this box in other vagrant boxes using
-#config.vm.box = "dtaas"
+# config.vm.box = "dtaas"
 ```
 
 ## Certificate Generation
 
-For development purposes, you may want to generate SSL/TLS certificates. 
-While openssl is installed by default, consider using [mkcert](https://github.com/FiloSottile/mkcert) 
+For development purposes, you may want to generate SSL/TLS certificates.
+While openssl is installed by default, consider using [mkcert](https://github.com/FiloSottile/mkcert)
 as an alternative for easier local development certificate management.
 
 ## TODO

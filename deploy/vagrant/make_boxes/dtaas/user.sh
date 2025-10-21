@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installs necessary packages to create the docker environment for 
+# Installs necessary packages to create the docker environment for
 # executing the DTaaS application
 
 apt-get update -y
