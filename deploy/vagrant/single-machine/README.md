@@ -18,12 +18,18 @@ Please follow these steps to make this work in your local environment.
    This shall be useful for logging into the vagrant machine
    created for single-machine deployment.
 
-1. Update the **Vagrantfile**. Fields to update are:
+1. Copy the Vagrantfile template and customize it:
+   ```bash
+   cp ../templates/Vagrantfile.single-machine.template Vagrantfile
+   ```
+   Update the **Vagrantfile** as needed. Fields to customize are:
     1. Hostname (`node.vm.hostname = "foo.com"`)
     1. MAC address (`:mac => "xxxxxxxx"`). This change is required
        if you have a DHCP server assigning domain names based on MAC
        address. Otherwise, you can leave this field unchanged.
+    1. Path to vagrant private key (`node.ssh.private_key_path = "vagrant"`)
     1. Other adjustments are optional.
+
 1. Execute the following commands from terminal
 
 ```bash

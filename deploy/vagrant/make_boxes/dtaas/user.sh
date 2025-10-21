@@ -15,7 +15,8 @@ apt-get install -y \
     apache2-utils \
     net-tools \
     python3-dev \
-    python3-pip
+    python3-pip \
+    python3-venv
 
 mkdir -p /etc/apt/keyrings
 if [ ! -f /etc/apt/keyrings/docker.gpg ]
@@ -39,22 +40,14 @@ docker run hello-world
 systemctl enable docker.service
 systemctl enable containerd.service
 
-apt-get update
+# Install nodejs using nvm
 apt-get install -y ca-certificates curl gnupg
-mkdir -p /etc/apt/keyrings
-if [ ! -f /etc/apt/keyrings/nodesource.gpg ]
-then
-  curl -fsSL "https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key" | \
-    gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-fi
-NODE_MAJOR=20
-printf "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] \
-  https://deb.nodesource.com/node_%s.x nodistro main" "$NODE_MAJOR" | \
-  tee /etc/apt/sources.list.d/nodesource.list
-apt-get update
-apt-get install -y nodejs
-npm install -g npm@10.2.0
 
+# Install nvm for vagrant user
+sudo -u vagrant bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash'
+sudo -u vagrant bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 22 && nvm use 22 && nvm alias default 22'
+
+# Install yarn
 if [ ! -f /usr/share/keyrings/yarnkey.gpg ]
 then
   curl -sL "https://dl.yarnpkg.com/debian/pubkey.gpg" | gpg --dearmor | \
@@ -64,7 +57,9 @@ then
 fi
 apt-get update -y
 apt-get install -y yarn
-npm install -g serve
+
+# Install global npm packages
+sudo -u vagrant bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && npm install -g serve pm2 madge'
 
 cat /vagrant/vagrant.pub >> /home/vagrant/.ssh/authorized_keys
 mkdir -p /root/.ssh
@@ -73,12 +68,12 @@ cat /vagrant/vagrant.pub >> /root/.ssh/authorized_keys
 # get the required docker images
 docker pull traefik:v2.10
 docker pull mltooling/ml-workspace-minimal:0.13.2
-docker pull grafana/grafana:10.1.4
+docker pull grafana/grafana:11.5.2-ubuntu
 docker pull influxdb:2.7
-docker pull rabbitmq:3-management
+docker pull rabbitmq:4.0.7-management
 docker pull eclipse-mosquitto:2
-docker pull mongo:7.0.3
-docker pull gitlab/gitlab-ce:16.4.1-ce.0
+docker pull mongo:8.0.3
+docker pull gitlab/gitlab-ce:17.9.2-ce.0
 
 # remove default route inserted by vagrant
 printf "* * * * * ip route del default via 10.0.2.2 dev enp0s3\n" | crontab -

@@ -33,29 +33,33 @@ are not a developer, no changes are required to the `Vagrantfile`.
 
 This vagrant box installed for users will have the following items:
 
-* docker v24.0
-* nodejs v20.10
+* docker (with docker compose plugin)
+* nodejs v22 (via nvm)
 * yarn v1.22
-* npm v10.2
+* npm global packages: serve, pm2, madge
+* python3 with venv
 * containers
-  * ml-workspace-minimal v0.13
+  * ml-workspace-minimal v0.13.2
   * traefik v2.10
-  * gitlab-ce v16.4
+  * gitlab-ce v17.9.2
   * influxdb v2.7
-  * grafana v10.1
-  * rabbitmq v3-management
-  * mongodb v7.0
+  * grafana v11.5.2
+  * rabbitmq v4.0.7-management
+  * mongodb v8.0.3
   * eclipse-mosquitto (mqtt) v2
 
 This vagrant box installed for developers will have
 the following items additional items:
 
-* docker-compose v2.20
 * microk8s v1.27
-* jupyterlab
-* mkdocs
+* jupyterlab (in python venv)
+* mkdocs (in python venv)
+* shellcheck
+* markdownlint (mdl)
+* graphviz
 * containers
-  * telegraf v1.28
+  * telegraf v1.28.2
+  * gitlab-runner alpine-v17.5.3
 
 The upcoming instructions will help with the creation of
 base vagrant box.

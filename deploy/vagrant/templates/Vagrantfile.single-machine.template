@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Single machine deployment of DTaaS
+# This requires the dtaas vagrant box to be already created
+
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "dtaas"
+
+  config.vm.define "dtaas" do |node|
+    # CUSTOMIZE: Change to your desired hostname
+    node.vm.hostname = "foo.com"
+    
+    # CUSTOMIZE: Change MAC address if using DHCP with DNS assignment
+    node.vm.network "public_network", :mac => "02163ef4f4f4"
+
+    node.vm.provider "virtualbox" do |vb|
+      vb.name = "dtaas-one"
+      vb.memory = 16384
+      vb.cpus = 8
+    end
+
+    # CUSTOMIZE: Ensure this path points to your vagrant private SSH key
+    node.ssh.private_key_path = "vagrant"
+  end
+
+end

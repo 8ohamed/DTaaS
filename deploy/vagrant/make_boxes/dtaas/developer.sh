@@ -5,11 +5,7 @@
 apt-get update -y
 apt-get upgrade -y
 
-#install docker-compose from https://docs.docker.com/compose/install/other/
-curl -SL "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64" \
-  -o /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-chmod 755 /usr/local/bin/docker-compose /usr/bin/docker-compose
+# docker-compose is now installed as docker compose plugin via docker-compose-plugin package in user.sh
 
 # Install openssl for certificate generation
 apt-get install -y wget openssl
@@ -19,13 +15,9 @@ npx --yes playwright install-deps
 
 #-------------
 printf "\n\n Install jupyterlab and mkdocs"
-pip install jupyterlab
-pip install mkdocs
-pip3 install mkdocs-material
-pip3 install python-markdown-math
-pip3 install mkdocs-open-in-new-tab
-pip3 install mkdocs-with-pdf
-pip3 install qrcode
+# Create a python virtual environment for the vagrant user
+sudo -u vagrant bash -c 'cd /home/vagrant && python3 -m venv ./dtaas-venv'
+sudo -u vagrant bash -c 'cd /home/vagrant && ./dtaas-venv/bin/pip3 install jupyterlab mkdocs mkdocs-material python-markdown-math mkdocs-open-in-new-tab mkdocs-with-pdf qrcode'
 
 # Install minimal Kubernetes cluster
 snap install microk8s --classic
@@ -35,11 +27,15 @@ newgrp microk8s
 
 # get the required docker images
 docker pull telegraf:1.28.2
+docker pull gitlab/gitlab-runner:alpine-v17.5.3
 
 # Install markdownlint
 sudo apt-get install -y rubygems
 sudo gem install mdl
 
+# Install shellcheck
+sudo apt-get install -y shellcheck
+
 # Install madge for generating dependency graphs of typescript projects
 sudo apt-get install -y graphviz
-sudo npm install -g madge
+# madge is already installed via npm in user.sh
