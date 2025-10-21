@@ -44,28 +44,20 @@ need _server name_, _hostname_ and _MAC address_. The hostname is the network
 URL at which the server can be accessed on the world wide web. Please follow
 these steps to make this work in your local environment.
 
-1. Copy the configuration templates:
-   ```bash
-   cp ../templates/Vagrantfile.two-machine.template Vagrantfile
-   cp ../templates/boxes.json.template boxes.json
-   ```
+Update the **boxes.json**. There are entries one for each server.
+The fields to update are:
 
-2. Update the **boxes.json**. There are entries one for each server.
-   The fields to update are:
-
-   1. `name` - name of server1 (default: `"dtaas-two"`)
-   1. `hostname` - hostname of server1 (example: `"foo.com"`)
-   1. MAC address (`:mac => "xxxxxxxx"`). This change is required if you have a
-      DHCP server assigning domain names based on MAC address.
-      Otherwise, you can leave this field unchanged.
-   1. `name` - name of server2 (default: `"services"`)
-   1. `hostname` - hostname of server2 (example: `"services.foo.com"`)
-   1. MAC address (`:mac => "xxxxxxxx"`). This change is required if you have a
-      DHCP server assigning domain names based on MAC address. Otherwise, you
-      can leave this field unchanged.
-   1. Other adjustments are optional.
-
-3. The Vagrantfile will automatically read configuration from boxes.json.
+  1. `name` - name of server1 (`"name" = "dtaas"`)
+  1. `hostname` - hostname of server1 (`"name" = "foo.com"`)
+  1. MAC address (`:mac => "xxxxxxxx"`). This change is required if you have a
+     DHCP server assigning domain names based on MAC address.
+     Otherwise, you can leave this field unchanged.
+  1. `name` - name of server2 (`"name" = "services"`)
+  1. `hostname` - hostname of server2 (`"name" = "services.foo.com"`)
+  1. MAC address (`:mac => "xxxxxxxx"`). This change is required if you have a
+     DHCP server assigning domain names based on MAC address. Otherwise, you
+     can leave this field unchanged.
+  1. Other adjustments are optional.
 
 ## Launch platform default services
 

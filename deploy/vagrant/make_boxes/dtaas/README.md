@@ -34,10 +34,10 @@ are not a developer, no changes are required to the `Vagrantfile`.
 This vagrant box installed for users will have the following items:
 
 * docker (with docker compose plugin)
-* nodejs v22 (via nvm)
+* nodejs v20.10
 * yarn v1.22
-* npm global packages: serve, pm2, madge
-* python3 with venv
+* npm v10.2
+* python3 with pip
 * containers
   * ml-workspace-minimal v0.13.2
   * traefik v2.10
@@ -51,14 +51,14 @@ This vagrant box installed for users will have the following items:
 This vagrant box installed for developers will have
 the following items additional items:
 
-* microk8s v1.27
+* nodejs v22 (via nvm)
+* npm global packages: serve, pm2, madge
 * jupyterlab (in python venv)
 * mkdocs (in python venv)
 * shellcheck
 * markdownlint (mdl)
 * graphviz
 * containers
-  * telegraf v1.28.2
   * gitlab-runner alpine-v17.5.3
 
 The upcoming instructions will help with the creation of
