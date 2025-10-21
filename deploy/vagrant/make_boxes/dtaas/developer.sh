@@ -20,7 +20,7 @@ sudo -u vagrant bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v
 sudo -u vagrant bash -c 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install 22 && nvm use 22 && nvm alias default 22'
 
 # Install yarn
-if [ ! -f /usr/share/keyrings/yarnkey.gpg ]
+if [[ ! -f /usr/share/keyrings/yarnkey.gpg ]]
 then
   curl -sL "https://dl.yarnpkg.com/debian/pubkey.gpg" | gpg --dearmor | \
     tee /usr/share/keyrings/yarnkey.gpg >/dev/null
