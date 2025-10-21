@@ -47,6 +47,7 @@ This vagrant box installed for users will have the following items:
   * rabbitmq v4.0.7-management
   * mongodb v8.0.3
   * eclipse-mosquitto (mqtt) v2
+  * gitlab-runner alpine-v17.5.3
 
 This vagrant box installed for developers will have
 the following items additional items:
@@ -58,8 +59,6 @@ the following items additional items:
 * shellcheck
 * markdownlint (mdl)
 * graphviz
-* containers
-  * gitlab-runner alpine-v17.5.3
 
 The upcoming instructions will help with the creation of
 base vagrant box.
@@ -113,5 +112,4 @@ as an alternative for easier local development certificate management.
 
 ## TODO
 
-1. Write a script for automating the above steps
-1. Generate the ssh keys from ssl/certificates.bash
+Write a script for automating the above steps

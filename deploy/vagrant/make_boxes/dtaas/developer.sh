@@ -42,9 +42,6 @@ printf "\n\n Install jupyterlab and mkdocs"
 sudo -u vagrant bash -c 'cd /home/vagrant && python3 -m venv ./dtaas-venv'
 sudo -u vagrant bash -c 'cd /home/vagrant && ./dtaas-venv/bin/pip3 install jupyterlab mkdocs mkdocs-material python-markdown-math mkdocs-open-in-new-tab mkdocs-with-pdf qrcode'
 
-# get the required docker images
-docker pull gitlab/gitlab-runner:alpine-v17.5.3
-
 # Install markdownlint
 sudo apt-get install -y rubygems
 sudo gem install mdl
