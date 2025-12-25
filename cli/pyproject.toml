@@ -14,9 +14,9 @@ click = "^8.1.7"
 tomlkit = "^0.13.2"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
-pylint = "^3.3.1"
-pytest-cov = "^6.0.0"
+pytest = "^9.0.0"
+pylint = "^4.0.0"
+pytest-cov = "^7.0.0"
 setuptools = "^80.0.0"
 zipp = "^3.19.1"
 safety = "^3.6.2"
