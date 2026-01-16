@@ -30,6 +30,7 @@ Run the following commands from a virtual environment.
 Install the standalone wheel package using pip:
 
 ```bash
+cd deploy/services/cli
 pip install dtaas_services-0.1.0-py3-none-any.whl
 ```
 
