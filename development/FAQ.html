@@ -9,14 +9,14 @@
       
       
       
-        <link rel="prev" href="admin/guides/common_workspace_readonly.html">
+        <link rel="prev" href="admin/guides/renew_certs.html">
       
       
         <link rel="next" href="developer/index.html">
       
       
       <link rel="icon" href="assets/dtaas-logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.0253249f.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.7e359304.min.css">
       
       
 
@@ -45,7 +45,7 @@
     
       <link rel="stylesheet" href="assets/css/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -85,7 +85,7 @@
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -105,13 +105,13 @@
     </div>
     
     
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
       <label class="md-header__button md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -120,21 +120,21 @@
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+      <div class="md-search__scrollwrap" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -151,7 +151,7 @@
         <a href="https://github.com/into-cps-association/DTaaS" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     DTaaS
@@ -358,7 +358,7 @@
       <a href="https://github.com/into-cps-association/DTaaS" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     DTaaS
@@ -474,16 +474,83 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="user/website/index.html" class="md-nav__link">
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
   
   <span class="md-ellipsis">
     Website
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Website
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/website/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/website/settings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -560,6 +627,27 @@
   
   <span class="md-ellipsis">
     Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/library/devops/ui.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DevOps Preview
   </span>
   
 
@@ -737,6 +825,69 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/digital-twins/devops/execution-settings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/digital-twins/devops/capabilities.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Capabilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="user/digital-twins/devops/concurrent-execution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concurrent Execution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -781,7 +932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user/servers/execution/runner/index.html" class="md-nav__link">
+      <a href="user/servers/execution/runner/readme.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1586,7 +1737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="admin/host.html" class="md-nav__link">
+      <a href="admin/server.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1723,16 +1874,83 @@
   
   
   
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1_8" id="__nav_3_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Platform Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Platform Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="admin/services.html" class="md-nav__link">
+      <a href="admin/services/cli.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Services
+    CLI
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="admin/services/terminal-install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Install
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1832,16 +2050,83 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="admin/gitlab/runner.html" class="md-nav__link">
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
+            
   
   <span class="md-ellipsis">
     Gitlab Runner
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Gitlab Runner
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="admin/gitlab/runner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linux
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="admin/gitlab/runner-windows.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Windows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2097,6 +2382,27 @@
   
   
     <li class="md-nav__item">
+      <a href="admin/guides/check_config.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Check Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="admin/guides/add_user.html" class="md-nav__link">
         
   
@@ -2139,27 +2445,6 @@
   
   
     <li class="md-nav__item">
-      <a href="admin/guides/add_service.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Add Service
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="admin/guides/link_service.html" class="md-nav__link">
         
   
@@ -2186,6 +2471,27 @@
   
   <span class="md-ellipsis">
     Common Assets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="admin/guides/renew_certs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Renew Certificates
   </span>
   
 
@@ -2308,6 +2614,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#digital-twin-devops-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Digital Twin DevOps Automation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#data-management" class="md-nav__link">
     <span class="md-ellipsis">
       Data Management
@@ -2317,9 +2632,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#platform-native-services-on-dtaas-platform" class="md-nav__link">
+  <a href="#platform-native-services-on-the-dtaas-platform" class="md-nav__link">
     <span class="md-ellipsis">
-      Platform Native Services on DTaaS Platform
+      Platform Native Services on the DTaaS Platform
     </span>
   </a>
   
@@ -2585,7 +2900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer/oauth/OAUTH2.0.html" class="md-nav__link">
+      <a href="developer/oauth/oauth2.0.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2606,7 +2921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer/oauth/DESIGN.html" class="md-nav__link">
+      <a href="developer/oauth/design.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2627,7 +2942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer/oauth/AUTHMS.html" class="md-nav__link">
+      <a href="developer/oauth/authms.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2718,6 +3033,90 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="developer/cli.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTaaS CLI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer/client/client.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer/servers/lib/lib-ms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Library Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="developer/servers/execution/runner/runner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Runner Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -2729,10 +3128,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_13" >
         
           
-          <label class="md-nav__link" for="__nav_5_9" id="__nav_5_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_13" id="__nav_5_13_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2743,8 +3142,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_13">
             <span class="md-nav__icon md-icon"></span>
             DevOps Framework
           </label>
@@ -3048,6 +3447,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#digital-twin-devops-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Digital Twin DevOps Automation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#data-management" class="md-nav__link">
     <span class="md-ellipsis">
       Data Management
@@ -3057,9 +3465,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#platform-native-services-on-dtaas-platform" class="md-nav__link">
+  <a href="#platform-native-services-on-the-dtaas-platform" class="md-nav__link">
     <span class="md-ellipsis">
-      Platform Native Services on DTaaS Platform
+      Platform Native Services on the DTaaS Platform
     </span>
   </a>
   
@@ -3129,46 +3537,45 @@
 <!-- markdownlint-disable-file MD046 -->
 
 <details class="question">
-<summary>What is DTaaS?</summary>
-<p>DTaaS is software platform on which you can create and run digital twins.
-Please see the <a href="user/features.html">features</a> page
-to get a sense of the things you can do in DaaS.</p>
+<summary>What is the DTaaS platform?</summary>
+<p>The DTaaS platform is a software platform on which digital twins can be created and executed.
+The <a href="user/features.html">features</a> page provides
+an overview of the capabilities available in DTaaS.</p>
 </details>
 <details class="question">
-<summary>What is the scope and current capabilities of DTaaS?</summary>
+<summary>What is the scope and current capabilities of the DTaaS platform?</summary>
 <ol>
-<li>DTaaS is a web based interface to allow you to invoke various tools
-   related to work you want to perform with one or more DTs.</li>
+<li>DTaaS is a web-based interface that allows invocation of various tools
+   related to work to be performed with one or more DTs.</li>
 <li>DTaaS permits users to run DTs in their private workspaces.
-   These user workspaces are based on Ubuntu 20.04
+   These user workspaces are based on the Ubuntu 20.04
    Operating system.</li>
-<li>DTaaS can help you create reusable DT assets only if DT
+<li>DTaaS can help create reusable DT assets only if DT
    asset authoring tools
-   can work in Ubuntu 20.04 xfce desktop environment.</li>
-<li>DTs are just executables, as far as DTaaS is concerned.
-   Users are not constrained to work with DTs in a certain way.
-   The DTaaS suggests creation of DTs from reusable assets and provides
+   can operate in the Ubuntu 20.04 xfce desktop environment.</li>
+<li>DTs are executables from the DTaaS platform perspective.
+   Users are not constrained to work with DTs in a specific manner.
+   DTaaS suggests creation of DTs from reusable assets and provides
    a suggestive structure for DTs. The <a href="user/examples/index.html">examples</a>
-   provide more insight into DTaaS way of working with DTs.
-   But this suggested workflow is not binding on the users.</li>
-<li>DTs can be run as services with REST API from within user workspace
-   which can help with service-level DT composition.</li>
+   provide more insight into the DTaaS workflow.
+   However, this suggested workflow is not mandatory.</li>
+<li>DTs can be run as services with REST API from within user workspaces,
+   which can facilitate service-level DT composition.</li>
 </ol>
 </details>
 <details class="question">
-<summary>What can not be done inside DTaaS?</summary>
+<summary>What can not be done inside the DTaaS platform?</summary>
 <ol>
-<li>DTaaS as such won't help you to install DTs that you get from elsewhere.</li>
-<li>The current user interface of DTaaS web application is heavily reliant
-   on the use of Jupyter lab and notebook.
-   The <strong>Digital Twins</strong> page has Create / Execute / Analyze sections but
-   all point to Jupyter lab. Web interface. The functionality of these pages
+<li>DTaaS as such does not help install DTs obtained from external sources.</li>
+<li>The current user interface of the DTaaS web application is heavily reliant
+   on the use of Jupyter Lab and Notebook.
+   The <strong>Digital Twins</strong> page has Create / Execute / Analyze sections, but
+   all point to Jupyter Lab web interface. The functionality of these pages
    is still under development.</li>
-<li>DTaaS does not yet have DevOps like automation capabilities.</li>
 </ol>
 </details>
 <details class="question">
-<summary>Is there any fundamental difference between commercial solutions like Ansys Twin Builder and DTaaS?</summary>
+<summary>Is there any fundamental difference between commercial solutions like Ansys Twin Builder and the DTaaS platform?</summary>
 <p>Commercial DT platforms like <em>Ansys Twin Builder</em> provide tight integration
 between models, simulation and sensors. This leads to fewer choices in
 DT design and implementation. In addition, there is a limitation of vendor lockin.
@@ -3179,18 +3586,18 @@ and combine these assets in a flexible way.</p>
 <summary>Do you provide licensed software like Matlab?</summary>
 <p>Proprietary and commercially licensed software is not
 available by default on the software platform.
-But users have private workspaces which are based
-on Linux-based xfce Desktop environment.
+However, users have private workspaces based
+on a Linux xfce Desktop environment.
 Users can install proprietary and commercially licensed
-software in their workspaces. Please see a
-<a href="FAQ/matlab-simulink.mp4">screencast</a> of using Matlab Simulink
-within the DTaaS software.
-The licensed software installed by one user is not available
-to another user.</p>
+software in their workspaces. A
+<a href="FAQ/matlab-simulink.mp4">screencast</a> demonstrates using Matlab Simulink
+within the DTaaS platform.
+Licensed software installed by one user is not available
+to other users.</p>
 </details>
 <h2 id="digital-twin-assets">Digital Twin Assets</h2>
 <details class="question">
-<summary>Can DTaaS be used to create new DT assets?</summary>
+<summary>Can the DTaaS platform be used to create new DT assets?</summary>
 <p>The core feature of DTaaS software is to help users
 create DTs from assets already available in the library.
 <img alt="Create Library Assets" src="user/servers/lib/author.png" />
@@ -3199,39 +3606,39 @@ available in their workspace to install asset authoring tools
 in their own workspace.
 These authoring tools can then be used to create and publish new assets.
 User workspaces are private and are not shared with other users.
-Thus any licensed software tools installed in their workspace is
-only available to them.</p>
+Thus, any licensed software tools installed in a workspace are
+only available to that user.</p>
 </details>
 <h2 id="digital-twin-models">Digital Twin Models</h2>
 <details class="question">
-<summary>Can DTaaS create new DT models?</summary>
-<p>DTaaS is not a model creation  tool. You can put model creation tool
-inside DTaaS and create new models.
-The DTaaS itself does not create digital twin models but it can help
-users create digital twin models. You can run
-Linux desktop / terminal tools  inside the DTaaS. So you can create
-models inside DTaaS and run them using tools that can run in Linux.
-The Windows only tools can not run in DTaaS.</p>
+<summary>Can the DTaaS platform create new DT models?</summary>
+<p>DTaaS is not a model creation tool. Model creation tools can be placed
+inside DTaaS to create new models.
+The DTaaS platform itself does not create digital twin models but can help
+users create digital twin models. Linux desktop/terminal tools
+can be run inside DTaaS. Thus, models can be created
+inside DTaaS and executed using tools that run on Linux.
+Windows-only tools cannot run in DTaaS.</p>
 </details>
 <details class="question">
-<summary>How can DTaaS help to design geometric model? Does it support 3D modeling and simulation?</summary>
+<summary>How can the DTaaS platform help to design geometric model? Does it support 3D modeling and simulation?</summary>
 <p>Well, DTaaS by itself does not produce any models. DTaaS only provides
 a platform and an ecosystem of services to facilitate digital twins to
 be run as services. Since each user has a Linux OS at their disposal,
 they can also run digital twins that have graphical interface.
-In summary, DTaaS is neither a modeling nor simulation tool. If you need
+In summary, the DTaaS platform is neither a modeling nor simulation tool. If you need
 these kinds of tools, you need to bring them onto the platform.
 For example, if you need Matlab for your work, you need to bring
 he licensed Matlab software.</p>
 </details>
 <details class="question">
-<summary>Can DTaaS support only the information models (or behavioral models) or some other kind of models?</summary>
-<p>The DTaaS as such is agnostic to the kind of models you use. DTaaS can
+<summary>Can the DTaaS platform support only the information models (or behavioral models) or some other kind of models?</summary>
+<p>The DTaaS platform as such is agnostic to the kind of models you use. DTaaS can
 run all kinds of models. This includes behavioral and data models.
 As long as you have models and the matching solvers that can run in
 Linux OS, you are good to go in DTaaS.
 In some cases, models and solvers (tools) are bundled together
-to form monolithic DTs. The DTaaS does not limit you from running
+to form monolithic DTs. The DTaaS platform does not limit you from running
 such DTs as well.
 DTaaS does not provide dedicated solvers. But if you can install
 a solver in your workspace, then you don't need the platform
@@ -3245,7 +3652,7 @@ to provide one.</p>
 </details>
 <h2 id="communication-between-physical-twin-and-digital-twin">Communication Between Physical Twin and Digital Twin</h2>
 <details class="question">
-<summary>How can DTaaS control the physical entity? Which technologies it uses for controlling the physical world?</summary>
+<summary>How can the DTaaS platform control the physical entity? Which technologies it uses for controlling the physical world?</summary>
 <p>At a very abstract level, there is a communication from physical entity
 to digital entity and back to physical entity. How this communication
 should happen is decided by the person designing the digital entity.
@@ -3267,7 +3674,7 @@ technologies and services hosted elsewhere on the Internet.</p>
 </details>
 <details class="question">
 <summary>How can real-time data differ from static data and what is the procedure to identify dynamic data? Is there any UI or specific tool used here?</summary>
-<p>DTaaS can not understand the static or dynamic nature of data.
+<p>The DTaaS platform can not understand the static or dynamic nature of data.
 It can facilitate storing names, units and any other text description
 of interesting quantities (weight of batter, voltage output etc).
 It can also store the data being sent by the physical twin.
@@ -3284,47 +3691,69 @@ support execution of digital twins. If a tool can be executed on
 a Linux desktop / commandline, the tool can be supported within DTaaS.
 The tool (ex. Matlab) itself can take care of the metadata requirements.</p>
 </details>
+<h2 id="digital-twin-devops-automation">Digital Twin DevOps Automation</h2>
+<details class="question">
+<summary>Can a DT execute forever?</summary>
+<p>The web UI imposes a 10-minute timeout. The users can manually
+terminate an ongoing execution. The best choice would be for
+a DT to execute terminate script which consequently concludes
+the execution and returns the logs.</p>
+</details>
+<details class="question">
+<summary>Is the DT execution really scalable?</summary>
+<p>This capacity of DT execution infrastructure is dependent on
+GitLab and the available compute power available to runners of
+GitLab. GitLab itself does not impose limits on the maximum
+number of runners.</p>
+</details>
+<details class="question">
+<summary>I have many GitLab runners attached with my GitLab repository? Which one is used?</summary>
+<p>This is indeterminate. You can't rely on the order and location
+of execution for a DT.</p>
+</details>
 <h2 id="data-management">Data Management</h2>
 <details class="question">
-<summary>Can DTaaS collect data directly from sensors?</summary>
+<summary>Can the DTaaS platform collect data directly from sensors?</summary>
 <p>Yes via platform services.</p>
 </details>
 <details class="question">
 <summary>Does DTaaS support data collection from different sources like hardware, software and network? Is there any user interface or any tracking instruments used for data collection?</summary>
-<p>The DTaaS provids InfluxDB, RabbitMQ, MQTT and MongoDB services.
+<p>The DTaaS platform provids InfluxDB, PostgreSQL, RabbitMQ, MQTT, MongoDB and ThingsBoard services.
 Both the physical twin
 and digital twin can utilize these protocols for communication.
 The IoT (time-series) data can be collected using InfluxDB and MQTT
 broker services. There is a user interface for InfluxDB which can be
 used to analyze the data collected.
-Users can also manually upload their data files into DTaaS.</p>
+Users can also manually upload their data files into the DTaaS.</p>
 </details>
 <details class="question">
-<summary>Is DTaaS able to transmit data to cloud in real time?</summary>
+<summary>Is the DTaaS platform able to transmit data to cloud in real time?</summary>
 <p>Yes via platform services.</p>
 </details>
 <details class="question">
-<summary>Which transmission protocol does DTaaS allow?</summary>
+<summary>Which transmission protocol does the DTaaS platform allow?</summary>
 <p>InfluxDB, RabbitMQ, MQTT and anything else that can be used from
 Cloud service providers.</p>
 </details>
 <details class="question">
-<summary>Does DTaaS support multisource information and combined multi sensor input data? Can it provide analysis and decision-supporting inferences?</summary>
+<summary>Does the DTaaS platform support multisource information and combined multi sensor input data? Can it provide analysis and decision-supporting inferences?</summary>
 <p>You can store information from multiple sources. The existing InfluxDB
 services hosted on DTaaS already has a dedicated Influx / Flux query
 language for doing sensor fusion, analysis and inferences.</p>
 </details>
 <details class="question">
-<summary>Which kinds of visualization technologies DTaaS can support (e.g. graphical, geometry, image, VR/AR representation)?</summary>
+<summary>Which kinds of visualization technologies the DTaaS platform can support (e.g. graphical, geometry, image, VR/AR representation)?</summary>
 <p>Graphical, geometric and images. If you need specific licensed software
 for the visualization, you will have to bring the license for it.
 DTaaS does not support AR/VR.</p>
 </details>
-<h2 id="platform-native-services-on-dtaas-platform">Platform Native Services on DTaaS Platform</h2>
+<h2 id="platform-native-services-on-the-dtaas-platform">Platform Native Services on the DTaaS Platform</h2>
 <details class="question">
-<summary>Is DTaaS able to detect the anomalies about-to-fail components and prescribe solutions?</summary>
+<summary>Is the DTaaS platform able to detect the anomalies about-to-fail components and prescribe solutions?</summary>
 <p>This is the job of a digital twin. If you have a ready to use digital twin
-that does the job, DTaaS allows others to use your solution.</p>
+that does the job, DTaaS allows others to use your solution.
+It is possible to perform anomaly detection using the platform services
+such as Grafana, ThingsBoard and InfluxDB.</p>
 </details>
 <h2 id="comparison-with-other-dt-platforms">Comparison with other DT Platforms</h2>
 <details class="question">
@@ -3332,6 +3761,7 @@ that does the job, DTaaS allows others to use your solution.</p>
 <p>Here is a qualitative comparison of different DT integration platforms:</p>
 <p>Legend: high performance (<strong>H</strong>), mid performance (<strong>M</strong>)
 and low performance (<strong>L</strong>)</p>
+</details>
 <table>
 <thead>
 <tr>
@@ -3414,7 +3844,7 @@ and low performance (<strong>L</strong>)</p>
 <td style="text-align: left;">L</td>
 </tr>
 <tr>
-<td style="text-align: left;">AU's DTaaS</td>
+<td style="text-align: left;">The DTaaS Platform</td>
 <td style="text-align: left;">Open source</td>
 <td style="text-align: left;">H</td>
 <td style="text-align: left;">H</td>
@@ -3426,12 +3856,18 @@ and low performance (<strong>L</strong>)</p>
 </tr>
 </tbody>
 </table>
-<p>Adopted by Tanusree Roy from Table 4 and 5 of the following paper.</p>
-<p>Ref: Naseri, F., Gil, S., Barbu, C., Cetkin, E., Yarimca, G., Jensen, A. C.,
+<div class="language-text highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code>Adopted by Tanusree Roy from Table 4 and 5 of the following paper.
+
+Ref: Naseri, F., Gil, S., Barbu, C., Cetkin, E., Yarimca, G., Jensen, A. C.,
 ... &amp; Gomes, C. (2023). Digital twin of electric vehicle battery systems:
 Comprehensive review of the use cases, requirements, and platforms.
-Renewable and Sustainable Energy Reviews, 179, 113280.</p>
-</details>
+Renewable and Sustainable Energy Reviews, 179, 113280.
+</code></pre></div></td></tr></table></div>
 <details class="question">
 <summary>All the comparisons between DT platforms seems so confusing. Why?</summary>
 <p>The fundamental confusion comes from the fact that different DT platforms
@@ -3446,7 +3882,7 @@ The takeaway is that we pick horses for the courses.</p>
 <h2 id="gdpr-concerns">GDPR Concerns</h2>
 <details class="question">
 <summary>Does your platform adhere to GDPR compliance standards? If so, how?</summary>
-<p>The DTaaS software platform does not store any personal information
+<p>The DTaaS platform does not store any personal information
 of users. It only stores username to identify users and these
 usernames do not contain enough information to deduce the true
 identify of users.</p>
@@ -3454,26 +3890,26 @@ identify of users.</p>
 <details class="question">
 <summary>Which security measures are deployed? How is data encrypted (if exists)?</summary>
 <p>The default installation requires a HTTPS terminating reverse proxy server
-from user to the DTaaS software installation. The administrators of DTaaS
-software can also install HTTPS certificates into the application.
+from user to the DTaaS platform installation. The administrators of DTaaS
+platform can also install HTTPS certificates into the application.
 The codebase can generate HTTPS application and the users also have
 the option of installing their own certificates obtained from
 certification agencies such as LetsEncrypt.</p>
 </details>
 <details class="question">
 <summary>What security measures does your cloud provider offer?</summary>
-<p>The current installation of DTaaS software runs on Aarhus University
-servers. The university network offers firewall access control to servers
+<p>The the DTaaS platform can be installed inside corporate server hosted
+behind network firewalls
 so that only permitted user groups have access to the network and
 physical access to the server.</p>
 </details>
 <details class="question">
 <summary>How is user access controlled and authenticated?</summary>
 <p>There is a two-level authorization mechanism in place in each default
-installation of DTaaS. The first-level is HTTP basic authorization
-over secure HTTPS connection. The second-level is the OAuth PKCE
-authorization flow for each user. The OAuth authorization is provider
-by a Gitlab instance. The DTaaS does not store the account and
+installation of the DTaaS. The first-level is HTTP basic authorization
+over secure HTTPS connection. The second-level is the OAuth 2.0 PKCE
+authorization flow for each user. The OAuth 2.0 authorization is provider
+by a GitLab instance. The DTaaS does not store the account and
 authorization information of users.</p>
 </details>
 <details class="question">
@@ -3514,17 +3950,17 @@ and the other one is user. The user roles are managed by the administrator.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="admin/guides/common_workspace_readonly.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Common Assets">
+          <a href="admin/guides/renew_certs.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Renew Certificates">
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Previous
               </span>
               <div class="md-ellipsis">
-                Common Assets
+                Renew Certificates
               </div>
             </div>
           </a>
@@ -3542,7 +3978,7 @@ and the other one is user. The user roles are managed by the administrator.</p>
             </div>
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
             </div>
           </a>
         
@@ -3554,7 +3990,7 @@ and the other one is user. The user roles are managed by the administrator.</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2022 - 2024 The INTO-CPS Association
+      Copyright &copy; 2022 - 2026 The INTO-CPS Association
     </div>
   
   
@@ -3575,10 +4011,10 @@ and the other one is user. The user roles are managed by the administrator.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.tracking", "navigation.footer"], "search": "assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.tracking", "navigation.footer"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.83f73b43.min.js"></script>
+      <script src="assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       

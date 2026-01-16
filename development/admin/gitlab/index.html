@@ -9,14 +9,14 @@
       
       
       
-        <link rel="prev" href="../services.html">
+        <link rel="prev" href="../services/terminal-install.html">
       
       
         <link rel="next" href="integration.html">
       
       
       <link rel="icon" href="../../assets/dtaas-logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
       
       
 
@@ -45,7 +45,7 @@
     
       <link rel="stylesheet" href="../../assets/css/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-gitlab" class="md-skip">
+        <a href="#local-gitlab-instance" class="md-skip">
           Skip to content
         </a>
       
@@ -85,7 +85,7 @@
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -105,13 +105,13 @@
     </div>
     
     
-      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
       <label class="md-header__button md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -120,21 +120,21 @@
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+      <div class="md-search__scrollwrap" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -151,7 +151,7 @@
         <a href="https://github.com/into-cps-association/DTaaS" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     DTaaS
@@ -360,7 +360,7 @@
       <a href="https://github.com/into-cps-association/DTaaS" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     DTaaS
@@ -476,16 +476,83 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../user/website/index.html" class="md-nav__link">
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
   
   <span class="md-ellipsis">
     Website
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Website
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/website/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/website/settings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -562,6 +629,27 @@
   
   <span class="md-ellipsis">
     Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/library/devops/ui.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DevOps Preview
   </span>
   
 
@@ -739,6 +827,69 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/digital-twins/devops/execution-settings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/digital-twins/devops/capabilities.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Capabilities
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user/digital-twins/devops/concurrent-execution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concurrent Execution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -783,7 +934,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user/servers/execution/runner/index.html" class="md-nav__link">
+      <a href="../../user/servers/execution/runner/readme.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1593,7 +1744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../host.html" class="md-nav__link">
+      <a href="../server.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1730,16 +1881,83 @@
   
   
   
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1_8" id="__nav_3_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Platform Services
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Platform Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../services.html" class="md-nav__link">
+      <a href="../services/cli.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Services
+    CLI
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../services/terminal-install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Install
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1846,6 +2064,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clone-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone Codebase
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-and-install" class="md-nav__link">
     <span class="md-ellipsis">
       Configure and Install
@@ -1872,6 +2108,21 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#create-users" class="md-nav__link">
@@ -1932,16 +2183,83 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="runner.html" class="md-nav__link">
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_3" id="__nav_3_2_3_label" tabindex="0">
+            
   
   <span class="md-ellipsis">
     Gitlab Runner
   </span>
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Gitlab Runner
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="runner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Linux
+  </span>
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="runner-windows.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Windows
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2197,6 +2515,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/check_config.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Check Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/add_user.html" class="md-nav__link">
         
   
@@ -2239,27 +2578,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/add_service.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Add Service
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../guides/link_service.html" class="md-nav__link">
         
   
@@ -2286,6 +2604,27 @@
   
   <span class="md-ellipsis">
     Common Assets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/renew_certs.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Renew Certificates
   </span>
   
 
@@ -2564,7 +2903,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../developer/oauth/OAUTH2.0.html" class="md-nav__link">
+      <a href="../../developer/oauth/oauth2.0.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2585,7 +2924,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../developer/oauth/DESIGN.html" class="md-nav__link">
+      <a href="../../developer/oauth/design.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2606,7 +2945,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../developer/oauth/AUTHMS.html" class="md-nav__link">
+      <a href="../../developer/oauth/authms.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2697,6 +3036,90 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../developer/cli.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    DTaaS CLI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/client/client.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/servers/lib/lib-ms.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Library Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/servers/execution/runner/runner.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Runner Microservice
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -2708,10 +3131,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_13" >
         
           
-          <label class="md-nav__link" for="__nav_5_9" id="__nav_5_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_13" id="__nav_5_13_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2722,8 +3145,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_13">
             <span class="md-nav__icon md-icon"></span>
             DevOps Framework
           </label>
@@ -2982,6 +3405,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clone-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone Codebase
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-and-install" class="md-nav__link">
     <span class="md-ellipsis">
       Configure and Install
@@ -3008,6 +3449,21 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#create-users" class="md-nav__link">
@@ -3050,46 +3506,61 @@
   
 
 
-<h1 id="install-gitlab">Install Gitlab</h1>
-<p>This guide helps with installation of a dedicated
-<a href="https://gitlab.com">Gitlab</a> service. This Gitlab installation can be used
-as OAuth2 authorization provider to the DTaaS software.
-In addition, it is also possible to use the integrated Gitlab for
-enabling the digital twin DevOps experimental features of the DTaaS.</p>
-<p>There are two possible ways you can install Gitlab:</p>
+<h1 id="local-gitlab-instance">Local GitLab Instance</h1>
+<p>This guide provides instructions for installing a dedicated local
+<a href="https://gitlab.com">GitLab</a> instance. This GitLab installation can be used
+as an OAuth 2.0 authorization provider and DevOps backend for the DTaaS platform.</p>
+<h2 id="design">Design</h2>
+<p>Two possible methods exist for installing GitLab alongside the DTaaS:</p>
 <ul>
-<li>At dedicated domain name (ex: <http:><em>gitlab.foo.com</em></http:>)</li>
-<li>At a URL path on existing WWW server (ex: <http:>foo.com/gitlab</http>)</li>
+<li>At a dedicated domain name (e.g., <http:><em>gitlab.foo.com</em></http:>)</li>
+<li>At a URL path on an existing WWW server (e.g., <http:>foo.com/gitlab</http>)</li>
 </ul>
-<p>This guide illustrates the installation of Gitlab at:
-<http:>foo.com/gitlab</http>. But the instructions can be
-adapted to install Gitlab at a dedicated domain name.</p>
-<h2 id="configure-and-install">Configure and Install</h2>
-<p>If you have not cloned the DTaaS git repository, cloning would be
+<p>The first is a two-server installation setup where GitLab and DTaaS
+are installed on separate servers. An illustration of this setup is shown below.</p>
+<p><img alt="GitLab independent install" src="gitlab-independent-install.png" /></p>
+<p>🗒️ The text starting with <code>/</code> at the beginning indicates the URL route
+at which a certain service is available. For example, user workspace
+is available at <a href="https://localhost/user1">https://localhost/user1</a>.</p>
+<p>The above figure shows integration of the DTaaS with a GitLab instance
+hosted at separate hostname, for example at <a href="https://gitlab.foo.com">https://gitlab.foo.com</a>.</p>
+<p>The second installation setup involves installation of both the GitLab
+and the DTaaS on the same server.
+An illustration of the integrated single-server installation setup is
+shown below.</p>
+<p><img alt="GitLab integrated install" src="gitlab-integrated-install.png" /></p>
+<p>This figure shows integration of GitLab instance hosted along side
+the DTaaS. The integrated GitLab is hosted behind the Traefik proxy.</p>
+<p>This guide illustrates the installation of GitLab at:
+<http:>foo.com/gitlab</http>. However, the instructions and <code>compose.gitlab.yml</code>
+can be adapted to install GitLab at a dedicated domain name.</p>
+<h2 id="clone-codebase">Clone Codebase</h2>
+<p>If the DTaaS git repository has not been cloned, cloning is
 the first step.
-In case you already have the codebase, you can skip the cloning step.
-To clone, do:</p>
+If the codebase already exists, the cloning step can be skipped.
+To clone:</p>
 <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
-<span class="normal"><a href="#__codelineno-0-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/into-cps-association/DTaaS.git
+<span class="normal"><a href="#__codelineno-0-2">2</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/INTO-CPS-Association/DTaaS.git
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>DTaaS/deploy/services/gitlab
 </span></code></pre></div></td></tr></table></div>
+<h2 id="configure-and-install">Configure and Install</h2>
 <p>This directory contains files
 needed to set up the docker container containing the local GitLab instance.</p>
 <ol>
 <li><code>./data</code>, <code>./config</code>, <code>./logs</code> are the directories that will contain data for
    the GitLab instance</li>
 <li><code>compose.gitlab.yml</code> and <code>.env</code> are the Docker compose and environment files
-   to manage the containerized instance of gitlab</li>
+   to manage the containerized instance of GitLab</li>
 </ol>
-<p>If the DTaaS application and gitlab are to be hosted at <a href="https://foo.com">https://foo.com</a>, then
+<p>If the DTaaS platform and GitLab are to be hosted at <a href="https://foo.com">https://foo.com</a>, then
 the client config file (<code>deploy/config/client/env.js</code>)
 needs to use the <a href="https://foo.com/gitlab">https://foo.com/gitlab</a> as <code>REACT_APP_AUTH_AUTHORITY</code>.
 In addition, this hosting at <a href="https://foo.com">https://foo.com</a> also requires changes to
 config file (<code>.env.server</code>).</p>
-<p>If the DTaaS application and gitlab are to be hosted at <a href="https://localhost">https://localhost</a>, then
+<p>If the DTaaS platform and GitLab are to be hosted at <a href="https://localhost">https://localhost</a>, then
 the client config file (<code>deploy/config/client/env.local.js</code>)
 needs to use the <a href="https://localhost/gitlab">https://localhost/gitlab</a> as <code>REACT_APP_AUTH_AUTHORITY</code>.
-If the application and the integrated gitlab are to be hosted at
+If the application and the integrated GitLab are to be hosted at
 <code>https://localhost/gitlab</code>, then <code>.env.server</code> need not be modified.</p>
 <p>Edit the <code>.env</code> file available in this directory to contain the following variables:</p>
 <table>
@@ -3102,9 +3573,9 @@ If the application and the integrated gitlab are to be hosted at
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">GITLAB_HOME</td>
-<td style="text-align: left;">'/home/Desktop/DTaaS/deploy/services/gitlab'</td>
-<td style="text-align: left;">Full path to the DTaaS gitlab directory. This is an absolute path with no trailing slash.</td>
+<td style="text-align: left;">DTAAS_DIR</td>
+<td style="text-align: left;">'/Users/username/DTaaS'</td>
+<td style="text-align: left;">Full path to the DTaaS directory. This is an absolute path with no trailing slash.</td>
 </tr>
 <tr>
 <td style="text-align: left;">SERVER_DNS</td>
@@ -3118,7 +3589,7 @@ incorrectly causes redirects to use the <code>HTTPS</code> URL scheme. This is a
 <a href="https://github.com/authts/react-oidc-context/issues/1288">known issue with the package</a>,
 and forces us to use <code>HTTPS</code> for the DTaaS server. If you are hosting the DTaaS
 locally, your GitLab instance should be available at <a href="https://localhost/gitlab">https://localhost/gitlab</a>.
-If you are hosting the DTaaS at <a href="https://foo.com">https://foo.com</a>, then you Gitlab instance
+If you are hosting the DTaaS at <a href="https://foo.com">https://foo.com</a>, then you GitLab instance
 should be available at <a href="https://foo.com/gitlab">https://foo.com/gitlab</a>.</p>
 <h2 id="run">Run</h2>
 <p><strong>NOTE</strong>: The GitLab instance operates with the <code>dtaas-frontend</code> network, which
@@ -3132,61 +3603,26 @@ requires the DTaaS server to be running before you start it. You may refer to se
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>compose.gitlab.yml<span class="w"> </span>down
 </span></code></pre></div></td></tr></table></div>
 <p>Each time you start the container, it may take a few minutes. You can monitor
-the progress with <code>watch docker ps</code> and check if the gitlab container is
+the progress with <code>watch docker ps</code> and check if the GitLab container is
 <code>healthy</code>.</p>
 <h3 id="post-install-configuration">Post-install Configuration</h3>
-<p>Gitlab also requires post-installation configuration.</p>
-<div class="admonition information">
-<p class="admonition-title">Information</p>
-<p><!-- markdownlint-disable-file MD013 -->
-This configuration needs to be done from within the running container.</p>
-</div>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>gitlab<span class="w"> </span>bash
-</span></code></pre></div></td></tr></table></div>
-<p>The configuration file to change is <em>/etc/gitlab/gitlab.rb</em>.
-The variables to change are:</p>
-<div class="language-ini highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
-<span class="normal"><a href="#__codelineno-3-2">2</a></span>
-<span class="normal"><a href="#__codelineno-3-3">3</a></span>
-<span class="normal"><a href="#__codelineno-3-4">4</a></span>
-<span class="normal"><a href="#__codelineno-3-5">5</a></span>
-<span class="normal"><a href="#__codelineno-3-6">6</a></span>
-<span class="normal"><a href="#__codelineno-3-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="na">external_url &#39;http(s)</span><span class="o">:</span><span class="s">//foo.com/gitlab&#39;</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="na">nginx[&#39;listen_port&#39;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">80</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="na">nginx[&#39;enable&#39;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="na">nginx[&#39;listen_https&#39;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="na">nginx[&#39;redirect_http_to_https&#39;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="na">letsencrypt[&#39;enable&#39;]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-</span></code></pre></div></td></tr></table></div>
-<p>The <code>external_url</code> mentioned about indicates hosting of gitlab at
-<a href="https://foo.com/gitlab">https://foo.com/gitlab</a>.
-If the gitlab needs to be available at <a href="https://localhost/gitlab">https://localhost/gitlab</a>, then
-the <code>external_url</code> should be <a href="https://localhost/gitlab">https://localhost/gitlab</a>.</p>
-<p>Save the changes and reconfigure gitlab by running:</p>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
-<span class="normal"><a href="#__codelineno-4-2">2</a></span>
-<span class="normal"><a href="#__codelineno-4-3">3</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># inside the gitlab docker container</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2"></a>gitlab-ctl<span class="w"> </span>reconfigure
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="nb">exit</span>
-</span></code></pre></div></td></tr></table></div>
 <p>The administrator username for GitLab is: <code>root</code>. The password for this user
-account will be available in: <em>/etc/gitlab/initial_root_password</em>. Be sure to
+account will be available in: <code>config/initial_root_password</code>. Be sure to
 save this password somewhere, as <strong>this file will be deleted after 24 hours</strong>
 from the first time you start the local instance.</p>
+<h2 id="use">Use</h2>
 <p>After running the container, your local GitLab instance will be available at
-<code>external_url</code> specified in <em>gitlab.rb</em>, i.e., either at
-<a href="https://foo.com/gitlab">https://foo.com/gitlab</a> or at <a href="https://localhost/gitlab">https://localhost/gitlab</a>.</p>
+either at <a href="https://foo.com/gitlab">https://foo.com/gitlab</a> or at <a href="https://localhost/gitlab">https://localhost/gitlab</a>.</p>
 <h3 id="create-users">Create Users</h3>
-<p>The newly installed gitlab only contains <code>root</code> user. More users need
+<p>The newly installed GitLab only contains <code>root</code> user. More users need
 to be created for use with DTaaS. Please see the
-<a href="https://docs.gitlab.com/ee/user/profile/account/create_accounts.html">Gitlab docs</a>
+<a href="https://docs.gitlab.com/ee/user/profile/account/create_accounts.html">GitLab docs</a>
 for further help.</p>
 <h2 id="pending-tasks">Pending Tasks</h2>
-<p>This README helps with installation of Gitlab along side DTaaS application.
-But the OAuth2 integration between Gitlab and DTaaS will still be pending.
+<p>This document helps with installation of GitLab along side DTaaS application.
+But the OAuth 2.0 integration between GitLab and DTaaS will still be pending.
 Follow the <a href="integration.html">integration guide</a> and the
-<a href="runner.html">runner setup guide</a> to setup the Gitlab integration.</p>
+<a href="runner.html">runner setup guide</a> to setup the GitLab integration.</p>
 
 
 
@@ -3216,17 +3652,17 @@ Follow the <a href="integration.html">integration guide</a> and the
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../services.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Services">
+          <a href="../services/terminal-install.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Manual Install">
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Previous
               </span>
               <div class="md-ellipsis">
-                Services
+                Manual Install
               </div>
             </div>
           </a>
@@ -3244,7 +3680,7 @@ Follow the <a href="integration.html">integration guide</a> and the
             </div>
             <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
             </div>
           </a>
         
@@ -3256,7 +3692,7 @@ Follow the <a href="integration.html">integration guide</a> and the
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2022 - 2024 The INTO-CPS Association
+      Copyright &copy; 2022 - 2026 The INTO-CPS Association
     </div>
   
   
@@ -3277,10 +3713,10 @@ Follow the <a href="integration.html">integration guide</a> and the
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tracking", "navigation.footer"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tracking", "navigation.footer"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      <script src="../../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       
