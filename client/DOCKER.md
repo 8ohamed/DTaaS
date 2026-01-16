@@ -22,7 +22,7 @@ the following into the file:
 ```yml
 services:
   client:
-    image: intocps/dtaas-web:latest
+    image: intocps/dtaas-web:0.10.2
     restart: unless-stopped
     volumes:
       - ./config.js:/dtaas/client/build/env.js

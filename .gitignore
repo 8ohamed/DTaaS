@@ -99,6 +99,9 @@ typings/
 # front end environment variables
 client/public/env.js
 
+# client test output
+client/test-results
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
