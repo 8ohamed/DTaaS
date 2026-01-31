@@ -2,10 +2,10 @@ import CreateDTDialog from 'preview/route/digitaltwins/create/CreateDTDialog';
 import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import fileSlice from 'preview/store/file.slice';
+import fileSlice from 'model/store/file.slice';
 import { validateFiles } from 'preview/util/fileUtils';
 import { initDigitalTwin } from 'model/backend/util/init';
-import cartSlice from 'preview/store/cart.slice';
+import cartSlice from 'model/store/cart.slice';
 
 jest.mock('preview/util/fileUtils', () => ({
   validateFiles: jest.fn(),

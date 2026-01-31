@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   removeAllCreationFiles,
   addOrUpdateFile,
-} from 'preview/store/file.slice';
+} from 'model/store/file.slice';
 import { defaultFiles } from 'model/backend/gitlab/digitalTwinConfig/constants';
 
 jest.mock('react-redux', () => ({

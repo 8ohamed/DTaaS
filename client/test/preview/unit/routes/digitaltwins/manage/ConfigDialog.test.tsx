@@ -13,8 +13,8 @@ import store, { RootState } from 'store/store';
 import { showSnackbar } from 'store/snackbar.slice';
 import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
-import { selectModifiedFiles } from 'preview/store/file.slice';
-import { selectModifiedLibraryFiles } from 'preview/store/libraryConfigFiles.slice';
+import { selectModifiedFiles } from 'model/store/file.slice';
+import { selectModifiedLibraryFiles } from 'model/store/libraryConfigFiles.slice';
 
 import * as digitalTwinSlice from 'model/backend/state/digitalTwin.slice';
 import * as snackbarSlice from 'store/snackbar.slice';

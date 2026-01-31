@@ -13,13 +13,13 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import DetailsDialog from 'preview/route/digitaltwins/manage/DetailsDialog';
-import assetsReducer, { setAssets } from 'preview/store/assets.slice';
+import assetsReducer, { setAssets } from 'model/store/assets.slice';
 import digitalTwinReducer, {
   setDigitalTwin,
 } from 'model/backend/state/digitalTwin.slice';
 import snackbarSlice from 'store/snackbar.slice';
-import fileSlice from 'preview/store/file.slice';
-import libraryConfigFilesSlice from 'preview/store/libraryConfigFiles.slice';
+import fileSlice from 'model/store/file.slice';
+import libraryConfigFilesSlice from 'model/store/libraryConfigFiles.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
 import { mockBackendInstance } from 'test/__mocks__/global_mocks';
 import LibraryManager from 'model/backend/libraryManager';

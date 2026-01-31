@@ -12,7 +12,7 @@ import LogDialog from 'components/LogDialog';
 import DetailsDialog from 'preview/route/digitaltwins/manage/DetailsDialog';
 import ReconfigureDialog from 'preview/route/digitaltwins/manage/ReconfigureDialog';
 import DeleteDialog from 'preview/route/digitaltwins/manage/DeleteDialog';
-import { selectAssetByPathAndPrivacy } from 'preview/store/assets.slice';
+import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 import HistoryButton from 'components/asset/HistoryButton';
 import StartButton from 'preview/components/asset/StartButton';
 import { Asset } from 'model/backend/Asset';

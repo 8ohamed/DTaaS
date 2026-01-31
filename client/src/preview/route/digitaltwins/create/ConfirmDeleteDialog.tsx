@@ -3,7 +3,7 @@ import { Dialog, DialogActions, DialogContent, Button } from '@mui/material';
 import {
   removeAllCreationFiles,
   addOrUpdateFile,
-} from 'preview/store/file.slice';
+} from 'model/store/file.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'store/store';
 import { defaultFiles } from 'model/backend/gitlab/digitalTwinConfig/constants';

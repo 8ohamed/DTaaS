@@ -9,8 +9,8 @@ import {
   Box,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import useCart from 'preview/store/CartAccess';
-import { removeAllFiles } from 'preview/store/libraryConfigFiles.slice';
+import useCart from 'model/store/CartAccess';
+import { removeAllFiles } from 'model/store/libraryConfigFiles.slice';
 import { useDispatch } from 'react-redux';
 import CartList from 'preview/components/cart/CartList';
 

@@ -1,4 +1,4 @@
-import useCart from 'preview/store/CartAccess';
+import useCart from 'model/store/CartAccess';
 import LibraryAsset from 'model/backend/libraryAsset';
 
 function CartList() {

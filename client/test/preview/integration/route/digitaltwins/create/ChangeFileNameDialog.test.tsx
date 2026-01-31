@@ -8,7 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import fileSlice from 'preview/store/file.slice';
+import fileSlice from 'model/store/file.slice';
 
 const store = configureStore({
   reducer: combineReducers({

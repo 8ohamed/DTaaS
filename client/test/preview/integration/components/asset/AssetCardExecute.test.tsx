@@ -6,7 +6,7 @@ import { Provider, useSelector } from 'react-redux';
 import assetsReducer, {
   selectAssetByPathAndPrivacy,
   setAssets,
-} from 'preview/store/assets.slice';
+} from 'model/store/assets.slice';
 import digitalTwinReducer, {
   setDigitalTwin,
 } from 'model/backend/state/digitalTwin.slice';

@@ -7,7 +7,7 @@ import {
   mockDigitalTwin,
   mockLibraryAsset,
 } from 'test/preview/__mocks__/global_mocks';
-import { addOrUpdateLibraryFile } from 'preview/store/libraryConfigFiles.slice';
+import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 import * as ReactRedux from 'react-redux';
 
 jest.mock('react-redux', () => ({

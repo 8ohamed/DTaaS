@@ -2,7 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import AssetBoard from 'preview/components/asset/AssetBoard';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import assetsReducer, { setAssets } from 'preview/store/assets.slice';
+import assetsReducer, { setAssets } from 'model/store/assets.slice';
 import digitalTwinReducer, {
   setDigitalTwin,
   setShouldFetchDigitalTwins,
@@ -13,9 +13,9 @@ import {
   createMockDigitalTwinData,
   mockLibraryAsset,
 } from 'test/preview/__mocks__/global_mocks';
-import fileSlice, { addOrUpdateFile } from 'preview/store/file.slice';
+import fileSlice, { addOrUpdateFile } from 'model/store/file.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
-import libraryConfigFilesSlice from 'preview/store/libraryConfigFiles.slice';
+import libraryConfigFilesSlice from 'model/store/libraryConfigFiles.slice';
 import { FileState } from 'model/backend/interfaces/sharedInterfaces';
 import { storeResetAll } from 'test/preview/integration/integration.testUtil';
 

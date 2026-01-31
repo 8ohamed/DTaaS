@@ -1,4 +1,4 @@
-import { addOrUpdateFile, renameFile } from 'preview/store/file.slice';
+import { addOrUpdateFile, renameFile } from 'model/store/file.slice';
 import {
   LibraryConfigFile,
   FileState,

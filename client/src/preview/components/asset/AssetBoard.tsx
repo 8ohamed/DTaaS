@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   deleteAsset,
   selectAssetsByTypeAndPrivacy,
-} from 'preview/store/assets.slice';
+} from 'model/store/assets.slice';
 import { fetchDigitalTwins } from 'model/backend/util/init';
 import { setShouldFetchDigitalTwins } from 'model/backend/state/digitalTwin.slice';
 import { RootState } from 'store/store';

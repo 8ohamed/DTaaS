@@ -1,7 +1,7 @@
 import DeleteFileDialog from 'preview/route/digitaltwins/create/DeleteFileDialog';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useDispatch } from 'react-redux';
-import { deleteFile } from 'preview/store/file.slice';
+import { deleteFile } from 'model/store/file.slice';
 
 jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),

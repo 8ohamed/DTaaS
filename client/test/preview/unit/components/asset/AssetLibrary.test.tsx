@@ -3,7 +3,7 @@ import { Provider, useSelector } from 'react-redux';
 import AssetLibrary from 'preview/components/asset/AssetLibrary';
 import store, { RootState } from 'store/store';
 import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
-import { selectAssetsByTypeAndPrivacy } from 'preview/store/assets.slice';
+import { selectAssetsByTypeAndPrivacy } from 'model/store/assets.slice';
 
 jest.mock('preview/store/assets.slice', () => ({
   ...jest.requireActual('preview/store/assets.slice'),

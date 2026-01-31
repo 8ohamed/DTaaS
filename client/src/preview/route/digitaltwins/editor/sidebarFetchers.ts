@@ -1,4 +1,4 @@
-import { addOrUpdateLibraryFile } from 'preview/store/libraryConfigFiles.slice';
+import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 import DigitalTwin from 'model/backend/digitalTwin';
 import { updateFileState } from 'preview/util/fileUtils';
 import LibraryAsset from 'model/backend/libraryAsset';

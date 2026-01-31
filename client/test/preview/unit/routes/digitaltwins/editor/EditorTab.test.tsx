@@ -2,8 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import EditorTab, {
   handleEditorChange,
 } from 'preview/route/digitaltwins/editor/EditorTab';
-import { addOrUpdateFile } from 'preview/store/file.slice';
-import { addOrUpdateLibraryFile } from 'preview/store/libraryConfigFiles.slice';
+import { addOrUpdateFile } from 'model/store/file.slice';
+import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 
 jest.mock('preview/store/file.slice', () => ({
   addOrUpdateFile: jest.fn(),

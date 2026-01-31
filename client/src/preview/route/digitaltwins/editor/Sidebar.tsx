@@ -3,7 +3,7 @@ import { Grid, CircularProgress, Button, Box } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'store/store';
-import { addOrUpdateLibraryFile } from 'preview/store/libraryConfigFiles.slice';
+import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 import { getFilteredFileNames } from 'preview/util/fileUtils';
 import { FileState, FileType } from 'model/backend/interfaces/sharedInterfaces';
 import { selectDigitalTwinByName } from 'route/digitaltwins/execution';

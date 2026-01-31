@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Button } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { selectAssetByPathAndPrivacy } from 'preview/store/assets.slice';
+import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 import { DescriptionProvider } from 'model/backend/interfaces/sharedInterfaces';
 import LibraryAsset from 'model/backend/libraryAsset';
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';

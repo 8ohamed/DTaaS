@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   removeAllModifiedLibraryFiles,
   selectModifiedLibraryFiles,
-} from 'preview/store/libraryConfigFiles.slice';
+} from 'model/store/libraryConfigFiles.slice';
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 import {
@@ -21,7 +21,7 @@ import {
 import {
   removeAllModifiedFiles,
   selectModifiedFiles,
-} from 'preview/store/file.slice';
+} from 'model/store/file.slice';
 import { updateDescription } from 'model/backend/state/digitalTwin.slice';
 import { showSnackbar } from 'store/snackbar.slice';
 import DigitalTwin, { formatName } from 'model/backend/digitalTwin';

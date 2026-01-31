@@ -1,4 +1,4 @@
-import { addOrUpdateFile } from 'preview/store/file.slice';
+import { addOrUpdateFile } from 'model/store/file.slice';
 import {
   LibraryConfigFile,
   FileState,
@@ -7,7 +7,7 @@ import DigitalTwin from 'model/backend/digitalTwin';
 import { Dispatch, SetStateAction } from 'react';
 import { useDispatch } from 'react-redux';
 import LibraryAsset from 'model/backend/libraryAsset';
-import { addOrUpdateLibraryFile } from 'preview/store/libraryConfigFiles.slice';
+import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 import {
   getFileTypeFromExtension,
   updateFileState,

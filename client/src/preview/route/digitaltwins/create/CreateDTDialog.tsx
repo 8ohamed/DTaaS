@@ -8,7 +8,7 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material';
-import { removeAllCreationFiles } from 'preview/store/file.slice';
+import { removeAllCreationFiles } from 'model/store/file.slice';
 import {
   LibraryConfigFile,
   FileState,
@@ -21,7 +21,7 @@ import { addDefaultFiles, validateFiles } from 'preview/util/fileUtils';
 import { defaultFiles } from 'model/backend/gitlab/digitalTwinConfig/constants';
 import { initDigitalTwin } from 'model/backend/util/init';
 import LibraryAsset from 'model/backend/libraryAsset';
-import useCart from 'preview/store/CartAccess';
+import useCart from 'model/store/CartAccess';
 import { extractDataFromDigitalTwin } from 'model/backend/util/digitalTwinAdapter';
 import {
   setDigitalTwin,

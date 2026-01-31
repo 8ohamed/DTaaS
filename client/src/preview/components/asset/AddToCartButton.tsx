@@ -1,8 +1,8 @@
 import { Button } from '@mui/material';
 import LibraryAsset from 'model/backend/libraryAsset';
-import useCart from 'preview/store/CartAccess';
+import useCart from 'model/store/CartAccess';
 import { useSelector } from 'react-redux';
-import { selectAssetByPathAndPrivacy } from 'preview/store/assets.slice';
+import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 
 interface AddToCartButtonProps {
   assetPath: string;
