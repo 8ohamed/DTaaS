@@ -9,7 +9,7 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
-jest.mock('preview/store/cart.slice', () => ({
+jest.mock('model/store/cart.slice', () => ({
   addToCart: jest.fn(),
   removeFromCart: jest.fn(),
   clearCart: jest.fn(),

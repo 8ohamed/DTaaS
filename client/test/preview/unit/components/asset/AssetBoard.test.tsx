@@ -13,8 +13,8 @@ jest.mock('preview/components/asset/AssetCard', () => ({
   AssetCardExecute: () => <div>Asset Card Execute</div>,
 }));
 
-jest.mock('preview/store/assets.slice', () => ({
-  ...jest.requireActual('preview/store/assets.slice'),
+jest.mock('model/store/assets.slice', () => ({
+  ...jest.requireActual('model/store/assets.slice'),
 }));
 
 jest.mock('model/backend/util/init', () => ({

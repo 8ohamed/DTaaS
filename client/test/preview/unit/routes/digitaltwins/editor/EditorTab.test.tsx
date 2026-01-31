@@ -5,7 +5,7 @@ import EditorTab, {
 import { addOrUpdateFile } from 'model/store/file.slice';
 import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 
-jest.mock('preview/store/file.slice', () => ({
+jest.mock('model/store/file.slice', () => ({
   addOrUpdateFile: jest.fn(),
 }));
 

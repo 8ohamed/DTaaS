@@ -17,7 +17,7 @@ jest.mock('model/backend/libraryAsset', () => ({
 }));
 
 const setAsset = jest.fn();
-jest.mock('preview/store/assets.slice', () => ({
+jest.mock('model/store/assets.slice', () => ({
   setAsset,
 }));
 

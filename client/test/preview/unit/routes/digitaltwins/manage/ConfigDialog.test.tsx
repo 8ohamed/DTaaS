@@ -19,8 +19,8 @@ import { selectModifiedLibraryFiles } from 'model/store/libraryConfigFiles.slice
 import * as digitalTwinSlice from 'model/backend/state/digitalTwin.slice';
 import * as snackbarSlice from 'store/snackbar.slice';
 
-jest.mock('preview/store/file.slice', () => {
-  const actual = jest.requireActual('preview/store/file.slice');
+jest.mock('model/store/file.slice', () => {
+  const actual = jest.requireActual('model/store/file.slice');
   return {
     ...actual,
     selectModifiedFiles: jest.fn(),

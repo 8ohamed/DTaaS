@@ -5,8 +5,8 @@ import store, { RootState } from 'store/store';
 import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
 import { selectAssetsByTypeAndPrivacy } from 'model/store/assets.slice';
 
-jest.mock('preview/store/assets.slice', () => ({
-  ...jest.requireActual('preview/store/assets.slice'),
+jest.mock('model/store/assets.slice', () => ({
+  ...jest.requireActual('model/store/assets.slice'),
   selectAssetsByTypeAndPrivacy: jest.fn(() => []),
 }));
 
