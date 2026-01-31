@@ -1,22 +1,22 @@
 import { render, screen } from '@testing-library/react';
 import CreateDialogs from 'preview/route/digitaltwins/create/CreateDialogs';
 
-jest.mock('preview/route/digitaltwins/create/ChangeFileNameDialog', () => ({
+jest.mock('route/digitaltwins/create/ChangeFileNameDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="change-file-name-dialog" />,
 }));
 
-jest.mock('preview/route/digitaltwins/create/DeleteFileDialog', () => ({
+jest.mock('route/digitaltwins/create/DeleteFileDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="delete-file-dialog" />,
 }));
 
-jest.mock('preview/route/digitaltwins/create/ConfirmDeleteDialog', () => ({
+jest.mock('route/digitaltwins/create/ConfirmDeleteDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="confirm-delete-dialog" />,
 }));
 
-jest.mock('preview/route/digitaltwins/create/CreateDTDialog', () => ({
+jest.mock('route/digitaltwins/create/CreateDTDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="create-dt-dialog" />,
 }));

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import FileActionButtons from 'preview/route/digitaltwins/create/FileActionButtons';
+import FileActionButtons from 'route/digitaltwins/create/FileActionButtons';
 import { act } from 'react';
 
 describe('FileActionButtons', () => {

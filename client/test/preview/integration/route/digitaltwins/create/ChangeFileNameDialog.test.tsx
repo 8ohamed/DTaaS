@@ -1,4 +1,4 @@
-import ChangeFileNameDialog from 'preview/route/digitaltwins/create/ChangeFileNameDialog';
+import ChangeFileNameDialog from 'route/digitaltwins/create/ChangeFileNameDialog';
 import { Provider } from 'react-redux';
 import {
   act,

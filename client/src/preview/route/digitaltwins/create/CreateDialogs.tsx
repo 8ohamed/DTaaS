@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction } from 'react';
-import ChangeFileNameDialog from 'preview/route/digitaltwins/create/ChangeFileNameDialog';
-import DeleteFileDialog from 'preview/route/digitaltwins/create/DeleteFileDialog';
-import ConfirmDeleteDialog from 'preview/route/digitaltwins/create/ConfirmDeleteDialog';
-import CreateDTDialog from 'preview/route/digitaltwins/create/CreateDTDialog';
+import ChangeFileNameDialog from 'route/digitaltwins/create/ChangeFileNameDialog';
+import DeleteFileDialog from 'route/digitaltwins/create/DeleteFileDialog';
+import ConfirmDeleteDialog from 'route/digitaltwins/create/ConfirmDeleteDialog';
+import CreateDTDialog from 'route/digitaltwins/create/CreateDTDialog';
 
 interface CreateDialogsProps {
   openChangeFileNameDialog: boolean;

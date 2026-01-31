@@ -1,4 +1,4 @@
-import DeleteFileDialog from 'preview/route/digitaltwins/create/DeleteFileDialog';
+import DeleteFileDialog from 'route/digitaltwins/create/DeleteFileDialog';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useDispatch } from 'react-redux';
 import { deleteFile } from 'model/store/file.slice';

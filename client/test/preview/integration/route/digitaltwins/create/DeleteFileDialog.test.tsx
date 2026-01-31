@@ -1,4 +1,4 @@
-import DeleteFileDialog from 'preview/route/digitaltwins/create/DeleteFileDialog';
+import DeleteFileDialog from 'route/digitaltwins/create/DeleteFileDialog';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';

@@ -1,4 +1,4 @@
-import CreateDTDialog from 'preview/route/digitaltwins/create/CreateDTDialog';
+import CreateDTDialog from 'route/digitaltwins/create/CreateDTDialog';
 import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
