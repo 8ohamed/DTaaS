@@ -4,7 +4,7 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from 'store/store';
 import { initDigitalTwin } from 'model/backend/util/init';
 import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
-import { validateFiles } from 'preview/util/fileUtils';
+import { validateFiles } from 'util/fileUtils';
 import { FileState, FileType } from 'model/backend/interfaces/sharedInterfaces';
 
 jest.mock('react-redux', () => ({
@@ -13,9 +13,13 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 
-jest.mock('preview/util/fileUtils', () => ({
-  ...jest.requireActual('preview/util/fileUtils'),
+jest.mock('util/fileUtils', () => ({
+  ...jest.requireActual('util/fileUtils'),
   validateFiles: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('util/fileActions', () => ({
+  ...jest.requireActual('util/fileActions'),
   addDefaultFiles: jest.fn(),
 }));
 

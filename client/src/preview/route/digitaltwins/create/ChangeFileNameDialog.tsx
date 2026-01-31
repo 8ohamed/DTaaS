@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { handleChangeFileName } from 'preview/util/fileUtils';
+import { handleChangeFileName } from 'util/fileActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'store/store';
 

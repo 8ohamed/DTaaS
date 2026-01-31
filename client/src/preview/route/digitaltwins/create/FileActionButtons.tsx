@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { isFileDeletable, isFileModifiable } from 'preview/util/fileUtils';
+import { isFileDeletable, isFileModifiable } from 'util/fileUtils';
 import { Tooltip } from '@mui/material';
 
 function FileActionButtons({

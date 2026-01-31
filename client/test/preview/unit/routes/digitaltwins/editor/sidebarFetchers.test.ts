@@ -3,7 +3,7 @@ import {
   mockLibraryAsset,
 } from 'test/preview/__mocks__/global_mocks';
 import * as SidebarFetchers from 'preview/route/digitaltwins/editor/sidebarFetchers';
-import * as FileUtils from 'preview/util/fileUtils';
+import * as FileUtils from 'util/fileUtils';
 
 describe('sidebarFetchers', () => {
   const setFileName = jest.fn();

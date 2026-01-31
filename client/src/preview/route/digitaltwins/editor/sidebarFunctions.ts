@@ -11,7 +11,7 @@ import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
 import {
   getFileTypeFromExtension,
   updateFileState,
-} from 'preview/util/fileUtils';
+} from 'util/fileUtils';
 import {
   fetchAndSetFileContent,
   fetchAndSetFileLibraryContent,

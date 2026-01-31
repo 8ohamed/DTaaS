@@ -2,7 +2,7 @@ import ChangeFileNameDialog from 'preview/route/digitaltwins/create/ChangeFileNa
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import store from 'store/store';
-import * as fileUtils from 'preview/util/fileUtils';
+import * as fileActions from 'util/fileActions';
 
 describe('ChangeFileNameDialog', () => {
   const showDialog = true;
@@ -35,7 +35,7 @@ describe('ChangeFileNameDialog', () => {
 
   it('handles change file name', async () => {
     const handleChangeFileNameSpy = jest
-      .spyOn(fileUtils, 'handleChangeFileName')
+      .spyOn(fileActions, 'handleChangeFileName')
       .mockImplementation(jest.fn());
 
     const changeButton = screen.getByRole('button', { name: /Change/i });
