@@ -1,4 +1,4 @@
-import DetailsButton from 'preview/components/asset/DetailsButton';
+import DetailsButton from 'components/asset/DetailsButton';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 import * as React from 'react';

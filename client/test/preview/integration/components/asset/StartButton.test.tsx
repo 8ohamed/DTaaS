@@ -5,7 +5,7 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import StartButton from 'preview/components/asset/StartButton';
+import StartButton from 'components/asset/StartButton';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import digitalTwinReducer, {

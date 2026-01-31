@@ -1,8 +1,8 @@
 import Layout from 'page/Layout';
 import TabComponent from 'components/tab/TabComponent';
 import { Paper, Typography } from '@mui/material';
-import ShoppingCart from 'preview/components/cart/ShoppingCart';
-import AssetLibrary from 'preview/components/asset/AssetLibrary';
+import ShoppingCart from 'components/cart/ShoppingCart';
+import AssetLibrary from 'components/asset/AssetLibrary';
 import { assetType, scope } from 'preview/route/library/LibraryTabDataPreview';
 
 export function createTabs() {

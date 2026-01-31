@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Grid, CircularProgress, Box } from '@mui/material';
-import { AssetCardLibrary } from 'preview/components/asset/AssetCard';
+import { AssetCardLibrary } from 'components/asset/AssetCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAssetsByTypeAndPrivacy } from 'model/store/assets.slice';
 import { fetchLibraryAssets } from 'model/backend/util/init';
-import Filter from 'preview/components/asset/Filter';
+import Filter from 'components/asset/Filter';
 
 const outerGridContainerProps = {
   container: true,

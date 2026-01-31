@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { Provider, useSelector } from 'react-redux';
-import AssetLibrary from 'preview/components/asset/AssetLibrary';
+import AssetLibrary from 'components/asset/AssetLibrary';
 import store, { RootState } from 'store/store';
 import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
 import { selectAssetsByTypeAndPrivacy } from 'model/store/assets.slice';
@@ -14,12 +14,12 @@ jest.mock('model/backend/util/init', () => ({
   fetchLibraryAssets: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('preview/components/asset/Filter', () => ({
+jest.mock('components/asset/Filter', () => ({
   __esModule: true,
   default: () => <div>Filter</div>,
 }));
 
-jest.mock('preview/components/asset/AssetCard', () => ({
+jest.mock('components/asset/AssetCard', () => ({
   __esModule: true,
   AssetCardLibrary: () => <div>Asset Card Library</div>,
 }));

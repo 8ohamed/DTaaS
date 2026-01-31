@@ -14,12 +14,12 @@ import ReconfigureDialog from 'preview/route/digitaltwins/manage/ReconfigureDial
 import DeleteDialog from 'preview/route/digitaltwins/manage/DeleteDialog';
 import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 import HistoryButton from 'components/asset/HistoryButton';
-import StartButton from 'preview/components/asset/StartButton';
+import StartButton from 'components/asset/StartButton';
 import { Asset } from 'model/backend/Asset';
-import ReconfigureButton from 'preview/components/asset/ReconfigureButton';
-import DeleteButton from 'preview/components/asset/DeleteButton';
-import AddToCartButton from 'preview/components/asset/AddToCartButton';
-import DetailsButton from 'preview/components/asset/DetailsButton';
+import ReconfigureButton from 'components/asset/ReconfigureButton';
+import DeleteButton from 'components/asset/DeleteButton';
+import AddToCartButton from 'components/asset/AddToCartButton';
+import DetailsButton from 'components/asset/DetailsButton';
 
 interface AssetCardProps {
   asset: Asset;

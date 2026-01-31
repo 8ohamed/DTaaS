@@ -1,4 +1,4 @@
-import DeleteButton from 'preview/components/asset/DeleteButton';
+import DeleteButton from 'components/asset/DeleteButton';
 import { Provider } from 'react-redux';
 import store from 'store/store';
 import { render, screen, fireEvent } from '@testing-library/react';

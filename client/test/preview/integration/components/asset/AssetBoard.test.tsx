@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import AssetBoard from 'preview/components/asset/AssetBoard';
+import AssetBoard from 'components/asset/AssetBoard';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import assetsReducer, { setAssets } from 'model/store/assets.slice';
 import digitalTwinReducer, {

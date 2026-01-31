@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { handleStart } from 'route/digitaltwins/execution/executionButtonHandlers';
-import StartButton from 'preview/components/asset/StartButton';
+import StartButton from 'components/asset/StartButton';
 import { ExecutionStatus, JobLog } from 'model/backend/interfaces/execution';
 import * as redux from 'react-redux';
 

@@ -8,12 +8,12 @@ import {
 import { fetchDigitalTwins } from 'model/backend/util/init';
 import { setShouldFetchDigitalTwins } from 'model/backend/state/digitalTwin.slice';
 import { RootState } from 'store/store';
-import Filter from 'preview/components/asset/Filter';
+import Filter from 'components/asset/Filter';
 import { Asset } from 'model/backend/Asset';
 import {
   AssetCardExecute,
   AssetCardManage,
-} from 'preview/components/asset/AssetCard';
+} from 'components/asset/AssetCard';
 
 const outerGridContainerProps = {
   container: true,

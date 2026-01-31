@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import {
   AssetCardManage,
   AssetCardExecute,
-} from 'preview/components/asset/AssetCard';
+} from 'components/asset/AssetCard';
 import * as React from 'react';
 import { Provider, useSelector } from 'react-redux';
 import store from 'store/store';
