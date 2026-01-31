@@ -3,7 +3,7 @@ import TabComponent from 'components/tab/TabComponent';
 import { Paper, Typography } from '@mui/material';
 import ShoppingCart from 'components/cart/ShoppingCart';
 import AssetLibrary from 'components/asset/AssetLibrary';
-import { assetType, scope } from 'preview/route/library/LibraryTabDataPreview';
+import { assetType, scope } from 'route/library/cart/LibraryTabDataPreview';
 
 export function createTabs() {
   return assetType.map((tab) => ({

@@ -1,4 +1,4 @@
-import LibraryPreview from 'preview/route/library/LibraryPreview';
+import LibraryPreview from 'route/library/cart/LibraryPreview';
 import store from 'store/store';
 import { act, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
