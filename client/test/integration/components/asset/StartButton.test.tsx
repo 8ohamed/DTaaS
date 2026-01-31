@@ -16,9 +16,9 @@ import executionHistoryReducer, {
   addExecutionHistoryEntry,
 } from 'model/backend/state/executionHistory.slice';
 import '@testing-library/jest-dom';
-import { createMockDigitalTwinData } from 'test/preview/__mocks__/global_mocks';
+import { createMockDigitalTwinData } from 'test/__mocks__/global_mocks';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { storeResetAll } from 'test/preview/integration/integration.testUtil';
+import { storeResetAll } from 'test/integration/integration.testUtil';
 
 jest.mock('model/backend/util/digitalTwinAdapter', () => ({
   createDigitalTwinFromData: jest.fn().mockResolvedValue({

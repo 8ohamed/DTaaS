@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import executionHistoryReducer from 'model/backend/state/executionHistory.slice';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { dispatchAddExecHistoryEntry } from 'test/preview/integration/integration.testUtil';
+import { dispatchAddExecHistoryEntry } from 'test/integration/integration.testUtil';
 
 const createTestStore = () =>
   configureStore({
@@ -18,7 +18,7 @@ const createTestStore = () =>
       }),
   });
 
-describe('LogButton Integration Test', () => {
+describe('HistoryButton Integration Test', () => {
   const assetName = 'test-asset';
   let store: ReturnType<typeof createTestStore>;
 
@@ -26,7 +26,7 @@ describe('LogButton Integration Test', () => {
     store = createTestStore();
   });
 
-  const renderLogButton = (
+  const renderHistoryButton = (
     setShowLog: jest.Mock = jest.fn(),
     historyButtonDisabled = false,
     testAssetName = assetName,
@@ -43,28 +43,32 @@ describe('LogButton Integration Test', () => {
       );
     });
 
+  const getHistoryButtonElement = () =>
+    screen.getByRole('button', { name: /History/i });
   it('renders the History button', () => {
-    renderLogButton();
+    renderHistoryButton();
     expect(
       screen.getByRole('button', { name: /History/i }),
     ).toBeInTheDocument();
   });
 
-  const clickLogButton = () => {
-    const logButton = screen.getByRole('button', { name: /History/i });
-    act(() => {
-      fireEvent.click(logButton);
-    });
-  };
   it('handles button click when enabled', () => {
-    renderLogButton();
-    clickLogButton();
-    expect(screen.getByRole('button', { name: /History/i })).toBeEnabled();
+    const setShowLog = jest.fn((callback) => callback(false));
+    renderHistoryButton(setShowLog);
+
+    const historyButton = getHistoryButtonElement();
+    act(() => {
+      fireEvent.click(historyButton);
+    });
+
+    expect(setShowLog).toHaveBeenCalled();
   });
 
   it('does not handle button click when disabled and no executions', () => {
-    renderLogButton(jest.fn(), true);
-    expect(screen.getByRole('button', { name: /History/i })).toBeDisabled();
+    renderHistoryButton(jest.fn(), true); // historyButtonDisabled = true
+
+    const historyButton = getHistoryButtonElement();
+    expect(historyButton).toBeDisabled();
   });
 
   it('toggles setShowLog value correctly', () => {
@@ -72,10 +76,18 @@ describe('LogButton Integration Test', () => {
     const mockSetShowLog = jest.fn((callback) => {
       toggleValue = callback(toggleValue);
     });
-    renderLogButton(mockSetShowLog);
-    clickLogButton();
+
+    renderHistoryButton(mockSetShowLog);
+    const historyButton = getHistoryButtonElement();
+
+    act(() => {
+      fireEvent.click(historyButton);
+    });
     expect(toggleValue).toBe(true);
-    clickLogButton();
+
+    act(() => {
+      fireEvent.click(historyButton);
+    });
     expect(toggleValue).toBe(false);
   });
 
@@ -86,14 +98,30 @@ describe('LogButton Integration Test', () => {
       pipelineId: 456,
       status: ExecutionStatus.RUNNING,
     });
-    renderLogButton();
+    renderHistoryButton();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
   it('enables button when historyButtonDisabled is true but executions exist', async () => {
     await dispatchAddExecHistoryEntry(store, {});
-    renderLogButton(jest.fn(), true);
-    const logButton = screen.getByRole('button', { name: /History/i });
-    expect(logButton).toBeEnabled();
+    renderHistoryButton(jest.fn(), true);
+    const historyButton = getHistoryButtonElement();
+    expect(historyButton).toBeEnabled();
+  });
+
+  it('filters executions by assetName', async () => {
+    await dispatchAddExecHistoryEntry(store, {});
+    await dispatchAddExecHistoryEntry(store, {
+      id: '2',
+      dtName: 'different-asset',
+      pipelineId: 456,
+    });
+    await dispatchAddExecHistoryEntry(store, {
+      id: '3',
+      pipelineId: 789,
+      status: ExecutionStatus.RUNNING,
+    });
+    renderHistoryButton();
+    expect(screen.getByText('2')).toBeInTheDocument();
   });
 });

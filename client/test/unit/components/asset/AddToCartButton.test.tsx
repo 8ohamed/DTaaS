@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import AddToCartButton from 'components/asset/AddToCartButton';
 import * as cartAccess from 'model/store/CartAccess';
-import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryAsset } from 'test/__mocks__/global_mocks';
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/store';
 import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';

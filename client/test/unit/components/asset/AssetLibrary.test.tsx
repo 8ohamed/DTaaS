@@ -2,7 +2,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { Provider, useSelector } from 'react-redux';
 import AssetLibrary from 'components/asset/AssetLibrary';
 import store, { RootState } from 'store/store';
-import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryAsset } from 'test/__mocks__/global_mocks';
 import { selectAssetsByTypeAndPrivacy } from 'model/store/assets.slice';
 
 jest.mock('model/store/assets.slice', () => ({

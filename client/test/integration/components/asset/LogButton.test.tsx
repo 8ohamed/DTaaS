@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import executionHistoryReducer from 'model/backend/state/executionHistory.slice';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { dispatchAddExecHistoryEntry } from 'test/preview/integration/integration.testUtil';
+import { dispatchAddExecHistoryEntry } from 'test/integration/integration.testUtil';
 
 const createTestStore = () =>
   configureStore({
@@ -18,7 +18,7 @@ const createTestStore = () =>
       }),
   });
 
-describe('HistoryButton Integration Test', () => {
+describe('LogButton Integration Test', () => {
   const assetName = 'test-asset';
   let store: ReturnType<typeof createTestStore>;
 
@@ -26,7 +26,7 @@ describe('HistoryButton Integration Test', () => {
     store = createTestStore();
   });
 
-  const renderHistoryButton = (
+  const renderLogButton = (
     setShowLog: jest.Mock = jest.fn(),
     historyButtonDisabled = false,
     testAssetName = assetName,
@@ -43,32 +43,28 @@ describe('HistoryButton Integration Test', () => {
       );
     });
 
-  const getHistoryButtonElement = () =>
-    screen.getByRole('button', { name: /History/i });
   it('renders the History button', () => {
-    renderHistoryButton();
+    renderLogButton();
     expect(
       screen.getByRole('button', { name: /History/i }),
     ).toBeInTheDocument();
   });
 
-  it('handles button click when enabled', () => {
-    const setShowLog = jest.fn((callback) => callback(false));
-    renderHistoryButton(setShowLog);
-
-    const historyButton = getHistoryButtonElement();
+  const clickLogButton = () => {
+    const logButton = screen.getByRole('button', { name: /History/i });
     act(() => {
-      fireEvent.click(historyButton);
+      fireEvent.click(logButton);
     });
-
-    expect(setShowLog).toHaveBeenCalled();
+  };
+  it('handles button click when enabled', () => {
+    renderLogButton();
+    clickLogButton();
+    expect(screen.getByRole('button', { name: /History/i })).toBeEnabled();
   });
 
   it('does not handle button click when disabled and no executions', () => {
-    renderHistoryButton(jest.fn(), true); // historyButtonDisabled = true
-
-    const historyButton = getHistoryButtonElement();
-    expect(historyButton).toBeDisabled();
+    renderLogButton(jest.fn(), true);
+    expect(screen.getByRole('button', { name: /History/i })).toBeDisabled();
   });
 
   it('toggles setShowLog value correctly', () => {
@@ -76,18 +72,10 @@ describe('HistoryButton Integration Test', () => {
     const mockSetShowLog = jest.fn((callback) => {
       toggleValue = callback(toggleValue);
     });
-
-    renderHistoryButton(mockSetShowLog);
-    const historyButton = getHistoryButtonElement();
-
-    act(() => {
-      fireEvent.click(historyButton);
-    });
+    renderLogButton(mockSetShowLog);
+    clickLogButton();
     expect(toggleValue).toBe(true);
-
-    act(() => {
-      fireEvent.click(historyButton);
-    });
+    clickLogButton();
     expect(toggleValue).toBe(false);
   });
 
@@ -98,30 +86,14 @@ describe('HistoryButton Integration Test', () => {
       pipelineId: 456,
       status: ExecutionStatus.RUNNING,
     });
-    renderHistoryButton();
+    renderLogButton();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
   it('enables button when historyButtonDisabled is true but executions exist', async () => {
     await dispatchAddExecHistoryEntry(store, {});
-    renderHistoryButton(jest.fn(), true);
-    const historyButton = getHistoryButtonElement();
-    expect(historyButton).toBeEnabled();
-  });
-
-  it('filters executions by assetName', async () => {
-    await dispatchAddExecHistoryEntry(store, {});
-    await dispatchAddExecHistoryEntry(store, {
-      id: '2',
-      dtName: 'different-asset',
-      pipelineId: 456,
-    });
-    await dispatchAddExecHistoryEntry(store, {
-      id: '3',
-      pipelineId: 789,
-      status: ExecutionStatus.RUNNING,
-    });
-    renderHistoryButton();
-    expect(screen.getByText('2')).toBeInTheDocument();
+    renderLogButton(jest.fn(), true);
+    const logButton = screen.getByRole('button', { name: /History/i });
+    expect(logButton).toBeEnabled();
   });
 });

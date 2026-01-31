@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import CartList from 'components/cart/CartList';
 import * as cartAccess from 'model/store/CartAccess';
-import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryAsset } from 'test/__mocks__/global_mocks';
 
 describe('CartList', () => {
   it('should render a list of assets', () => {

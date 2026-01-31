@@ -12,12 +12,12 @@ import snackbarSlice from 'store/snackbar.slice';
 import {
   createMockDigitalTwinData,
   mockLibraryAsset,
-} from 'test/preview/__mocks__/global_mocks';
+} from 'test/__mocks__/global_mocks';
 import fileSlice, { addOrUpdateFile } from 'model/store/file.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
 import libraryConfigFilesSlice from 'model/store/libraryConfigFiles.slice';
 import { FileState } from 'model/backend/interfaces/sharedInterfaces';
-import { storeResetAll } from 'test/preview/integration/integration.testUtil';
+import { storeResetAll } from 'test/integration/integration.testUtil';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

@@ -15,10 +15,10 @@ import snackbarSlice from 'store/snackbar.slice';
 import {
   mockLibraryAsset,
   createMockDigitalTwinData,
-} from 'test/preview/__mocks__/global_mocks';
+} from 'test/__mocks__/global_mocks';
 import { RootState } from 'store/store';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { storeResetAll } from 'test/preview/integration/integration.testUtil';
+import { storeResetAll } from 'test/integration/integration.testUtil';
 
 jest.mock('database/executionHistoryDB');
 

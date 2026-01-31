@@ -1,6 +1,9 @@
 import { Gitlab } from '@gitbeaker/core';
 import { BackendInterface } from 'model/backend/interfaces/backendInterfaces';
 import GitlabAPI from 'model/backend/gitlab/backend';
+import LibraryAsset from 'model/backend/libraryAsset';
+import LibraryManager from 'model/backend/libraryManager';
+import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 
 export const mockAppURL = 'https://example.com/';
 export const mockURLforDT = 'https://example.com/URL_DT';
@@ -150,3 +153,52 @@ jest.mock('react-syntax-highlighter', () => ({
 jest.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   materialDark: {},
 }));
+
+const createCommonMocks = () => ({
+  getFileContent: jest.fn(),
+  getFileNames: jest.fn(),
+  getDescription: jest.fn(),
+  getFullDescription: jest.fn(),
+  getConfigFiles: jest.fn(),
+});
+
+const mockLibraryManager: LibraryManager = {
+  DTName: 'mockedDTName',
+  backend: mockBackendInstance,
+  assets: [],
+  assetFiles: [],
+  getAssets: jest.fn(),
+  getAsset: jest.fn(),
+  deleteAsset: jest.fn(),
+} as unknown as LibraryManager;
+
+export const mockLibraryAsset: LibraryAsset = {
+  name: 'Asset 1',
+  path: 'path',
+  type: 'Digital Twins',
+  isPrivate: true,
+  backend: mockBackendInstance,
+  description: 'description',
+  fullDescription: 'fullDescription',
+  libraryManager: mockLibraryManager,
+  configFiles: [],
+  ...createCommonMocks(),
+} as unknown as LibraryAsset;
+
+/**
+ * Creates a mock DigitalTwinData object for Redux state
+ * This creates clean serializable data for Redux, not DigitalTwin instances
+ */
+export const createMockDigitalTwinData = (dtName: string): DigitalTwinData => ({
+  DTName: dtName,
+  description: 'Test Digital Twin Description',
+  fullDescription: 'Test README',
+  jobLogs: [],
+  pipelineCompleted: false,
+  pipelineLoading: false,
+  pipelineId: undefined,
+  currentExecutionId: undefined,
+  lastExecutionStatus: undefined,
+  // Store only serializable data
+  gitlabProjectId: 123,
+});
