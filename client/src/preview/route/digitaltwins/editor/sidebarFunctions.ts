@@ -8,10 +8,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { useDispatch } from 'react-redux';
 import LibraryAsset from 'model/backend/libraryAsset';
 import { addOrUpdateLibraryFile } from 'model/store/libraryConfigFiles.slice';
-import {
-  getFileTypeFromExtension,
-  updateFileState,
-} from 'util/fileUtils';
+import { getFileTypeFromExtension, updateFileState } from 'util/fileUtils';
 import {
   fetchAndSetFileContent,
   fetchAndSetFileLibraryContent,

@@ -1,8 +1,5 @@
 import { addOrUpdateFile, renameFile } from 'model/store/file.slice';
-import {
-  FileState,
-  FileType,
-} from 'model/backend/interfaces/sharedInterfaces';
+import { FileState, FileType } from 'model/backend/interfaces/sharedInterfaces';
 import { Dispatch, SetStateAction } from 'react';
 import { useDispatch } from 'react-redux';
 import { getExtension } from 'util/fileUtils';

@@ -1,7 +1,4 @@
-import assetsSlice, {
-  deleteAsset,
-  setAssets,
-} from 'model/store/assets.slice';
+import assetsSlice, { deleteAsset, setAssets } from 'model/store/assets.slice';
 import digitalTwinReducer, {
   setDigitalTwin,
   setPipelineCompleted,
