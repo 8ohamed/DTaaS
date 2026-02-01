@@ -77,16 +77,16 @@ describe('FileUtils', () => {
     const onClose = jest.fn();
     const dispatch = jest.fn();
 
-    fileActions.handleChangeFileName(
+    fileActions.handleChangeFileName({
       files,
       modifiedFileName,
-      fileName,
+      currentFileName: fileName,
       setFileName,
       setFileType,
-      setErrorChangeMessage,
-      onClose,
+      setErrorMessage: setErrorChangeMessage,
+      setOpenDialog: onClose,
       dispatch,
-    );
+    });
 
     expect(setErrorChangeMessage).toHaveBeenCalledWith('');
     expect(dispatch).toHaveBeenCalled();
@@ -106,16 +106,16 @@ describe('FileUtils', () => {
     const onClose = jest.fn();
     const dispatch = jest.fn();
 
-    fileActions.handleChangeFileName(
+    fileActions.handleChangeFileName({
       files,
       modifiedFileName,
-      fileName,
+      currentFileName: fileName,
       setFileName,
       setFileType,
-      setErrorChangeMessage,
-      onClose,
+      setErrorMessage: setErrorChangeMessage,
+      setOpenDialog: onClose,
       dispatch,
-    );
+    });
 
     expect(setErrorChangeMessage).toHaveBeenCalledWith(
       "File name can't be empty.",
@@ -138,16 +138,16 @@ describe('FileUtils', () => {
     const onClose = jest.fn();
     const dispatch = jest.fn();
 
-    fileActions.handleChangeFileName(
+    fileActions.handleChangeFileName({
       files,
       modifiedFileName,
-      fileName,
+      currentFileName: fileName,
       setFileName,
       setFileType,
-      setErrorChangeMessage,
-      onClose,
+      setErrorMessage: setErrorChangeMessage,
+      setOpenDialog: onClose,
       dispatch,
-    );
+    });
 
     expect(setErrorChangeMessage).toHaveBeenCalledWith(
       'A file with this name already exists.',
