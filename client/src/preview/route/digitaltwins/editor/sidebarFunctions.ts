@@ -79,14 +79,14 @@ export const handleCreateFileClick = (
   if (asset instanceof DigitalTwin || asset === null) {
     const newFile = files.find((file) => file.name === fileName && file.isNew);
     if (newFile) {
-      updateFileState(
-        newFile.name,
-        newFile.content,
+      updateFileState({
+        fileName: newFile.name,
+        fileContent: newFile.content,
         setFileName,
         setFileContent,
         setFileType,
         setFilePrivacy,
-      );
+      });
       setIsLibraryFile(false);
       setLibraryAssetPath('');
     }
@@ -98,15 +98,15 @@ export const handleCreateFileClick = (
         file.isPrivate === asset.isPrivate,
     );
     if (libraryFile?.isModified) {
-      updateFileState(
-        libraryFile.fileName,
-        libraryFile.fileContent,
+      updateFileState({
+        fileName: libraryFile.fileName,
+        fileContent: libraryFile.fileContent,
         setFileName,
         setFileContent,
         setFileType,
         setFilePrivacy,
-        asset.isPrivate,
-      );
+        isPrivate: asset.isPrivate,
+      });
       setIsLibraryFile(true);
       setLibraryAssetPath(libraryFile.assetPath);
     } else {
@@ -147,14 +147,14 @@ export const handleReconfigureFileClick = async (
         (file) => file.name === fileName && file.isModified && !file.isNew,
       );
       if (modifiedFile) {
-        updateFileState(
-          modifiedFile.name,
-          modifiedFile.content,
+        updateFileState({
+          fileName: modifiedFile.name,
+          fileContent: modifiedFile.content,
           setFileName,
           setFileContent,
           setFileType,
-          setFileType,
-        );
+          setFilePrivacy: setFileType,
+        });
       } else {
         fetchAndSetFileContent(
           fileName,
@@ -172,14 +172,14 @@ export const handleReconfigureFileClick = async (
         (file) => file.fileName === fileName && file.assetPath === assetPath,
       );
       if (modifiedLibraryFile?.isModified) {
-        updateFileState(
-          modifiedLibraryFile.fileName,
-          modifiedLibraryFile.fileContent,
+        updateFileState({
+          fileName: modifiedLibraryFile.fileName,
+          fileContent: modifiedLibraryFile.fileContent,
           setFileName,
           setFileContent,
           setFileType,
           setFilePrivacy,
-        );
+        });
       } else {
         fetchAndSetFileContent(
           fileName,

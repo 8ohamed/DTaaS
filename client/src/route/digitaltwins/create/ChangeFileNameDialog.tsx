@@ -67,16 +67,16 @@ const ChangeFileNameDialog: React.FC<ChangeFileNameDialogProps> = ({
         </Button>
         <Button
           onClick={() =>
-            handleChangeFileName(
+            handleChangeFileName({
               files,
               modifiedFileName,
-              fileName,
+              currentFileName: fileName,
               setFileName,
               setFileType,
-              setErrorChangeMessage,
-              setOpenChangeFileNameDialog,
+              setErrorMessage: setErrorChangeMessage,
+              setOpenDialog: setOpenChangeFileNameDialog,
               dispatch,
-            )
+            })
           }
           color="secondary"
         >

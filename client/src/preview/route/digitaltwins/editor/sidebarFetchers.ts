@@ -33,14 +33,14 @@ export const fetchAndSetFileContent = async (
       fileContent = await digitalTwin!.DTAssets.getFileContent(fileName);
     }
     if (fileContent) {
-      updateFileState(
+      updateFileState({
         fileName,
         fileContent,
         setFileName,
         setFileContent,
         setFileType,
         setFilePrivacy,
-      );
+      });
     }
   } catch {
     setFileContent(`Error fetching ${fileName} content`);
@@ -77,14 +77,14 @@ export const fetchAndSetFileLibraryContent = async (
       }),
     );
     if (fileContent) {
-      updateFileState(
+      updateFileState({
         fileName,
         fileContent,
         setFileName,
         setFileContent,
         setFileType,
         setFilePrivacy,
-      );
+      });
     }
     setIsLibraryFile(true);
     setLibraryAssetPath(libraryAsset!.path);

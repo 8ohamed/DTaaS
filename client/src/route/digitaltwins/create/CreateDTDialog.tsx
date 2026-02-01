@@ -41,6 +41,27 @@ interface CreateDTDialogProps {
   setFileType: Dispatch<SetStateAction<string>>;
 }
 
+// Configuration interfaces to reduce parameter count
+interface DialogState {
+  setOpenCreateDTDialog: Dispatch<SetStateAction<boolean>>;
+  setFileName: Dispatch<SetStateAction<string>>;
+  setFileContent: Dispatch<SetStateAction<string>>;
+  setFileType: Dispatch<SetStateAction<string>>;
+  setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
+  setErrorMessage: Dispatch<SetStateAction<string>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+}
+
+interface CreateDTConfig {
+  files: FileState[];
+  libraryFiles: LibraryConfigFile[];
+  cartAssets: LibraryAsset[];
+  newDigitalTwinName: string;
+  dispatch: ReturnType<typeof useDispatch>;
+  dialogState: DialogState;
+  cartActions: ReturnType<typeof useCart>['actions'];
+}
+
 const handleError = (
   message: string,
   dispatch: ReturnType<typeof useDispatch>,
@@ -73,37 +94,29 @@ const handleSuccess = (
   addDefaultFiles(defaultFiles, files, dispatch);
 };
 
-const resetDialogAndForm = (
-  setOpenCreateDTDialog: Dispatch<SetStateAction<boolean>>,
-  setFileName: Dispatch<SetStateAction<string>>,
-  setFileContent: Dispatch<SetStateAction<string>>,
-  setFileType: Dispatch<SetStateAction<string>>,
-) => {
+const resetDialogAndForm = (dialogState: Omit<DialogState, 'setErrorMessage' | 'setIsLoading' | 'setNewDigitalTwinName'>) => {
+  const { setOpenCreateDTDialog, setFileName, setFileContent, setFileType } = dialogState;
   setOpenCreateDTDialog(false);
   setFileName('');
   setFileContent('');
   setFileType('');
 };
 
-const handleConfirm = async (
-  files: FileState[],
-  libraryFiles: LibraryConfigFile[],
-  cartAssets: LibraryAsset[],
-  setErrorMessage: Dispatch<SetStateAction<string>>,
-  newDigitalTwinName: string,
-  dispatch: ReturnType<typeof useDispatch>,
-  setOpenCreateDTDialog: Dispatch<SetStateAction<boolean>>,
-  setFileName: Dispatch<SetStateAction<string>>,
-  setFileContent: Dispatch<SetStateAction<string>>,
-  setFileType: Dispatch<SetStateAction<string>>,
-  setNewDigitalTwinName: Dispatch<SetStateAction<string>>,
-  setIsLoading: Dispatch<SetStateAction<boolean>>,
-  actions: ReturnType<typeof useCart>['actions'],
-) => {
-  setIsLoading(true);
+const handleConfirm = async (config: CreateDTConfig) => {
+  const {
+    files,
+    libraryFiles,
+    cartAssets,
+    newDigitalTwinName,
+    dispatch,
+    dialogState,
+    cartActions,
+  } = config;
 
-  if (validateFiles(files, libraryFiles, setErrorMessage)) {
-    setIsLoading(false);
+  dialogState.setIsLoading(true);
+
+  if (validateFiles(files, libraryFiles, dialogState.setErrorMessage)) {
+    dialogState.setIsLoading(false);
     return;
   }
 
@@ -116,15 +129,10 @@ const handleConfirm = async (
     handleSuccess(digitalTwin, dispatch, newDigitalTwinName, files);
   }
 
-  resetDialogAndForm(
-    setOpenCreateDTDialog,
-    setFileName,
-    setFileContent,
-    setFileType,
-  );
-  setNewDigitalTwinName('');
-  actions.clear();
-  setIsLoading(false);
+  resetDialogAndForm(dialogState);
+  dialogState.setNewDigitalTwinName('');
+  cartActions.clear();
+  dialogState.setIsLoading(false);
 };
 
 const CreateDTDialog: React.FC<CreateDTDialogProps> = ({
@@ -167,12 +175,12 @@ const CreateDTDialog: React.FC<CreateDTDialogProps> = ({
         {!isLoading && (
           <Button
             onClick={() =>
-              resetDialogAndForm(
+              resetDialogAndForm({
                 setOpenCreateDTDialog,
                 setFileName,
                 setFileContent,
                 setFileType,
-              )
+              })
             }
           >
             Cancel
@@ -180,21 +188,23 @@ const CreateDTDialog: React.FC<CreateDTDialogProps> = ({
         )}
         <Button
           onClick={() =>
-            handleConfirm(
+            handleConfirm({
               files,
               libraryFiles,
               cartAssets,
-              setErrorMessage,
               newDigitalTwinName,
               dispatch,
-              setOpenCreateDTDialog,
-              setFileName,
-              setFileContent,
-              setFileType,
-              setNewDigitalTwinName,
-              setIsLoading,
-              actions,
-            )
+              dialogState: {
+                setOpenCreateDTDialog,
+                setFileName,
+                setFileContent,
+                setFileType,
+                setNewDigitalTwinName,
+                setErrorMessage,
+                setIsLoading,
+              },
+              cartActions: actions,
+            })
           }
           disabled={isLoading}
         >

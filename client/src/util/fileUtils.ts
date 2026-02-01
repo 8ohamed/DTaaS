@@ -15,33 +15,59 @@ export const getExtension = (filename: string): string => {
   return parts.length > 1 ? parts.pop()! : '';
 };
 
+// Helper function to get empty file names from regular files
+const getEmptyFileNames = (files: FileState[]): string[] =>
+  files
+    .filter((file) => file.isNew && file.content === '')
+    .map((file) => file.name);
+
+// Helper function to get empty library files  
+const getEmptyLibraryFiles = (
+  libraryFiles: LibraryConfigFile[],
+): LibraryConfigFile[] =>
+  libraryFiles.filter(
+    (file) => file.isNew && file.isModified && file.fileContent === '',
+  );
+
+// Helper function to format empty library file names
+const formatLibraryFileNames = (files: LibraryConfigFile[]): string =>
+  files.map((file) => `${file.fileName} (${file.assetPath})`).join(', ');
+
+// Helper function to build error message for empty files
+const buildEmptyFilesErrorMessage = (
+  emptyFiles: string[],
+  emptyLibraryFiles: LibraryConfigFile[],
+): string => {
+  const regularFiles = emptyFiles.length > 0 ? emptyFiles.join(', ') : '';
+  const separator =
+    emptyFiles.length > 0 && emptyLibraryFiles.length > 0 ? ', ' : '';
+  const libraryFiles =
+    emptyLibraryFiles.length > 0
+      ? formatLibraryFileNames(emptyLibraryFiles)
+      : '';
+
+  return `The following files have empty content: ${regularFiles}${separator}${libraryFiles}.\n Edit them in order to create the new digital twin.`;
+};
+
 export const validateFiles = (
   files: FileState[],
   libraryFiles: LibraryConfigFile[],
   setErrorMessage: Dispatch<SetStateAction<string>>,
 ): boolean => {
-  const emptyFiles = files
-    .filter((file) => file.isNew && file.content === '')
-    .map((file) => file.name);
+  const emptyFiles = getEmptyFileNames(files);
+  const emptyLibraryFiles = getEmptyLibraryFiles(libraryFiles);
 
-  const emptyLibraryFiles = libraryFiles.filter(
-    (file) => file.isNew && file.isModified && file.fileContent === '',
-  );
+  const hasEmptyFiles = emptyFiles.length > 0 || emptyLibraryFiles.length > 0;
 
-  if (emptyFiles.length > 0 || emptyLibraryFiles.length > 0) {
-    setErrorMessage(
-      `The following files have empty content: ${
-        emptyFiles.length > 0 ? emptyFiles.join(', ') : ''
-      }${emptyFiles.length > 0 && emptyLibraryFiles.length > 0 ? ', ' : ''}${
-        emptyLibraryFiles.length > 0
-          ? emptyLibraryFiles
-              .map((file) => `${file.fileName} (${file.assetPath})`)
-              .join(', ')
-          : ''
-      }.\n Edit them in order to create the new digital twin.`,
+  if (hasEmptyFiles) {
+    const errorMessage = buildEmptyFilesErrorMessage(
+      emptyFiles,
+      emptyLibraryFiles,
     );
+    setErrorMessage(errorMessage);
     return true;
   }
+
   return false;
 };
 
@@ -60,15 +86,28 @@ export const getFilteredFileNames = (type: FileType, files: FileState[]) =>
     )
     .map((file) => file.name);
 
-export const updateFileState = (
-  fileName: string,
-  fileContent: string,
-  setFileName: Dispatch<SetStateAction<string>>,
-  setFileContent: Dispatch<SetStateAction<string>>,
-  setFileType: Dispatch<SetStateAction<string>>,
-  setFilePrivacy: Dispatch<SetStateAction<string>>,
-  isPrivate?: boolean,
-) => {
+// Configuration interface for updating file state
+interface FileStateConfig {
+  fileName: string;
+  fileContent: string;
+  setFileName: Dispatch<SetStateAction<string>>;
+  setFileContent: Dispatch<SetStateAction<string>>;
+  setFileType: Dispatch<SetStateAction<string>>;
+  setFilePrivacy: Dispatch<SetStateAction<string>>;
+  isPrivate?: boolean;
+}
+
+export const updateFileState = (config: FileStateConfig) => {
+  const {
+    fileName,
+    fileContent,
+    setFileName,
+    setFileContent,
+    setFileType,
+    setFilePrivacy,
+    isPrivate,
+  } = config;
+
   setFileName(fileName);
   setFileContent(fileContent);
   setFileType(fileName.split('.').pop()!);

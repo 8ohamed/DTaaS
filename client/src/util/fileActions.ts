@@ -24,36 +24,50 @@ export const addDefaultFiles = (
   });
 };
 
-export const handleChangeFileName = (
-  files: FileState[],
-  modifiedFileName: string,
-  fileName: string,
-  setFileName: Dispatch<SetStateAction<string>>,
-  setFileType: Dispatch<SetStateAction<string>>,
-  setErrorChangeMessage: Dispatch<SetStateAction<string>>,
-  setOpenChangeFileNameDialog: Dispatch<SetStateAction<boolean>>,
-  dispatch: ReturnType<typeof useDispatch>,
-) => {
+// Configuration interface for file name change
+interface FileNameChangeConfig {
+  files: FileState[];
+  modifiedFileName: string;
+  currentFileName: string;
+  setFileName: Dispatch<SetStateAction<string>>;
+  setFileType: Dispatch<SetStateAction<string>>;
+  setErrorMessage: Dispatch<SetStateAction<string>>;
+  setOpenDialog: Dispatch<SetStateAction<boolean>>;
+  dispatch: ReturnType<typeof useDispatch>;
+}
+
+export const handleChangeFileName = (config: FileNameChangeConfig) => {
+  const {
+    files,
+    modifiedFileName,
+    currentFileName,
+    setFileName,
+    setFileType,
+    setErrorMessage,
+    setOpenDialog,
+    dispatch,
+  } = config;
+
   const fileExists = files.some(
     (fileStore: { name: string }) => fileStore.name === modifiedFileName,
   );
 
   if (fileExists) {
-    setErrorChangeMessage('A file with this name already exists.');
+    setErrorMessage('A file with this name already exists.');
     return;
   }
 
   if (modifiedFileName === '') {
-    setErrorChangeMessage("File name can't be empty.");
+    setErrorMessage("File name can't be empty.");
     return;
   }
 
-  setErrorChangeMessage('');
-  dispatch(renameFile({ oldName: fileName, newName: modifiedFileName }));
+  setErrorMessage('');
+  dispatch(renameFile({ oldName: currentFileName, newName: modifiedFileName }));
   setFileName(modifiedFileName);
 
   const extension = getExtension(modifiedFileName);
   setFileType(extension);
 
-  setOpenChangeFileNameDialog(false);
+  setOpenDialog(false);
 };
