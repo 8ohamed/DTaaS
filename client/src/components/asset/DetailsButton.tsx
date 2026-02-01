@@ -2,10 +2,10 @@ import { Dispatch, SetStateAction } from 'react';
 import { Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
-import { DescriptionProvider } from 'model/backend/interfaces/sharedInterfaces';
 import LibraryAsset from 'model/backend/libraryAsset';
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
+import { getAuthority } from 'util/envUtil';
 
 interface DialogButtonProps {
   assetName: string;
@@ -15,33 +15,29 @@ interface DialogButtonProps {
   assetPath?: string;
 }
 
-// Helper to show description dialog for any asset type
-const showAssetDescription = async (
-  asset: DescriptionProvider,
-  setShowDetails: Dispatch<SetStateAction<boolean>>,
-) => {
-  await asset.getFullDescription();
-  setShowDetails(true);
-};
-
 // Handle library asset details display
 const handleLibraryAssetClick = async (
   asset: LibraryAsset,
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
-  await showAssetDescription(asset, setShowDetails);
+  await asset.getFullDescription(getAuthority());
+  setShowDetails(true);
 };
 
-// Handle digital twin details display
+// Handle digital twin details display  
 const handleDigitalTwinClick = async (
-  asset: any,
+  digitalTwinData: any,
   assetName: string,
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
-  if (!('DTName' in asset)) return;
+  if (!('DTName' in digitalTwinData)) return;
   
-  const digitalTwinInstance = await createDigitalTwinFromData(asset, assetName);
-  await showAssetDescription(digitalTwinInstance, setShowDetails);
+  const digitalTwinInstance = await createDigitalTwinFromData(
+    digitalTwinData,
+    assetName,
+  );
+  await digitalTwinInstance.getFullDescription();
+  setShowDetails(true);
 };
 
 function DetailsButton({

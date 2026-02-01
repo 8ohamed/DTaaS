@@ -7,6 +7,7 @@ import { selectExecutionHistoryByDTName } from 'model/backend/state/executionHis
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
 import { DEBOUNCE_TIME } from 'model/backend/gitlab/digitalTwinConfig/constants';
+import { DTExecutionResult } from 'model/backend/gitlab/types/executionHistory';
 
 interface StartButtonProps {
   readonly assetName: string;
@@ -14,7 +15,7 @@ interface StartButtonProps {
 }
 
 // Helper to get running executions from execution list
-const getRunningExecutions = (executions: any[]) => {
+const getRunningExecutions = (executions: DTExecutionResult[]) => {
   if (!Array.isArray(executions)) return [];
   return executions.filter(
     (execution) => execution.status === ExecutionStatus.RUNNING,

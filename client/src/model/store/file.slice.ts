@@ -1,18 +1,9 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { FileState, FileType } from 'model/backend/interfaces/sharedInterfaces';
+import { FileState } from 'model/backend/interfaces/sharedInterfaces';
 import { RootState } from 'store/store';
+import { getFileTypeFromExtension } from 'util/fileUtils';
 
 const initialState: FileState[] = [];
-
-// Helper to determine file type from extension
-const getFileTypeFromExtension = (fileName: string): FileType => {
-  const extension = fileName.split('.').pop();
-  if (extension === 'md') return FileType.DESCRIPTION;
-  if (extension && ['json', 'yaml', 'yml'].includes(extension)) {
-    return FileType.CONFIGURATION;
-  }
-  return FileType.LIFECYCLE;
-};
 
 const filesSlice = createSlice({
   name: 'files',
