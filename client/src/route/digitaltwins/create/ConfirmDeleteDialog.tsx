@@ -17,6 +17,41 @@ interface ConfirmDeleteDialogProps {
   setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
 }
 
+// Helper to reset form state
+const resetFormState = (
+  setFileName: Dispatch<SetStateAction<string>>,
+  setFileContent: Dispatch<SetStateAction<string>>,
+  setFileType: Dispatch<SetStateAction<string>>,
+  setNewDigitalTwinName: Dispatch<SetStateAction<string>>,
+) => {
+  setFileName('');
+  setFileContent('');
+  setFileType('');
+  setNewDigitalTwinName('');
+};
+
+// Helper to add missing default files
+const addMissingDefaultFiles = (
+  files: any[],
+  dispatch: any,
+) => {
+  defaultFiles.forEach((file) => {
+    const fileExists = files.some(
+      (f) => f.name === file.name && f.isNew === true,
+    );
+    if (!fileExists) {
+      dispatch(
+        addOrUpdateFile({
+          name: file.name,
+          content: '',
+          isNew: true,
+          isModified: false,
+        }),
+      );
+    }
+  });
+};
+
 const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
   open,
   setOpenConfirmDeleteDialog,
@@ -26,32 +61,12 @@ const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
   setNewDigitalTwinName,
 }) => {
   const dispatch = useDispatch();
-
   const files = useSelector((state: RootState) => state.files);
 
   const handleConfirmCancel = () => {
-    setFileName('');
-    setFileContent('');
-    setFileType('');
-    setNewDigitalTwinName('');
+    resetFormState(setFileName, setFileContent, setFileType, setNewDigitalTwinName);
     dispatch(removeAllCreationFiles());
-
-    defaultFiles.forEach((file) => {
-      const fileExists = files.some(
-        (f) => f.name === file.name && f.isNew === true,
-      );
-      if (!fileExists) {
-        dispatch(
-          addOrUpdateFile({
-            name: file.name,
-            content: '',
-            isNew: true,
-            isModified: false,
-          }),
-        );
-      }
-    });
-
+    addMissingDefaultFiles(files, dispatch);
     setOpenConfirmDeleteDialog(false);
   };
 

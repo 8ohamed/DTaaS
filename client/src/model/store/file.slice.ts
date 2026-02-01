@@ -4,6 +4,16 @@ import { RootState } from 'store/store';
 
 const initialState: FileState[] = [];
 
+// Helper to determine file type from extension
+const getFileTypeFromExtension = (fileName: string): FileType => {
+  const extension = fileName.split('.').pop();
+  if (extension === 'md') return FileType.DESCRIPTION;
+  if (extension && ['json', 'yaml', 'yml'].includes(extension)) {
+    return FileType.CONFIGURATION;
+  }
+  return FileType.LIFECYCLE;
+};
+
 const filesSlice = createSlice({
   name: 'files',
   initialState,
@@ -36,19 +46,11 @@ const filesSlice = createSlice({
       const index = state.findIndex(
         (file) => file.name === action.payload.oldName,
       );
-      if (index >= 0) {
-        state[index].name = action.payload.newName;
-        state[index].isModified = true;
+      if (index < 0) return;
 
-        const extension = action.payload.newName.split('.').pop();
-        if (extension === 'md') {
-          state[index].type = FileType.DESCRIPTION;
-        } else if (['json', 'yaml', 'yml'].includes(extension!)) {
-          state[index].type = FileType.CONFIGURATION;
-        } else {
-          state[index].type = FileType.LIFECYCLE;
-        }
-      }
+      state[index].name = action.payload.newName;
+      state[index].isModified = true;
+      state[index].type = getFileTypeFromExtension(action.payload.newName);
     },
 
     removeAllModifiedFiles: (state) => {

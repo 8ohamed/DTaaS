@@ -9,23 +9,30 @@ interface AddToCartButtonProps {
   assetPrivacy: boolean;
 }
 
+// Helper to check if asset is in cart
+const isAssetInCart = (
+  cartAssets: LibraryAsset[],
+  asset: LibraryAsset,
+): boolean =>
+  cartAssets.some(
+    (item: LibraryAsset) =>
+      item.path === asset.path && item.isPrivate === asset.isPrivate,
+  );
+
 function AddToCartButton({ assetPath, assetPrivacy }: AddToCartButtonProps) {
   const { state: cartState, actions } = useCart();
   const asset = useSelector(
     selectAssetByPathAndPrivacy(assetPath, assetPrivacy),
   ) as LibraryAsset;
 
-  const isInCart = cartState.assets.some(
-    (item: LibraryAsset) =>
-      item.path === asset.path && item.isPrivate === asset.isPrivate,
-  );
+  const isInCart = isAssetInCart(cartState.assets, asset);
 
-  const handleAddToCart = async () => {
-    actions.add(asset);
-  };
-
-  const handleRemoveFromCart = async () => {
-    actions.remove(asset);
+  const handleClick = () => {
+    if (isInCart) {
+      actions.remove(asset);
+    } else {
+      actions.add(asset);
+    }
   };
 
   return (
@@ -33,13 +40,7 @@ function AddToCartButton({ assetPath, assetPrivacy }: AddToCartButtonProps) {
       variant="contained"
       size="small"
       color="primary"
-      onClick={() => {
-        if (isInCart) {
-          handleRemoveFromCart();
-        } else {
-          handleAddToCart();
-        }
-      }}
+      onClick={handleClick}
     >
       {isInCart ? 'Remove' : 'Add'}
     </Button>

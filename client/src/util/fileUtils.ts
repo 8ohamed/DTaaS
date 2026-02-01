@@ -38,15 +38,17 @@ const buildEmptyFilesErrorMessage = (
   emptyFiles: string[],
   emptyLibraryFiles: LibraryConfigFile[],
 ): string => {
-  const regularFiles = emptyFiles.length > 0 ? emptyFiles.join(', ') : '';
-  const separator =
-    emptyFiles.length > 0 && emptyLibraryFiles.length > 0 ? ', ' : '';
-  const libraryFiles =
-    emptyLibraryFiles.length > 0
-      ? formatLibraryFileNames(emptyLibraryFiles)
-      : '';
+  const parts: string[] = [];
+  
+  if (emptyFiles.length > 0) {
+    parts.push(emptyFiles.join(', '));
+  }
+  
+  if (emptyLibraryFiles.length > 0) {
+    parts.push(formatLibraryFileNames(emptyLibraryFiles));
+  }
 
-  return `The following files have empty content: ${regularFiles}${separator}${libraryFiles}.\n Edit them in order to create the new digital twin.`;
+  return `The following files have empty content: ${parts.join(', ')}.\n Edit them in order to create the new digital twin.`;
 };
 
 export const validateFiles = (
@@ -71,12 +73,19 @@ export const validateFiles = (
   return false;
 };
 
+// File type mapping for efficient lookup
+const FILE_TYPE_MAP: Record<string, FileType> = {
+  md: FileType.DESCRIPTION,
+  json: FileType.CONFIGURATION,
+  yaml: FileType.CONFIGURATION,
+  yml: FileType.CONFIGURATION,
+};
+
 export const getFileTypeFromExtension = (fileName: string): FileType => {
   const extension = fileName.split('.').pop()?.toLowerCase();
-  if (extension === 'md') return FileType.DESCRIPTION;
-  if (extension === 'json' || extension === 'yaml' || extension === 'yml')
-    return FileType.CONFIGURATION;
-  return FileType.LIFECYCLE;
+  return extension && FILE_TYPE_MAP[extension]
+    ? FILE_TYPE_MAP[extension]
+    : FileType.LIFECYCLE;
 };
 
 export const getFilteredFileNames = (type: FileType, files: FileState[]) =>

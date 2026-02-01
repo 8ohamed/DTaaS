@@ -13,6 +13,21 @@ interface StartButtonProps {
   readonly setHistoryButtonDisabled: Dispatch<SetStateAction<boolean>>;
 }
 
+// Helper to get running executions from execution list
+const getRunningExecutions = (executions: any[]) => {
+  if (!Array.isArray(executions)) return [];
+  return executions.filter(
+    (execution) => execution.status === ExecutionStatus.RUNNING,
+  );
+};
+
+// Helper to determine if button should show loading state
+const shouldShowLoading = (
+  hasRunningExecutions: boolean,
+  hasAnyExecutions: boolean,
+  isPipelineLoading: boolean | undefined,
+) => hasRunningExecutions || (!hasAnyExecutions && isPipelineLoading);
+
 function StartButton({
   assetName,
   setHistoryButtonDisabled,
@@ -24,17 +39,15 @@ function StartButton({
 
   const [isDebouncing, setIsDebouncing] = useState(false);
 
-  const runningExecutions = Array.isArray(executions)
-    ? executions.filter(
-        (execution) => execution.status === ExecutionStatus.RUNNING,
-      )
-    : [];
-
+  const runningExecutions = getRunningExecutions(executions);
   const hasRunningExecutions = runningExecutions.length > 0;
   const hasAnyExecutions = executions.length > 0;
 
-  const isLoading =
-    hasRunningExecutions || (!hasAnyExecutions && digitalTwin?.pipelineLoading);
+  const isLoading = shouldShowLoading(
+    hasRunningExecutions,
+    hasAnyExecutions,
+    digitalTwin?.pipelineLoading,
+  );
 
   const runningCount = runningExecutions.length;
 

@@ -68,7 +68,7 @@ const AssetBoard: React.FC<AssetBoardProps> = ({ tab }) => {
       }
     };
 
-    if (shouldFetchDigitalTwins === true) {
+    if (shouldFetchDigitalTwins) {
       fetchData();
     } else {
       setLoading(false);
@@ -87,32 +87,32 @@ const AssetBoard: React.FC<AssetBoardProps> = ({ tab }) => {
     return <em style={{ textAlign: 'center' }}>{error}</em>;
   }
 
+  if (loading) {
+    return (
+      <Grid
+        container
+        justifyContent="center"
+        alignItems="center"
+        sx={{ minHeight: '10rem' }}
+      >
+        <CircularProgress />
+      </Grid>
+    );
+  }
+
   return (
     <>
-      {loading ? (
-        <Grid
-          container
-          justifyContent="center"
-          alignItems="center"
-          sx={{ minHeight: '10rem' }}
-        >
-          <CircularProgress />
-        </Grid>
-      ) : (
-        <>
-          <Filter value={filter} onChange={setFilter} />
-          <Grid {...outerGridContainerProps}>
-            {filteredAssets.map((asset) => (
-              <AssetGridItem
-                key={asset.path}
-                asset={asset}
-                tab={tab}
-                onDelete={handleDelete}
-              />
-            ))}
-          </Grid>
-        </>
-      )}
+      <Filter value={filter} onChange={setFilter} />
+      <Grid {...outerGridContainerProps}>
+        {filteredAssets.map((asset) => (
+          <AssetGridItem
+            key={asset.path}
+            asset={asset}
+            tab={tab}
+            onDelete={handleDelete}
+          />
+        ))}
+      </Grid>
     </>
   );
 };

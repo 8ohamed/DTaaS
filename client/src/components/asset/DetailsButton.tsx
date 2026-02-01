@@ -15,7 +15,8 @@ interface DialogButtonProps {
   assetPath?: string;
 }
 
-export const handleToggleDetailsDialog = async (
+// Helper to show description dialog for any asset type
+const showAssetDescription = async (
   asset: DescriptionProvider,
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
@@ -23,12 +24,24 @@ export const handleToggleDetailsDialog = async (
   setShowDetails(true);
 };
 
-export const handleToggleDetailsLibraryDialog = async (
-  asset: DescriptionProvider,
+// Handle library asset details display
+const handleLibraryAssetClick = async (
+  asset: LibraryAsset,
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
-  await asset.getFullDescription();
-  setShowDetails(true);
+  await showAssetDescription(asset, setShowDetails);
+};
+
+// Handle digital twin details display
+const handleDigitalTwinClick = async (
+  asset: any,
+  assetName: string,
+  setShowDetails: Dispatch<SetStateAction<boolean>>,
+) => {
+  if (!('DTName' in asset)) return;
+  
+  const digitalTwinInstance = await createDigitalTwinFromData(asset, assetName);
+  await showAssetDescription(digitalTwinInstance, setShowDetails);
 };
 
 function DetailsButton({
@@ -45,27 +58,22 @@ function DetailsButton({
 
   const asset = library ? libraryAsset : digitalTwin;
 
+  const handleClick = async () => {
+    if (!asset) return;
+
+    if (library) {
+      await handleLibraryAssetClick(asset as LibraryAsset, setShowDetails);
+    } else {
+      await handleDigitalTwinClick(asset, assetName, setShowDetails);
+    }
+  };
+
   return (
     <Button
       variant="contained"
       size="small"
       color="primary"
-      onClick={async () => {
-        if (library && asset) {
-          handleToggleDetailsLibraryDialog(
-            asset as LibraryAsset,
-            setShowDetails,
-          );
-        } else if (asset) {
-          if ('DTName' in asset) {
-            const digitalTwinInstance = await createDigitalTwinFromData(
-              asset,
-              assetName,
-            );
-            handleToggleDetailsDialog(digitalTwinInstance, setShowDetails);
-          }
-        }
-      }}
+      onClick={handleClick}
     >
       Details
     </Button>
