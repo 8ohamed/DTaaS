@@ -31,137 +31,97 @@ describe('SidebarRendering', () => {
     jest.restoreAllMocks();
   });
 
-  it('should render file tree items correctly and handle file click - DigitalTwin', () => {
-    const handleFileClick = jest
-      .spyOn(SidebarFunctions, 'handleFileClick')
-      .mockImplementation(jest.fn());
-
-    render(
-      <SimpleTreeView>
-        {SidebarRendering.renderFileTreeItems(
-          'label',
-          ['file'],
-          mockDigitalTwin,
-          setFileName,
-          setFileContent,
-          setFileType,
-          setFilePrivacy,
-          files,
-          'create',
-          dispatch,
-          setIsLibraryFile,
-          setIsLibraryAssetPath,
-        )}
-      </SimpleTreeView>,
-    );
-
+  // Helper function to reduce duplication in assertions
+  const assertFileTreeBehavior = (handleFileClick: jest.SpyInstance) => {
     expect(screen.getByText('label')).toBeInTheDocument();
     fireEvent.click(screen.getByText('label'));
     expect(screen.getByText('file')).toBeInTheDocument();
     fireEvent.click(screen.getByText('file'));
-
     expect(handleFileClick).toHaveBeenCalled();
+  };
+
+  describe('renderFileTreeItems', () => {
+    const testCases = [
+      { description: 'DigitalTwin', asset: mockDigitalTwin },
+      { 
+        description: 'LibraryAsset', 
+        asset: mockLibraryAsset, 
+        setup: () => { mockLibraryAsset.isPrivate = false; } 
+      },
+    ];
+
+    testCases.forEach(({ description, asset, setup }) => {
+      it(`should render file tree items correctly and handle file click - ${description}`, () => {
+        if (setup) setup();
+        
+        const handleFileClick = jest
+          .spyOn(SidebarFunctions, 'handleFileClick')
+          .mockImplementation(jest.fn());
+
+        render(
+          <SimpleTreeView>
+            {SidebarRendering.renderFileTreeItems(
+              'label',
+              ['file'],
+              asset,
+              setFileName,
+              setFileContent,
+              setFileType,
+              setFilePrivacy,
+              files,
+              'create',
+              dispatch,
+              setIsLibraryFile,
+              setIsLibraryAssetPath,
+            )}
+          </SimpleTreeView>,
+        );
+
+        assertFileTreeBehavior(handleFileClick);
+      });
+    });
   });
 
-  it('should render file tree items correctly and handle file click - LibraryAsset', () => {
-    const handleFileClick = jest
-      .spyOn(SidebarFunctions, 'handleFileClick')
-      .mockImplementation(jest.fn());
+  describe('renderFileSection', () => {
+    const testCases = [
+      { 
+        description: 'LibraryAsset', 
+        asset: mockLibraryAsset, 
+        setup: () => { mockLibraryAsset.isPrivate = false; } 
+      },
+      { description: 'DigitalTwin', asset: mockDigitalTwin },
+    ];
 
-    mockLibraryAsset.isPrivate = false;
+    testCases.forEach(({ description, asset, setup }) => {
+      it(`should render file section correctly and handle file click - ${description}`, () => {
+        if (setup) setup();
+        
+        const handleFileClick = jest
+          .spyOn(SidebarFunctions, 'handleFileClick')
+          .mockImplementation(jest.fn());
 
-    render(
-      <SimpleTreeView>
-        {SidebarRendering.renderFileTreeItems(
-          'label',
-          ['file'],
-          mockLibraryAsset,
-          setFileName,
-          setFileContent,
-          setFileType,
-          setFilePrivacy,
-          files,
-          'create',
-          dispatch,
-          setIsLibraryFile,
-          setIsLibraryAssetPath,
-        )}
-      </SimpleTreeView>,
-    );
+        render(
+          <SimpleTreeView>
+            {SidebarRendering.renderFileSection(
+              'label',
+              'Digital Twins',
+              ['file'],
+              asset,
+              setFileName,
+              setFileContent,
+              setFileType,
+              setFilePrivacy,
+              files,
+              'create',
+              dispatch,
+              setIsLibraryFile,
+              setIsLibraryAssetPath,
+            )}
+          </SimpleTreeView>,
+        );
 
-    expect(screen.getByText('label')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('label'));
-    expect(screen.getByText('file')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('file'));
-
-    expect(handleFileClick).toHaveBeenCalled();
-  });
-
-  it('should render file section correctly and handle file click - LibraryAsset', () => {
-    const handleFileClick = jest
-      .spyOn(SidebarFunctions, 'handleFileClick')
-      .mockImplementation(jest.fn());
-
-    mockLibraryAsset.isPrivate = false;
-
-    render(
-      <SimpleTreeView>
-        {SidebarRendering.renderFileSection(
-          'label',
-          'Digital Twins',
-          ['file'],
-          mockLibraryAsset,
-          setFileName,
-          setFileContent,
-          setFileType,
-          setFilePrivacy,
-          files,
-          'create',
-          dispatch,
-          setIsLibraryFile,
-          setIsLibraryAssetPath,
-        )}
-      </SimpleTreeView>,
-    );
-
-    expect(screen.getByText('label')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('label'));
-    expect(screen.getByText('file')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('file'));
-    expect(handleFileClick).toHaveBeenCalled();
-  });
-
-  it('should render file section correctly and handle file click - DigitalTwin', () => {
-    const handleFileClick = jest
-      .spyOn(SidebarFunctions, 'handleFileClick')
-      .mockImplementation(jest.fn());
-
-    render(
-      <SimpleTreeView>
-        {SidebarRendering.renderFileSection(
-          'label',
-          'Digital Twins',
-          ['file'],
-          mockDigitalTwin,
-          setFileName,
-          setFileContent,
-          setFileType,
-          setFilePrivacy,
-          files,
-          'create',
-          dispatch,
-          setIsLibraryFile,
-          setIsLibraryAssetPath,
-        )}
-      </SimpleTreeView>,
-    );
-
-    expect(screen.getByText('label')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('label'));
-    expect(screen.getByText('file')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('file'));
-    expect(handleFileClick).toHaveBeenCalled();
+        assertFileTreeBehavior(handleFileClick);
+      });
+    });
   });
 });
