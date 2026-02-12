@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { RootState } from 'store/store';
+import { WorkspaceService } from 'store/workspaceServices.slice';
 
 /**
  * @param url or endpoint to clean
@@ -43,36 +44,51 @@ export interface KeyLinkPair {
   link: string;
 }
 
+const serviceKeyToIconKey: Record<string, string> = {
+  desktop: 'VNCDESKTOP',
+  vscode: 'VSCODE',
+  notebook: 'JUPYTERNOTEBOOK',
+  lab: 'JUPYTERLAB',
+};
+
 /**
- * @returns an array of `KeyLinkPair` objects, where each object contains a `key` and a `link`.
+ * @returns an array of `KeyLinkPair` objects derived from workspace services stored in Redux.
  *
- * The `key` is the `key` of the environment variable, with the prefix *"REACT_APP_WORKBENCHLINK_"* removed.
- * For example, if the `key` of the environment variable is *"REACT_APP_WORKBENCHLINK_MYWORKBENCH"*, then the `key` will be *"MYWORKBENCH"*.
+ * The workspace services are fetched from the user's workspace `/services` endpoint
+ * and stored in the Redux store. Each service has a key (e.g., "desktop", "vscode"),
+ * a name, description, and endpoint.
  *
- * The `link` is constructed by appending the `username` to the end of the *REACT_APP_URL_WORKBENCH*, and then appending the value of the environment variable to the end of that.
- * For example, if the *REACT_APP_URL_WORKBENCH* is https://foo.com, the `username` is *"user1"*, and the value of the environment variable is "/my-workbench", then the link will be https://foo.com/user1/my-workbench.
+ * The `key` is mapped to the corresponding icon key used by LinkIcons
+ * (e.g., "desktop" → "VNCDESKTOP", "vscode" → "VSCODE").
+ *
+ * The `link` is constructed by appending the `username` and service endpoint to the base URL.
+ *
+ * Additionally, preview links for Library and Digital Twins are included.
  */
 export function getWorkbenchLinkValues(): KeyLinkPair[] {
-  const prefix = 'REACT_APP_WORKBENCHLINK_';
+  const services: Record<string, WorkspaceService> = useSelector(
+    (state: RootState) => state.workspaceServices.services,
+  );
   const workbenchLinkValues: KeyLinkPair[] = [];
 
-  Object.keys(window.env)
-    .filter((key) => key.startsWith(prefix))
-    .forEach((key) => {
-      const value = window.env[key];
-      if (value !== undefined) {
-        const keyWithoutPrefix = key.slice(prefix.length);
-        const linkValue =
-          keyWithoutPrefix === 'DT_PREVIEW' ||
-          keyWithoutPrefix === 'LIBRARY_PREVIEW'
-            ? value
-            : useUserLink(useAppURL(), value);
-        workbenchLinkValues.push({
-          key: keyWithoutPrefix,
-          link: linkValue,
-        });
-      }
+  Object.entries(services).forEach(([serviceKey, service]) => {
+    const iconKey = serviceKeyToIconKey[serviceKey] ?? serviceKey.toUpperCase();
+    const link = useUserLink(useAppURL(), service.endpoint);
+    workbenchLinkValues.push({
+      key: iconKey,
+      link,
     });
+  });
+
+  workbenchLinkValues.push({
+    key: 'LIBRARY_PREVIEW',
+    link: '/preview/library',
+  });
+
+  workbenchLinkValues.push({
+    key: 'DT_PREVIEW',
+    link: '/preview/digitaltwins',
+  });
 
   return workbenchLinkValues;
 }
@@ -99,4 +115,8 @@ export function getLogoutRedirectURI(): string {
 
 export function getGitLabScopes(): string {
   return window.env.REACT_APP_GITLAB_SCOPES;
+}
+
+export function useServicesUrl(): string {
+  return useUserLink(useAppURL(), 'services');
 }

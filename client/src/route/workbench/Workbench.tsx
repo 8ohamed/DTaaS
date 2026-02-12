@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
 import { Paper, Typography } from '@mui/material';
 import LinkButtons from 'components/LinkButtons';
 import Layout from 'page/Layout';
 
 import styled from '@emotion/styled';
-import { getWorkbenchLinkValues } from 'util/envUtil';
+import { getWorkbenchLinkValues, useServicesUrl } from 'util/envUtil';
+import { useDispatch } from 'react-redux';
+import { fetchWorkspaceServices } from 'store/workspaceServices.slice';
+import type { AppDispatch } from 'store/store';
 
 const Container = styled.div`
   display: flex;
@@ -13,6 +17,13 @@ const Container = styled.div`
 `;
 
 function WorkBenchContent() {
+  const dispatch = useDispatch<AppDispatch>();
+  const servicesUrl = useServicesUrl();
+
+  useEffect(() => {
+    dispatch(fetchWorkspaceServices(servicesUrl));
+  }, [dispatch, servicesUrl]);
+
   const linkValues = getWorkbenchLinkValues();
   return (
     <Layout sx={{ display: 'flex' }}>

@@ -99,6 +99,7 @@ jest.mock('util/envUtil', () => ({
   getLogoutRedirectURI: () => mockLogoutRedirectURI,
   getGitLabScopes: () => mockGitLabScopes,
   getURLforWorkbench: () => mockURLforWorkbench,
+  useServicesUrl: () => 'https://example.com/username/services',
   getWorkbenchLinkValues: () => [
     { key: '1', link: 'link1' },
     { key: '2', link: 'link2' },
@@ -113,12 +114,6 @@ globalThis.env = {
   REACT_APP_URL_BASENAME: 'mock_url_basename',
   REACT_APP_URL_DTLINK: '/lab',
   REACT_APP_URL_LIBLINK: '',
-  REACT_APP_WORKBENCHLINK_VNCDESKTOP: '/tools/vnc/?foo=bar',
-  REACT_APP_WORKBENCHLINK_VSCODE: '/tools/vscode/',
-  REACT_APP_WORKBENCHLINK_JUPYTERLAB: '/lab',
-  REACT_APP_WORKBENCHLINK_JUPYTERNOTEBOOK: '',
-  REACT_APP_WORKBENCHLINK_LIBRARY_PREVIEW: '/preview/library',
-  REACT_APP_WORKBENCHLINK_DT_PREVIEW: '/preview/digitaltwins',
 
   REACT_APP_CLIENT_ID: mockClientID,
   REACT_APP_AUTH_AUTHORITY: mockAuthority,
