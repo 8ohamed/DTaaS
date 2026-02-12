@@ -72,12 +72,14 @@ export function getWorkbenchLinkValues(): KeyLinkPair[] {
   const workbenchLinkValues: KeyLinkPair[] = [];
 
   Object.entries(services).forEach(([serviceKey, service]) => {
-    const iconKey = serviceKeyToIconKey[serviceKey] ?? serviceKey.toUpperCase();
-    const link = useUserLink(useAppURL(), service.endpoint);
-    workbenchLinkValues.push({
-      key: iconKey,
-      link,
-    });
+    const iconKey = serviceKeyToIconKey[serviceKey];
+    if (iconKey) {
+      const link = useUserLink(useAppURL(), service.endpoint);
+      workbenchLinkValues.push({
+        key: iconKey,
+        link,
+      });
+    }
   });
 
   workbenchLinkValues.push({

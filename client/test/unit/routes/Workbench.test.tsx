@@ -17,7 +17,8 @@ describe('Workbench', () => {
   });
 
   it('renders', () => {
-    expect(true);
+    const heading = screen.getByRole('heading', { level: 4 });
+    expect(heading).toHaveTextContent('Workbench Tools');
   });
 
   it('displays buttons', () => {
