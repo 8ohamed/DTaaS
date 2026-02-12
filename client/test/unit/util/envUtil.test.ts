@@ -4,6 +4,7 @@ import {
   getWorkbenchLinkValues,
   cleanURL,
   useURLbasename,
+  useServicesUrl,
 } from 'util/envUtil';
 import { useSelector } from 'react-redux';
 
@@ -22,18 +23,35 @@ describe('envUtil', () => {
   const testRedirect = 'https://example.com/redirect';
   const testLogoutRedirect = 'https://example.com';
 
+  const testServices = {
+    desktop: {
+      name: 'Desktop',
+      description: 'Virtual Desktop',
+      endpoint: testWorkbenchEndpoints[0],
+    },
+    vscode: {
+      name: 'VS Code',
+      description: 'VS Code IDE',
+      endpoint: testWorkbenchEndpoints[1],
+    },
+    notebook: {
+      name: 'Jupyter Notebook',
+      description: 'Jupyter Notebook',
+      endpoint: testWorkbenchEndpoints[2],
+    },
+    lab: {
+      name: 'Jupyter Lab',
+      description: 'Jupyter Lab IDE',
+      endpoint: testWorkbenchEndpoints[3],
+    },
+  };
+
   globalThis.env = {
     REACT_APP_ENVIRONMENT: 'test',
     REACT_APP_URL: testAppURL,
     REACT_APP_URL_BASENAME: testBasename,
     REACT_APP_URL_DTLINK: testDT,
     REACT_APP_URL_LIBLINK: testLIB,
-    REACT_APP_WORKBENCHLINK_VNCDESKTOP: testWorkbenchEndpoints[0],
-    REACT_APP_WORKBENCHLINK_VSCODE: testWorkbenchEndpoints[1],
-    REACT_APP_WORKBENCHLINK_JUPYTERLAB: testWorkbenchEndpoints[2],
-    REACT_APP_WORKBENCHLINK_JUPYTERNOTEBOOK: testWorkbenchEndpoints[3],
-    REACT_APP_WORKBENCHLINK_LIBRARY_PREVIEW: testWorkbenchEndpoints[4],
-    REACT_APP_WORKBENCHLINK_DT_PREVIEW: testWorkbenchEndpoints[4],
 
     REACT_APP_CLIENT_ID: testAppID,
     REACT_APP_AUTH_AUTHORITY: testAuthority,
@@ -43,9 +61,15 @@ describe('envUtil', () => {
   };
 
   beforeEach(() => {
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockReturnValue({
-      userName: testUsername,
-    });
+    (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
+      (selector: Function) => {
+        const mockState = {
+          auth: { userName: testUsername },
+          workspaceServices: { services: testServices },
+        };
+        return selector(mockState);
+      },
+    );
   });
 
   test('GetURL should return the correct enviroment variables', () => {
@@ -73,17 +97,51 @@ describe('envUtil', () => {
     ).toBe(true);
   });
 
-  // Test that the links are correctly constructed
-  it('should construct the links correctly', () => {
+  // Test that the service links are correctly constructed
+  it('should construct the links correctly from services', () => {
     const result = getWorkbenchLinkValues();
 
-    result.forEach((el, i) => {
+    const serviceEntries = Object.values(testServices);
+    const serviceLinks = result.filter(
+      (el) => el.key !== 'LIBRARY_PREVIEW' && el.key !== 'DT_PREVIEW',
+    );
+
+    serviceLinks.forEach((el, i) => {
       expect(el.link).toEqual(
         `${testAppURL}/${testBasename}/${testUsername}/${cleanURL(
-          testWorkbenchEndpoints[i],
+          serviceEntries[i].endpoint,
         )}`,
       );
     });
+  });
+
+  // Test that preview links are included
+  it('should include preview links', () => {
+    const result = getWorkbenchLinkValues();
+    const previewLinks = result.filter(
+      (el) => el.key === 'LIBRARY_PREVIEW' || el.key === 'DT_PREVIEW',
+    );
+    expect(previewLinks).toHaveLength(2);
+    expect(previewLinks[0]).toEqual({
+      key: 'LIBRARY_PREVIEW',
+      link: '/preview/library',
+    });
+    expect(previewLinks[1]).toEqual({
+      key: 'DT_PREVIEW',
+      link: '/preview/digitaltwins',
+    });
+  });
+
+  // Test key mapping from service keys to icon keys
+  it('should map service keys to icon keys correctly', () => {
+    const result = getWorkbenchLinkValues();
+    const serviceLinks = result.filter(
+      (el) => el.key !== 'LIBRARY_PREVIEW' && el.key !== 'DT_PREVIEW',
+    );
+    expect(serviceLinks[0].key).toBe('VNCDESKTOP');
+    expect(serviceLinks[1].key).toBe('VSCODE');
+    expect(serviceLinks[2].key).toBe('JUPYTERNOTEBOOK');
+    expect(serviceLinks[3].key).toBe('JUPYTERLAB');
   });
 
   it('cleanURL should remove leading and trailing slashes', () => {
@@ -91,6 +149,12 @@ describe('envUtil', () => {
     expect(cleanURL('/test')).toBe('test');
     expect(cleanURL('test/')).toBe('test');
     expect(cleanURL('test')).toBe('test');
+  });
+
+  it('should return the services URL', () => {
+    expect(useServicesUrl()).toBe(
+      `${testAppURL}/${testBasename}/${testUsername}/services`,
+    );
   });
 
   it('still handles if basename is set to empty string', () => {

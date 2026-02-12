@@ -1,21 +1,42 @@
-import { screen, within } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import {
   itShowsTheTooltipWhenHoveringButton,
   setupIntegrationTest,
 } from 'test/integration/integration.testUtil';
 import { testLayout } from 'test/integration/Routes/routes.testUtil';
+import store from 'store/store';
+import { setServices } from 'store/workspaceServices.slice';
 
 globalThis.env = {
   ...globalThis.env,
   REACT_APP_URL: 'http://example.com/',
   REACT_APP_URL_BASENAME: 'basename',
-  REACT_APP_WORKBENCHLINK_VNCDESKTOP: '/tools/vnc/?foo=bar',
-  REACT_APP_WORKBENCHLINK_VSCODE: '/tools/vscode/',
-  REACT_APP_WORKBENCHLINK_JUPYTERLAB: '/lab',
-  REACT_APP_WORKBENCHLINK_JUPYTERNOTEBOOK: '',
 };
 
 jest.deepUnmock('util/envUtil');
+
+const mockServices = {
+  desktop: {
+    name: 'Desktop',
+    description: 'Virtual Desktop Environment',
+    endpoint: 'tools/vnc?foo=bar',
+  },
+  vscode: {
+    name: 'VS Code',
+    description: 'VS Code IDE',
+    endpoint: 'tools/vscode',
+  },
+  notebook: {
+    name: 'Jupyter Notebook',
+    description: 'Jupyter Notebook',
+    endpoint: '',
+  },
+  lab: {
+    name: 'Jupyter Lab',
+    description: 'Jupyter Lab IDE',
+    endpoint: 'lab',
+  },
+};
 
 async function testTool(toolTipText: string, name: string) {
   const toolDiv = screen.getByLabelText(toolTipText);
@@ -27,11 +48,18 @@ async function testTool(toolTipText: string, name: string) {
   expect(toolButton).toBeInTheDocument();
 }
 
-const setup = () => setupIntegrationTest('/workbench');
+const setup = async () => {
+  globalThis.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => mockServices,
+  });
+  store.dispatch(setServices(mockServices));
+  await setupIntegrationTest('/workbench');
+};
 
 describe('Workbench', () => {
   const desktopLabel =
-    'http://example.com/basename/username/tools/vnc/?foo=bar';
+    'http://example.com/basename/username/tools/vnc?foo=bar';
   const VSCodeLabel = 'http://example.com/basename/username/tools/vscode';
   const jupyterLabLabel = 'http://example.com/basename/username/lab';
   const jupyterNotebookLabel = 'http://example.com/basename/username/';
