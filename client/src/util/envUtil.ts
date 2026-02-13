@@ -83,9 +83,7 @@ export function useWorkbenchLinkValues(): KeyLinkPair[] {
   const services: Record<string, WorkspaceService> = useSelector(
     (state: RootState) => state.workspaceServices.services,
   );
-  const username = useSelector(
-    (state: RootState) => state.auth,
-  ).userName;
+  const username = useSelector((state: RootState) => state.auth).userName;
   const appURL = useAppURL();
 
   const serviceLinks: KeyLinkPair[] = Object.entries(services)

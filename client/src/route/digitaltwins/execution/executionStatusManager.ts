@@ -156,9 +156,8 @@ export const handlePipelineCompletion = async (
       : ExecutionStatus.FAILED;
 
   if (executionId) {
-    const { fetchLogsAndUpdateExecution } = await import(
-      'route/digitaltwins/execution/executionStatusHandlers'
-    );
+    const { fetchLogsAndUpdateExecution } =
+      await import('route/digitaltwins/execution/executionStatusHandlers');
 
     const logsUpdated = await fetchLogsAndUpdateExecution(
       digitalTwin,

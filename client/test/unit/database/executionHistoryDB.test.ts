@@ -237,9 +237,8 @@ describe('IndexedDBService (Real Implementation)', () => {
 
     indexedDB.open = jest.fn().mockImplementation(mockOpenImplementation);
 
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const newService = Object.create(Object.getPrototypeOf(IndexedDBService));
     newService.db = null;
     newService.dbName = 'test-db';
@@ -384,9 +383,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject add operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -455,9 +453,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject update operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -482,9 +479,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject getById operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -500,9 +496,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject getByDTName operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -518,9 +513,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject getAll operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -536,9 +530,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject delete operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );
@@ -554,9 +547,8 @@ describe('IndexedDBService (Real Implementation)', () => {
   });
 
   it('should reject deleteByDTName operation when database is not initialized', async () => {
-    const { default: IndexedDBService } = await import(
-      'database/executionHistoryDB'
-    );
+    const { default: IndexedDBService } =
+      await import('database/executionHistoryDB');
     const uninitializedService = Object.create(
       Object.getPrototypeOf(IndexedDBService),
     );

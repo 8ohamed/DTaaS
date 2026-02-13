@@ -58,8 +58,7 @@ const setup = async () => {
 };
 
 describe('Workbench', () => {
-  const desktopLabel =
-    'http://example.com/basename/username/tools/vnc?foo=bar';
+  const desktopLabel = 'http://example.com/basename/username/tools/vnc?foo=bar';
   const VSCodeLabel = 'http://example.com/basename/username/tools/vscode';
   const jupyterLabLabel = 'http://example.com/basename/username/lab';
   const jupyterNotebookLabel = 'http://example.com/basename/username/';

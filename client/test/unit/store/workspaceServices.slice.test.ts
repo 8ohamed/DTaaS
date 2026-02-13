@@ -118,9 +118,7 @@ describe('workspaceServicesSlice', () => {
       expect(state.services).toEqual(mockServices);
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
-      expect(fetch).toHaveBeenCalledWith(
-        'http://example.com/user1/services',
-      );
+      expect(fetch).toHaveBeenCalledWith('http://example.com/user1/services');
     });
 
     it('should set error on non-ok response', async () => {

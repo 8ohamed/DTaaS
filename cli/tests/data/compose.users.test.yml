@@ -6,8 +6,7 @@ services:
       - /home/testuser/DTaaS/files/common:/workspace/common
       - /home/testuser/DTaaS/files/testuser:/workspace
     environment:
-      - AUTHENTICATE_VIA_JUPYTER=
-      - WORKSPACE_BASE_URL=testuser
+      - MAIN_USER=testuser
     shm_size: "512m"
     labels:
       - traefik.enable=true

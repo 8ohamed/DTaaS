@@ -172,7 +172,8 @@ export interface DigitalTwinFileProvider {
  */
 
 export interface DigitalTwinInterface
-  extends DigitalTwinDetails,
+  extends
+    DigitalTwinDetails,
     DigitalTwinPipelineState,
     DigitalTwinFiles,
     DigitalTwinCreator,
@@ -262,7 +263,8 @@ export interface DTAssetsDeleter {
  */
 
 export interface DTAssetsInterface
-  extends DTAssetsFileCreator,
+  extends
+    DTAssetsFileCreator,
     DTAssetFileContentUpdater,
     DTAssetsFileProvider,
     DTAssetsFolderProvider,
@@ -296,9 +298,7 @@ export interface FileHandlerFolderProvider {
  */
 
 export interface FileHandlerInterface
-  extends IFile,
-    FileHandlerLibraryFileProvider,
-    FileHandlerFolderProvider {
+  extends IFile, FileHandlerLibraryFileProvider, FileHandlerFolderProvider {
   name: string;
   backend: BackendInterface;
   /**
@@ -338,7 +338,8 @@ export interface LibraryAssetFileProvider {
  */
 
 export interface LibraryAssetInterface
-  extends LibraryAssetDetails,
+  extends
+    LibraryAssetDetails,
     LibraryAssetFiles,
     DescriptionProvider,
     LibraryAssetFileProvider {
@@ -374,9 +375,7 @@ export interface FileNamesProvider {
  */
 
 export interface LibraryManagerInterface
-  extends FileContentProvider,
-    FileNamesProvider,
-    LibraryManagerDetails {
+  extends FileContentProvider, FileNamesProvider, LibraryManagerDetails {
   /**
    * The backend provider instance
    */

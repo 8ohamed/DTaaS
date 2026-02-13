@@ -12,7 +12,7 @@ def test_import_yaml_users():
             "${DTAAS_DIR}/files/common:/workspace/common",
             "${DTAAS_DIR}/files/${username}:/workspace",
         ],
-        "environment": ["AUTHENTICATE_VIA_JUPYTER=", "WORKSPACE_BASE_URL=${username}"],
+        "environment": ["MAIN_USER=${username}"],
         "shm_size": "${shm_size}",
         "cpus": "${cpus}",
         "mem_limit": "${mem_limit}",
@@ -240,9 +240,7 @@ def get_test_compose_object():
                     "/home/testuser/DTaaS/files/common:/workspace/common",
                     "/home/testuser/DTaaS/files/testuser:/workspace",
                 ],
-                "environment": [
-                    "AUTHENTICATE_VIA_JUPYTER=",
-                    "WORKSPACE_BASE_URL=testuser",
+                "environment": ["MAIN_USER=testuser",
                 ],
                 "shm_size": "512m",
                 "labels": [
