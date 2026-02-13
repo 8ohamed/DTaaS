@@ -4,7 +4,7 @@ import LinkButtons from 'components/LinkButtons';
 import Layout from 'page/Layout';
 
 import styled from '@emotion/styled';
-import { getWorkbenchLinkValues, useServicesUrl } from 'util/envUtil';
+import { useWorkbenchLinkValues, useServicesUrl } from 'util/envUtil';
 import { useDispatch } from 'react-redux';
 import { fetchWorkspaceServices } from 'store/workspaceServices.slice';
 import type { AppDispatch } from 'store/store';
@@ -24,7 +24,7 @@ function WorkBenchContent() {
     dispatch(fetchWorkspaceServices(servicesUrl));
   }, [dispatch, servicesUrl]);
 
-  const linkValues = getWorkbenchLinkValues();
+  const linkValues = useWorkbenchLinkValues();
   return (
     <Layout sx={{ display: 'flex' }}>
       <Paper

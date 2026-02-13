@@ -52,6 +52,20 @@ const serviceKeyToIconKey: Record<string, string> = {
 };
 
 /**
+ * Constructs a link by appending `username` and `endpoint` to `baseURL`.
+ * This is a pure function (no hooks) for use outside of React hook context.
+ */
+function buildUserLink(
+  baseURL: string,
+  username: string | undefined,
+  endpoint?: string,
+): string {
+  const cleanBaseURL = cleanURL(baseURL);
+  const cleanEndpoint = cleanURL(endpoint ?? '');
+  return `${cleanBaseURL}/${username}/${cleanEndpoint}`;
+}
+
+/**
  * @returns an array of `KeyLinkPair` objects derived from workspace services stored in Redux.
  *
  * The workspace services are fetched from the user's workspace `/services` endpoint
@@ -65,34 +79,27 @@ const serviceKeyToIconKey: Record<string, string> = {
  *
  * Additionally, preview links for Library and Digital Twins are included.
  */
-export function getWorkbenchLinkValues(): KeyLinkPair[] {
+export function useWorkbenchLinkValues(): KeyLinkPair[] {
   const services: Record<string, WorkspaceService> = useSelector(
     (state: RootState) => state.workspaceServices.services,
   );
-  const workbenchLinkValues: KeyLinkPair[] = [];
+  const username = useSelector(
+    (state: RootState) => state.auth,
+  ).userName;
+  const appURL = useAppURL();
 
-  Object.entries(services).forEach(([serviceKey, service]) => {
-    const iconKey = serviceKeyToIconKey[serviceKey];
-    if (iconKey) {
-      const link = useUserLink(useAppURL(), service.endpoint);
-      workbenchLinkValues.push({
-        key: iconKey,
-        link,
-      });
-    }
-  });
+  const serviceLinks: KeyLinkPair[] = Object.entries(services)
+    .filter(([serviceKey]) => serviceKeyToIconKey[serviceKey])
+    .map(([serviceKey, service]) => ({
+      key: serviceKeyToIconKey[serviceKey],
+      link: buildUserLink(appURL, username, service.endpoint),
+    }));
 
-  workbenchLinkValues.push({
-    key: 'LIBRARY_PREVIEW',
-    link: '/preview/library',
-  });
-
-  workbenchLinkValues.push({
-    key: 'DT_PREVIEW',
-    link: '/preview/digitaltwins',
-  });
-
-  return workbenchLinkValues;
+  return [
+    ...serviceLinks,
+    { key: 'LIBRARY_PREVIEW', link: '/preview/library' },
+    { key: 'DT_PREVIEW', link: '/preview/digitaltwins' },
+  ];
 }
 
 export function useGetDTPagePreviewLink(): string {

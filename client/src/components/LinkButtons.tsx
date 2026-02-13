@@ -48,7 +48,7 @@ interface LinkButtonProps {
  * @param marginRight: number (optional) - the margin right to be applied to each button
  * @returns React.ReactElement - a row of buttons with icons and labels
  * @example
- * const linkValues = getWorkbenchLinkValues();
+ * const linkValues = useWorkbenchLinkValues();
  * <LinkButtons buttons={linkValues} size={6} />
  */ const LinkButtons = ({ buttons, size, marginRight }: LinkButtonProps) => {
   const iconButtons = getIconButtons(buttons);

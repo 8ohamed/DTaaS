@@ -1,4 +1,4 @@
-import { screen, within, waitFor } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import {
   itShowsTheTooltipWhenHoveringButton,
   setupIntegrationTest,

@@ -100,7 +100,7 @@ jest.mock('util/envUtil', () => ({
   getGitLabScopes: () => mockGitLabScopes,
   getURLforWorkbench: () => mockURLforWorkbench,
   useServicesUrl: () => 'https://example.com/username/services',
-  getWorkbenchLinkValues: () => [
+  useWorkbenchLinkValues: () => [
     { key: '1', link: 'link1' },
     { key: '2', link: 'link2' },
     { key: '3', link: 'link3' },

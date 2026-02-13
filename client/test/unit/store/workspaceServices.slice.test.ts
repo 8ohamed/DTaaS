@@ -111,7 +111,7 @@ describe('workspaceServicesSlice', () => {
       });
 
       await testStore.dispatch(
-        fetchWorkspaceServices('http://example.com/user1/services') as any,
+        fetchWorkspaceServices('http://example.com/user1/services'),
       );
 
       const state = testStore.getState().workspaceServices;
@@ -131,7 +131,7 @@ describe('workspaceServicesSlice', () => {
       });
 
       await testStore.dispatch(
-        fetchWorkspaceServices('http://example.com/user1/services') as any,
+        fetchWorkspaceServices('http://example.com/user1/services'),
       );
 
       const state = testStore.getState().workspaceServices;
@@ -146,7 +146,7 @@ describe('workspaceServicesSlice', () => {
         .mockRejectedValue(new Error('Network error'));
 
       await testStore.dispatch(
-        fetchWorkspaceServices('http://example.com/user1/services') as any,
+        fetchWorkspaceServices('http://example.com/user1/services'),
       );
 
       const state = testStore.getState().workspaceServices;

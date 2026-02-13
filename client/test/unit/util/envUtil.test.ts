@@ -1,7 +1,7 @@
 import {
   useURLforDT,
   useURLforLIB,
-  getWorkbenchLinkValues,
+  useWorkbenchLinkValues,
   cleanURL,
   useURLbasename,
   useServicesUrl,
@@ -62,7 +62,7 @@ describe('envUtil', () => {
 
   beforeEach(() => {
     (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
-      (selector: Function) => {
+      (selector: (state: Record<string, unknown>) => unknown) => {
         const mockState = {
           auth: { userName: testUsername },
           workspaceServices: { services: testServices },
@@ -83,13 +83,13 @@ describe('envUtil', () => {
   });
 
   test('GetWorkbenchLinkValues should return an array', () => {
-    const result = getWorkbenchLinkValues();
+    const result = useWorkbenchLinkValues();
     expect(Array.isArray(result)).toBe(true);
   });
 
   // Test that array elements have the expected shape
   test('GetWorkbenchLinkValues should return an array of objects with "key" and "link" properties', () => {
-    const result = getWorkbenchLinkValues();
+    const result = useWorkbenchLinkValues();
     expect(
       result.every(
         (el) => typeof el.key === 'string' && typeof el.link === 'string',
@@ -99,7 +99,7 @@ describe('envUtil', () => {
 
   // Test that the service links are correctly constructed
   it('should construct the links correctly from services', () => {
-    const result = getWorkbenchLinkValues();
+    const result = useWorkbenchLinkValues();
 
     const serviceEntries = Object.values(testServices);
     const serviceLinks = result.filter(
@@ -117,7 +117,7 @@ describe('envUtil', () => {
 
   // Test that preview links are included
   it('should include preview links', () => {
-    const result = getWorkbenchLinkValues();
+    const result = useWorkbenchLinkValues();
     const previewLinks = result.filter(
       (el) => el.key === 'LIBRARY_PREVIEW' || el.key === 'DT_PREVIEW',
     );
@@ -134,7 +134,7 @@ describe('envUtil', () => {
 
   // Test key mapping from service keys to icon keys
   it('should map service keys to icon keys correctly', () => {
-    const result = getWorkbenchLinkValues();
+    const result = useWorkbenchLinkValues();
     const serviceLinks = result.filter(
       (el) => el.key !== 'LIBRARY_PREVIEW' && el.key !== 'DT_PREVIEW',
     );
