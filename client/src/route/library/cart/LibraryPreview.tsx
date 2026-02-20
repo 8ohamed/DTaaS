@@ -8,11 +8,7 @@ import { assetType, scope } from 'route/library/cart/LibraryTabDataPreview';
 export function createTabs() {
   return assetType.map((tab) => ({
     label: tab.label,
-    body: (
-      <>
-        <Typography variant="body1">{tab.body}</Typography>
-      </>
-    ),
+    body: <Typography variant="body1">{tab.body}</Typography>,
   }));
 }
 

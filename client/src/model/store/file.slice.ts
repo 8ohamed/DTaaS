@@ -64,10 +64,14 @@ const filesSlice = createSlice({
     },
 
     removeAllCreationFiles: (state) => {
-      const protectedFiles = ['description.md', 'README.md', '.gitlab-ci.yml'];
+      const protectedFiles = new Set([
+        'description.md',
+        'README.md',
+        '.gitlab-ci.yml',
+      ]);
 
       const remainingFiles = state.filter((file) =>
-        protectedFiles.includes(file.name),
+        protectedFiles.has(file.name),
       );
 
       remainingFiles.forEach((file) => {

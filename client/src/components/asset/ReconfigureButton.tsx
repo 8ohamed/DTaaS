@@ -2,7 +2,7 @@ import { Button } from '@mui/material';
 import { Dispatch, SetStateAction } from 'react';
 
 interface ReconfigureButtonProps {
-  setShowReconfigure: Dispatch<SetStateAction<boolean>>;
+  readonly setShowReconfigure: Dispatch<SetStateAction<boolean>>;
 }
 
 export const handleToggleReconfigureDialog = (

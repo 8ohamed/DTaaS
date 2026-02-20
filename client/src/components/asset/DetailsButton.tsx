@@ -9,11 +9,11 @@ import { getAuthority } from 'util/envUtil';
 import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 
 interface DialogButtonProps {
-  assetName: string;
-  assetPrivacy: boolean;
-  setShowDetails: Dispatch<SetStateAction<boolean>>;
-  library?: boolean;
-  assetPath?: string;
+  readonly assetName: string;
+  readonly assetPrivacy: boolean;
+  readonly setShowDetails: Dispatch<SetStateAction<boolean>>;
+  readonly library?: boolean;
+  readonly assetPath?: string;
 }
 
 // Handle library asset details display
@@ -61,7 +61,11 @@ function DetailsButton({
     if (library) {
       await handleLibraryAssetClick(asset as LibraryAsset, setShowDetails);
     } else {
-      await handleDigitalTwinClick(asset as DigitalTwinData, assetName, setShowDetails);
+      await handleDigitalTwinClick(
+        asset as DigitalTwinData,
+        assetName,
+        setShowDetails,
+      );
     }
   };
 

@@ -11,7 +11,8 @@ const findLibraryFileIndex = (
   assetPath: string,
   isNew: boolean,
   isPrivate: boolean,
-) => state.findIndex(
+) =>
+  state.findIndex(
     (file) =>
       file.fileName === fileName &&
       file.assetPath === assetPath &&

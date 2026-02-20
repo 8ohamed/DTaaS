@@ -13,10 +13,10 @@ import DigitalTwin, { formatName } from 'model/backend/digitalTwin';
 import { showSnackbar } from 'store/snackbar.slice';
 
 interface DeleteDialogProps {
-  showDialog: boolean;
-  setShowDialog: Dispatch<SetStateAction<boolean>>;
-  name: string;
-  onDelete: () => void;
+  readonly showDialog: boolean;
+  readonly setShowDialog: Dispatch<SetStateAction<boolean>>;
+  readonly name: string;
+  readonly onDelete: () => void;
 }
 
 const handleCloseDeleteDialog = (

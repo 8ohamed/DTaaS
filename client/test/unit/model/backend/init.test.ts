@@ -19,11 +19,13 @@ jest.mock('model/backend/libraryAsset', () => ({
 const setAsset = jest.fn();
 jest.mock('model/store/assets.slice', () => ({
   setAsset,
+  default: (state = {}) => state,
 }));
 
 const setDigitalTwin = jest.fn();
 jest.mock('model/backend/state/digitalTwin.slice', () => ({
   setDigitalTwin,
+  default: (state = {}) => state,
 }));
 
 jest.deepUnmock('model/backend/util/init');

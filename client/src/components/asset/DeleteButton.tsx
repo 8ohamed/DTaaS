@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { Button } from '@mui/material';
 
 interface DeleteButtonProps {
-  setShowDelete: Dispatch<React.SetStateAction<boolean>>;
+  readonly setShowDelete: Dispatch<React.SetStateAction<boolean>>;
 }
 
 const handleToggleDeleteDialog = (

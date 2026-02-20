@@ -12,17 +12,16 @@ import ReconfigureDialog from 'preview/route/digitaltwins/manage/ReconfigureDial
 import DeleteDialog from 'route/digitaltwins/manage/DeleteDialog';
 
 interface AssetCardManageProps {
-  asset: Asset;
-  buttons?: React.ReactNode;
-  onDelete: () => void;
+  readonly asset: Asset;
+  readonly onDelete: () => void;
 }
 
 interface CardButtonsContainerManageProps {
-  assetName: string;
-  assetPrivacy: boolean;
-  setShowDetails: Dispatch<SetStateAction<boolean>>;
-  setShowReconfigure: Dispatch<SetStateAction<boolean>>;
-  setShowDelete: Dispatch<SetStateAction<boolean>>;
+  readonly assetName: string;
+  readonly assetPrivacy: boolean;
+  readonly setShowDetails: Dispatch<SetStateAction<boolean>>;
+  readonly setShowReconfigure: Dispatch<SetStateAction<boolean>>;
+  readonly setShowDelete: Dispatch<SetStateAction<boolean>>;
 }
 
 function CardButtonsContainerManage({

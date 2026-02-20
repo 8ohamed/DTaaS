@@ -5,17 +5,18 @@ function CartList() {
   const { state } = useCart();
   return (
     <ul>
-      {state.assets.map((a, i) => (
-        <CartItemRender key={i} asset={a}></CartItemRender>
+      {state.assets.map((a) => (
+        <CartItemRender
+          key={`${a.path}-${String(a.isPrivate)}`}
+          asset={a}
+        ></CartItemRender>
       ))}
     </ul>
   );
 }
 
-function CartItemRender(props: { asset: LibraryAsset }) {
-  const displayPath = props.asset.isPrivate
-    ? props.asset.path
-    : `common/${props.asset.path}`;
+function CartItemRender({ asset }: Readonly<{ asset: LibraryAsset }>) {
+  const displayPath = asset.isPrivate ? asset.path : `common/${asset.path}`;
 
   return <li>{displayPath}</li>;
 }

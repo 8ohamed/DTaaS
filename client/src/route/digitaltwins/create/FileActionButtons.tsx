@@ -3,17 +3,23 @@ import Button from '@mui/material/Button';
 import { isFileDeletable, isFileModifiable } from 'util/fileUtils';
 import { Tooltip } from '@mui/material';
 
+interface FileActionButtonsProps {
+  readonly fileName: string;
+  readonly setOpenDeleteFileDialog: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
+  readonly setOpenChangeFileNameDialog: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
+  readonly isLibraryFile: boolean;
+}
+
 function FileActionButtons({
   fileName,
   setOpenDeleteFileDialog,
   setOpenChangeFileNameDialog,
   isLibraryFile,
-}: {
-  fileName: string;
-  setOpenDeleteFileDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  setOpenChangeFileNameDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  isLibraryFile: boolean;
-}) {
+}: FileActionButtonsProps) {
   const deleteFileDisabled = !(
     isFileDeletable(fileName) &&
     fileName &&

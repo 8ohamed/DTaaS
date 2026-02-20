@@ -16,9 +16,14 @@ const outerGridContainerProps = {
   },
 };
 
-function AssetLibrary(props: { pathToAssets: string; privateRepo: boolean }) {
+interface AssetLibraryProps {
+  readonly pathToAssets: string;
+  readonly privateRepo: boolean;
+}
+
+function AssetLibrary({ pathToAssets, privateRepo }: AssetLibraryProps) {
   const assets = useSelector(
-    selectAssetsByTypeAndPrivacy(props.pathToAssets, props.privateRepo),
+    selectAssetsByTypeAndPrivacy(pathToAssets, privateRepo),
   );
   const [filter, setFilter] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,16 +33,11 @@ function AssetLibrary(props: { pathToAssets: string; privateRepo: boolean }) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      await fetchLibraryAssets(
-        dispatch,
-        setError,
-        props.pathToAssets,
-        props.privateRepo,
-      );
+      await fetchLibraryAssets(dispatch, setError, pathToAssets, privateRepo);
       setLoading(false);
     };
     fetchData();
-  }, [dispatch, props.pathToAssets, props.privateRepo]);
+  }, [dispatch, pathToAssets, privateRepo]);
 
   const filteredAssets = assets.filter((asset) =>
     asset.name.toLowerCase().includes(filter.toLowerCase()),
@@ -72,9 +72,9 @@ function AssetLibrary(props: { pathToAssets: string; privateRepo: boolean }) {
         <Filter value={filter} onChange={setFilter} />
       </Box>
       <Grid {...outerGridContainerProps}>
-        {filteredAssets.map((asset, i) => (
+        {filteredAssets.map((asset) => (
           <Grid
-            key={i}
+            key={asset.name}
             size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
             sx={{ minWidth: 250 }}
           >

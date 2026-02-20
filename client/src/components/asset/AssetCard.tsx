@@ -2,7 +2,7 @@ import { useState, Dispatch, SetStateAction } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { AlertColor, CardActions, Grid } from '@mui/material';
+import { CardActions, Grid } from '@mui/material';
 import styled from '@emotion/styled';
 import { formatName } from 'model/backend/digitalTwin';
 import { useSelector } from 'react-redux';
@@ -18,9 +18,9 @@ import AddToCartButton from 'components/asset/AddToCartButton';
 import DetailsButton from 'components/asset/DetailsButton';
 
 interface AssetCardProps {
-  asset: Asset;
-  buttons?: React.ReactNode;
-  library?: boolean;
+  readonly asset: Asset;
+  readonly buttons?: React.ReactNode;
+  readonly library?: boolean;
 }
 
 interface CardButtonsContainerExecuteProps {
@@ -142,8 +142,7 @@ export function AssetCard({ asset, buttons, library }: AssetCardProps) {
   );
 }
 
-function AssetCardExecute({ asset }: AssetCardProps) {
-  useState<AlertColor>('success');
+function AssetCardExecute({ asset }: Readonly<{ asset: Asset }>) {
   const [showLog, setShowLog] = useState(false);
   const digitalTwin = useSelector(selectDigitalTwinByName(asset.name));
 
@@ -169,8 +168,7 @@ function AssetCardExecute({ asset }: AssetCardProps) {
   );
 }
 
-function AssetCardLibrary({ asset }: AssetCardProps) {
-  useState<AlertColor>('success');
+function AssetCardLibrary({ asset }: Readonly<{ asset: Asset }>) {
   const [showDetails, setShowDetails] = useState(false);
 
   return (

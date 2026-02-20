@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 
 interface AddToCartButtonProps {
-  assetPath: string;
-  assetPrivacy: boolean;
+  readonly assetPath: string;
+  readonly assetPrivacy: boolean;
 }
 
 // Helper to check if asset is in cart

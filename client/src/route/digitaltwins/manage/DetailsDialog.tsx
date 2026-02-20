@@ -9,12 +9,12 @@ import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 
 interface DetailsDialogProps {
-  showDialog: boolean;
-  setShowDialog: Dispatch<SetStateAction<boolean>>;
-  name: string;
-  isPrivate: boolean;
-  library?: boolean;
-  path?: string;
+  readonly showDialog: boolean;
+  readonly setShowDialog: Dispatch<SetStateAction<boolean>>;
+  readonly name: string;
+  readonly isPrivate: boolean;
+  readonly library?: boolean;
+  readonly path?: string;
 }
 
 const handleCloseDetailsDialog = (

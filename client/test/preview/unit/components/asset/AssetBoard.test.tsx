@@ -7,8 +7,7 @@ jest.mock('preview/components/asset/AssetCardManage', () => ({
   __esModule: true,
   default: ({ onDelete }: { onDelete: () => void }) => (
     <div>
-      Asset Card Manage
-      <button onClick={onDelete}>Delete</button>
+      Asset Card Manage <button onClick={onDelete}>Delete</button>
     </div>
   ),
 }));
