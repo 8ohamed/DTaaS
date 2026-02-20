@@ -6,6 +6,7 @@ import LibraryAsset from 'model/backend/libraryAsset';
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 import { getAuthority } from 'util/envUtil';
+import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 
 interface DialogButtonProps {
   assetName: string;
@@ -24,14 +25,14 @@ const handleLibraryAssetClick = async (
   setShowDetails(true);
 };
 
-// Handle digital twin details display  
+// Handle digital twin details display
 const handleDigitalTwinClick = async (
-  digitalTwinData: any,
+  digitalTwinData: DigitalTwinData,
   assetName: string,
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
   if (!('DTName' in digitalTwinData)) return;
-  
+
   const digitalTwinInstance = await createDigitalTwinFromData(
     digitalTwinData,
     assetName,
@@ -60,7 +61,7 @@ function DetailsButton({
     if (library) {
       await handleLibraryAssetClick(asset as LibraryAsset, setShowDetails);
     } else {
-      await handleDigitalTwinClick(asset, assetName, setShowDetails);
+      await handleDigitalTwinClick(asset as DigitalTwinData, assetName, setShowDetails);
     }
   };
 

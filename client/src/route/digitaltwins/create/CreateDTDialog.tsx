@@ -94,8 +94,14 @@ const handleSuccess = (
   addDefaultFiles(defaultFiles, files, dispatch);
 };
 
-const resetDialogAndForm = (dialogState: Omit<DialogState, 'setErrorMessage' | 'setIsLoading' | 'setNewDigitalTwinName'>) => {
-  const { setOpenCreateDTDialog, setFileName, setFileContent, setFileType } = dialogState;
+const resetDialogAndForm = (
+  dialogState: Omit<
+    DialogState,
+    'setErrorMessage' | 'setIsLoading' | 'setNewDigitalTwinName'
+  >,
+) => {
+  const { setOpenCreateDTDialog, setFileName, setFileContent, setFileType } =
+    dialogState;
   setOpenCreateDTDialog(false);
   setFileName('');
   setFileContent('');

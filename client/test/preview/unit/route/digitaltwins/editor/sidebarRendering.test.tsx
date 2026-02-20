@@ -43,17 +43,19 @@ describe('SidebarRendering', () => {
   describe('renderFileTreeItems', () => {
     const testCases = [
       { description: 'DigitalTwin', asset: mockDigitalTwin },
-      { 
-        description: 'LibraryAsset', 
-        asset: mockLibraryAsset, 
-        setup: () => { mockLibraryAsset.isPrivate = false; } 
+      {
+        description: 'LibraryAsset',
+        asset: mockLibraryAsset,
+        setup: () => {
+          mockLibraryAsset.isPrivate = false;
+        },
       },
     ];
 
     testCases.forEach(({ description, asset, setup }) => {
       it(`should render file tree items correctly and handle file click - ${description}`, () => {
         if (setup) setup();
-        
+
         const handleFileClick = jest
           .spyOn(SidebarFunctions, 'handleFileClick')
           .mockImplementation(jest.fn());
@@ -84,10 +86,12 @@ describe('SidebarRendering', () => {
 
   describe('renderFileSection', () => {
     const testCases = [
-      { 
-        description: 'LibraryAsset', 
-        asset: mockLibraryAsset, 
-        setup: () => { mockLibraryAsset.isPrivate = false; } 
+      {
+        description: 'LibraryAsset',
+        asset: mockLibraryAsset,
+        setup: () => {
+          mockLibraryAsset.isPrivate = false;
+        },
       },
       { description: 'DigitalTwin', asset: mockDigitalTwin },
     ];
@@ -95,7 +99,7 @@ describe('SidebarRendering', () => {
     testCases.forEach(({ description, asset, setup }) => {
       it(`should render file section correctly and handle file click - ${description}`, () => {
         if (setup) setup();
-        
+
         const handleFileClick = jest
           .spyOn(SidebarFunctions, 'handleFileClick')
           .mockImplementation(jest.fn());

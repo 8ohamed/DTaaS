@@ -12,7 +12,7 @@ import {
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import DetailsDialog from 'preview/route/digitaltwins/manage/DetailsDialog';
+import DetailsDialog from 'route/digitaltwins/manage/DetailsDialog';
 import assetsReducer, { setAssets } from 'model/store/assets.slice';
 import digitalTwinReducer, {
   setDigitalTwin,

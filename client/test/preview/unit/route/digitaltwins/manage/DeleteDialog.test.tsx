@@ -1,4 +1,4 @@
-import DeleteDialog from 'preview/route/digitaltwins/manage/DeleteDialog';
+import DeleteDialog from 'route/digitaltwins/manage/DeleteDialog';
 import {
   render,
   screen,

@@ -7,6 +7,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'store/store';
 import { defaultFiles } from 'model/backend/gitlab/digitalTwinConfig/constants';
+import { FileState } from 'model/backend/interfaces/sharedInterfaces';
 
 interface ConfirmDeleteDialogProps {
   open: boolean;
@@ -32,8 +33,8 @@ const resetFormState = (
 
 // Helper to add missing default files
 const addMissingDefaultFiles = (
-  files: any[],
-  dispatch: any,
+  files: FileState[],
+  dispatch: ReturnType<typeof useDispatch>,
 ) => {
   defaultFiles.forEach((file) => {
     const fileExists = files.some(
@@ -64,7 +65,12 @@ const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
   const files = useSelector((state: RootState) => state.files);
 
   const handleConfirmCancel = () => {
-    resetFormState(setFileName, setFileContent, setFileType, setNewDigitalTwinName);
+    resetFormState(
+      setFileName,
+      setFileContent,
+      setFileType,
+      setNewDigitalTwinName,
+    );
     dispatch(removeAllCreationFiles());
     addMissingDefaultFiles(files, dispatch);
     setOpenConfirmDeleteDialog(false);

@@ -10,7 +10,8 @@ import { setShouldFetchDigitalTwins } from 'model/backend/state/digitalTwin.slic
 import { RootState } from 'store/store';
 import Filter from 'components/asset/Filter';
 import { Asset } from 'model/backend/Asset';
-import { AssetCardExecute, AssetCardManage } from 'components/asset/AssetCard';
+import { AssetCardExecute } from 'components/asset/AssetCard';
+import AssetCardManage from 'preview/components/asset/AssetCardManage';
 
 const outerGridContainerProps = {
   container: true,

@@ -11,15 +11,13 @@ const findLibraryFileIndex = (
   assetPath: string,
   isNew: boolean,
   isPrivate: boolean,
-) => {
-  return state.findIndex(
+) => state.findIndex(
     (file) =>
       file.fileName === fileName &&
       file.assetPath === assetPath &&
       file.isNew === isNew &&
       file.isPrivate === isPrivate,
   );
-};
 
 const libraryFilesSlice = createSlice({
   name: 'libraryConfigFiles',

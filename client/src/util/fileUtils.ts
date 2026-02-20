@@ -21,7 +21,7 @@ const getEmptyFileNames = (files: FileState[]): string[] =>
     .filter((file) => file.isNew && file.content === '')
     .map((file) => file.name);
 
-// Helper function to get empty library files  
+// Helper function to get empty library files
 const getEmptyLibraryFiles = (
   libraryFiles: LibraryConfigFile[],
 ): LibraryConfigFile[] =>
@@ -39,11 +39,11 @@ const buildEmptyFilesErrorMessage = (
   emptyLibraryFiles: LibraryConfigFile[],
 ): string => {
   const parts: string[] = [];
-  
+
   if (emptyFiles.length > 0) {
     parts.push(emptyFiles.join(', '));
   }
-  
+
   if (emptyLibraryFiles.length > 0) {
     parts.push(formatLibraryFileNames(emptyLibraryFiles));
   }

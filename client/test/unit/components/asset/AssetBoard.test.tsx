@@ -1,15 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import AssetBoard from 'components/asset/AssetBoard';
+import AssetBoard from 'preview/components/asset/AssetBoard';
 import store from 'store/store';
 
-jest.mock('components/asset/AssetCard', () => ({
-  AssetCardManage: ({ onDelete }: { onDelete: () => void }) => (
+jest.mock('preview/components/asset/AssetCardManage', () => ({
+  __esModule: true,
+  default: ({ onDelete }: { onDelete: () => void }) => (
     <div>
       Asset Card Manage
       <button onClick={onDelete}>Delete</button>
     </div>
   ),
+}));
+
+jest.mock('components/asset/AssetCard', () => ({
   AssetCardExecute: () => <div>Asset Card Execute</div>,
 }));
 

@@ -296,6 +296,10 @@ class DigitalTwin implements DigitalTwinInterface {
     const lifecycleFolderPath = `${mainFolderPath}/lifecycle`;
 
     try {
+      if (!this.backend.getProjectId()) {
+        throw new Error('Create failed');
+      }
+
       const assetFilesToCreate = await this.prepareAllAssetFiles(
         cartAssets,
         libraryFiles,

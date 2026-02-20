@@ -9,15 +9,11 @@ import { useSelector } from 'react-redux';
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 import { RootState } from 'store/store';
 import LogDialog from 'components/LogDialog';
-import DetailsDialog from 'preview/route/digitaltwins/manage/DetailsDialog';
-import ReconfigureDialog from 'preview/route/digitaltwins/manage/ReconfigureDialog';
-import DeleteDialog from 'preview/route/digitaltwins/manage/DeleteDialog';
+import DetailsDialog from 'route/digitaltwins/manage/DetailsDialog';
 import { selectAssetByPathAndPrivacy } from 'model/store/assets.slice';
 import HistoryButton from 'components/asset/HistoryButton';
 import StartButton from 'components/asset/StartButton';
 import { Asset } from 'model/backend/Asset';
-import ReconfigureButton from 'components/asset/ReconfigureButton';
-import DeleteButton from 'components/asset/DeleteButton';
 import AddToCartButton from 'components/asset/AddToCartButton';
 import DetailsButton from 'components/asset/DetailsButton';
 
@@ -25,20 +21,6 @@ interface AssetCardProps {
   asset: Asset;
   buttons?: React.ReactNode;
   library?: boolean;
-}
-
-interface AssetCardManageProps {
-  asset: Asset;
-  buttons?: React.ReactNode;
-  onDelete: () => void;
-}
-
-interface CardButtonsContainerManageProps {
-  assetName: string;
-  assetPrivacy: boolean;
-  setShowDetails: Dispatch<SetStateAction<boolean>>;
-  setShowReconfigure: Dispatch<SetStateAction<boolean>>;
-  setShowDelete: Dispatch<SetStateAction<boolean>>;
 }
 
 interface CardButtonsContainerExecuteProps {
@@ -101,26 +83,6 @@ function CardActionAreaContainer(asset: Asset, library?: boolean) {
   );
 }
 
-function CardButtonsContainerManage({
-  assetName,
-  assetPrivacy,
-  setShowDetails,
-  setShowReconfigure,
-  setShowDelete,
-}: CardButtonsContainerManageProps) {
-  return (
-    <CardActions style={{ justifyContent: 'flex-end' }}>
-      <DetailsButton
-        assetName={assetName}
-        setShowDetails={setShowDetails}
-        assetPrivacy={assetPrivacy}
-      />
-      <ReconfigureButton setShowReconfigure={setShowReconfigure} />
-      <DeleteButton setShowDelete={setShowDelete} />
-    </CardActions>
-  );
-}
-
 function CardButtonsContainerExecute({
   assetName,
   setShowLog,
@@ -161,7 +123,7 @@ function CardButtonsContainerLibrary({
   );
 }
 
-function AssetCard({ asset, buttons, library }: AssetCardProps) {
+export function AssetCard({ asset, buttons, library }: AssetCardProps) {
   return (
     <Card
       sx={{
@@ -177,49 +139,6 @@ function AssetCard({ asset, buttons, library }: AssetCardProps) {
       <CardActionAreaContainer {...{ ...asset, library }} />
       {buttons}
     </Card>
-  );
-}
-
-function AssetCardManage({ asset, onDelete }: AssetCardManageProps) {
-  const [showDetailsLog, setShowDetailsLog] = useState(false);
-  const [showDeleteLog, setShowDeleteLog] = useState(false);
-  const [showReconfigure, setShowReconfigure] = useState(false);
-  const digitalTwin = useSelector(selectDigitalTwinByName(asset.name));
-
-  return (
-    digitalTwin && (
-      <>
-        <AssetCard
-          asset={asset}
-          buttons={
-            <CardButtonsContainerManage
-              assetName={asset.name}
-              assetPrivacy={asset.isPrivate}
-              setShowDelete={setShowDeleteLog}
-              setShowDetails={setShowDetailsLog}
-              setShowReconfigure={setShowReconfigure}
-            />
-          }
-        />
-        <DetailsDialog
-          showDialog={showDetailsLog}
-          setShowDialog={setShowDetailsLog}
-          name={asset.name}
-          isPrivate={asset.isPrivate}
-        />
-        <ReconfigureDialog
-          showDialog={showReconfigure}
-          setShowDialog={setShowReconfigure}
-          name={asset.name}
-        />
-        <DeleteDialog
-          showDialog={showDeleteLog}
-          setShowDialog={setShowDeleteLog}
-          name={asset.name}
-          onDelete={onDelete}
-        />
-      </>
-    )
   );
 }
 
@@ -280,4 +199,4 @@ function AssetCardLibrary({ asset }: AssetCardProps) {
   );
 }
 
-export { AssetCardManage, AssetCardExecute, AssetCardLibrary };
+export { AssetCardExecute, AssetCardLibrary };

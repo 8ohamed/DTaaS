@@ -97,23 +97,31 @@ describe('EditorTab', () => {
       },
     ];
 
-    testCases.forEach(({ description, tab, isLibraryFile, libraryAssetPath, expectedDispatch }) => {
-      it(`calls onChange correctly - ${description}`, async () => {
-        await handleEditorChange(
-          tab,
-          'new content',
-          jest.fn(),
-          mockSetFileContent,
-          'fileName',
-          'private',
-          isLibraryFile,
-          libraryAssetPath,
-          mockDispatch,
-        );
+    testCases.forEach(
+      ({
+        description,
+        tab,
+        isLibraryFile,
+        libraryAssetPath,
+        expectedDispatch,
+      }) => {
+        it(`calls onChange correctly - ${description}`, async () => {
+          await handleEditorChange(
+            tab,
+            'new content',
+            jest.fn(),
+            mockSetFileContent,
+            'fileName',
+            'private',
+            isLibraryFile,
+            libraryAssetPath,
+            mockDispatch,
+          );
 
-        expect(mockSetFileContent).toHaveBeenCalledWith('new content');
-        expect(mockDispatch).toHaveBeenCalledWith(expectedDispatch);
-      });
-    });
+          expect(mockSetFileContent).toHaveBeenCalledWith('new content');
+          expect(mockDispatch).toHaveBeenCalledWith(expectedDispatch);
+        });
+      },
+    );
   });
 });

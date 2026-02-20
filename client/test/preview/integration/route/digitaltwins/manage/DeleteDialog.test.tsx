@@ -2,7 +2,7 @@ import 'test/preview/__mocks__/adapterMocks';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import DeleteDialog from 'preview/route/digitaltwins/manage/DeleteDialog';
+import DeleteDialog from 'route/digitaltwins/manage/DeleteDialog';
 import digitalTwinReducer, {
   setDigitalTwin,
 } from 'model/backend/state/digitalTwin.slice';

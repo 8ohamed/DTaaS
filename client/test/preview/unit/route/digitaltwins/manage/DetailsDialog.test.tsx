@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import DetailsDialog from 'preview/route/digitaltwins/manage/DetailsDialog';
+import DetailsDialog from 'route/digitaltwins/manage/DetailsDialog';
 import { useSelector, Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 

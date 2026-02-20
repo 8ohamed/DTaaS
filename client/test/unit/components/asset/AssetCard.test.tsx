@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { AssetCardManage, AssetCardExecute } from 'components/asset/AssetCard';
+import AssetCardManage from 'preview/components/asset/AssetCardManage';
+import { AssetCardExecute } from 'components/asset/AssetCard';
 import * as React from 'react';
 import { Provider, useSelector } from 'react-redux';
 import store from 'store/store';
@@ -15,7 +16,7 @@ jest.mock('components/LogDialog', () => ({
   default: () => <div data-testid="log-dialog" />,
 }));
 
-jest.mock('preview/route/digitaltwins/manage/DetailsDialog', () => ({
+jest.mock('route/digitaltwins/manage/DetailsDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="details-dialog" />,
 }));
@@ -25,7 +26,7 @@ jest.mock('preview/route/digitaltwins/manage/ReconfigureDialog', () => ({
   default: () => <div data-testid="reconfigure-dialog" />,
 }));
 
-jest.mock('preview/route/digitaltwins/manage/DeleteDialog', () => ({
+jest.mock('route/digitaltwins/manage/DeleteDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="delete-dialog" />,
 }));

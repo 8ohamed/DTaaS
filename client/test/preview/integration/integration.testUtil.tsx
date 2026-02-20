@@ -4,7 +4,7 @@ export {
   dispatchAddExecHistoryEntry,
   storeResetAll,
   previewStore,
-  setupIntegrationTest as default,
+  setupIntegrationTest,
   closestDiv,
   itShowsTheTooltipWhenHoveringButton,
   itShowsTheParagraphOfToTheSelectedTab,
