@@ -4,6 +4,9 @@ import GitlabAPI from 'model/backend/gitlab/backend';
 import LibraryAsset from 'model/backend/libraryAsset';
 import LibraryManager from 'model/backend/libraryManager';
 import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
+import DigitalTwin from 'model/backend/digitalTwin';
+import FileHandler from 'model/backend/fileHandler';
+import DTAssets from 'model/backend/DTAssets';
 
 export const mockAppURL = 'https://example.com/';
 export const mockURLforDT = 'https://example.com/URL_DT';
@@ -102,7 +105,7 @@ jest.mock('util/envUtil', () => ({
   getLogoutRedirectURI: () => mockLogoutRedirectURI,
   getGitLabScopes: () => mockGitLabScopes,
   getURLforWorkbench: () => mockURLforWorkbench,
-  getWorkbenchLinkValues: () => [
+  useWorkbenchLinkValues: () => [
     { key: '1', link: 'link1' },
     { key: '2', link: 'link2' },
     { key: '3', link: 'link3' },
@@ -162,7 +165,7 @@ const createCommonMocks = () => ({
   getConfigFiles: jest.fn(),
 });
 
-const mockLibraryManager: LibraryManager = {
+export const mockLibraryManager: LibraryManager = {
   DTName: 'mockedDTName',
   backend: mockBackendInstance,
   assets: [],
@@ -202,3 +205,77 @@ export const createMockDigitalTwinData = (dtName: string): DigitalTwinData => ({
   // Store only serializable data
   gitlabProjectId: 123,
 });
+
+const createAsyncMock = <T,>(value: T) => jest.fn().mockResolvedValue(value);
+
+export const mockFileHandler = {
+  name: 'mockedName',
+  backend: mockBackendInstance,
+  createFile: jest.fn(),
+  updateFile: jest.fn(),
+  deleteDT: jest.fn(),
+  getFileContent: jest.fn(),
+  getFileNames: jest.fn(),
+  getLibraryFileNames: jest.fn(),
+  getLibraryConfigFileNames: jest.fn(),
+  getFolders: jest.fn(),
+} as unknown as FileHandler;
+
+export const mockDTAssets = {
+  DTName: 'mockedDTName',
+  backend: mockBackendInstance,
+  fileHandler: mockFileHandler,
+  getFileContent: jest.fn(),
+  getFileNames: jest.fn(),
+  getDescription: jest.fn(),
+  getFullDescription: jest.fn(),
+  getConfigFiles: jest.fn(),
+  createFiles: jest.fn(),
+  getFilesFromAsset: jest.fn(),
+  updateFileContent: jest.fn(),
+  updateLibraryFileContent: jest.fn(),
+  appendTriggerToPipeline: jest.fn(),
+  removeTriggerFromPipeline: jest.fn(),
+  delete: jest.fn(),
+  getLibraryFileContent: jest.fn(),
+  getLibraryConfigFileNames: jest.fn(),
+  getFolders: jest.fn(),
+} as unknown as DTAssets;
+
+export const mockDigitalTwin: DigitalTwin = {
+  DTName: 'mockedDTName',
+  description: 'mockedDescription',
+  fullDescription: 'mockedFullDescription',
+  backend: mockBackendInstance,
+  DTAssets: mockDTAssets,
+  pipelineId: 1,
+  lastExecutionStatus: 'mockedStatus',
+  jobLogs: [{ jobName: 'job1', log: 'log1' }],
+  pipelineLoading: false,
+  pipelineCompleted: false,
+  descriptionFiles: ['descriptionFile'],
+  configFiles: ['configFile'],
+  lifecycleFiles: ['lifecycleFile'],
+  assetFiles: [
+    { assetPath: 'assetPath', fileNames: ['assetFileName1', 'assetFileName2'] },
+  ],
+  currentExecutionId: 'test-execution-id',
+  getFileContent: jest.fn(),
+  getFileNames: jest.fn(),
+  getDescription: jest.fn(),
+  getFullDescription: jest.fn(),
+  getConfigFiles: createAsyncMock(['configFile']),
+  triggerPipeline: jest.fn(),
+  execute: createAsyncMock(123),
+  stop: jest.fn(),
+  create: createAsyncMock('Success'),
+  delete: jest.fn(),
+  getDescriptionFiles: createAsyncMock(['descriptionFile']),
+  getLifecycleFiles: createAsyncMock(['lifecycleFile']),
+  prepareAllAssetFiles: jest.fn(),
+  getAssetFiles: jest.fn(),
+  updateExecutionStatus: jest.fn(),
+  updateExecutionLogs: jest.fn(),
+  getExecutionHistoryById: jest.fn(),
+  getExecutionHistoryByDTName: jest.fn(),
+} as unknown as DigitalTwin;

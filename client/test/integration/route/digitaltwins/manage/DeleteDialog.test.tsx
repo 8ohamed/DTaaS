@@ -1,4 +1,4 @@
-import 'test/preview/__mocks__/adapterMocks';
+import 'test/__mocks__/adapterMocks';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
@@ -8,9 +8,8 @@ import digitalTwinReducer, {
 } from 'model/backend/state/digitalTwin.slice';
 import snackbarSlice from 'store/snackbar.slice';
 import DigitalTwin from 'model/backend/digitalTwin';
-import { mockBackendInstance } from 'test/__mocks__/global_mocks';
-import { createMockDigitalTwinData } from 'test/preview/__mocks__/global_mocks';
-import { storeResetAll } from 'test/preview/integration/integration.testUtil';
+import { mockBackendInstance , createMockDigitalTwinData } from 'test/__mocks__/global_mocks';
+import { storeResetAll } from 'test/integration/integration.testUtil';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

@@ -6,7 +6,7 @@ import {
   getBranchName,
   getGroupName,
 } from 'model/backend/gitlab/digitalTwinConfig/settingsUtility';
-import { mockLibraryManager } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryManager } from 'test/__mocks__/global_mocks';
 import { getAuthority } from 'util/envUtil';
 
 jest.mock('model/backend/libraryManager');

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { AssetCardExecute } from 'components/asset/AssetCard';
+import AssetCardManage from 'preview/components/asset/AssetCardManage';
 import * as React from 'react';
 import { Provider, useSelector } from 'react-redux';
 import store from 'store/store';
@@ -10,14 +10,19 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
-jest.mock('components/LogDialog', () => ({
-  __esModule: true,
-  default: () => <div data-testid="log-dialog" />,
-}));
-
 jest.mock('route/digitaltwins/manage/DetailsDialog', () => ({
   __esModule: true,
   default: () => <div data-testid="details-dialog" />,
+}));
+
+jest.mock('preview/route/digitaltwins/manage/ReconfigureDialog', () => ({
+  __esModule: true,
+  default: () => <div data-testid="reconfigure-dialog" />,
+}));
+
+jest.mock('route/digitaltwins/manage/DeleteDialog', () => ({
+  __esModule: true,
+  default: () => <div data-testid="delete-dialog" />,
 }));
 
 const asset = {
@@ -68,13 +73,16 @@ const renderComponent = <T extends object>(
   );
 };
 
-describe('AssetCard', () => {
-  it('renders AssetCardExecute with digital twin description', () => {
+describe('AssetCardManage', () => {
+  it('renders AssetCardManage with digital twin description', () => {
     setupMockStore('Asset description', 'Digital Twin description');
-    renderComponent(AssetCardExecute, { asset });
+    renderComponent(AssetCardManage, { asset, onDelete: jest.fn() });
 
     expect(screen.getByText(formatName(asset.name))).toBeInTheDocument();
     expect(screen.getByText('Digital Twin description')).toBeInTheDocument();
-    expect(screen.getByTestId('log-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('details-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('reconfigure-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-dialog')).toBeInTheDocument();
   });
+
 });

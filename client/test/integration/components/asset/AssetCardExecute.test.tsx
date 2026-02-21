@@ -23,21 +23,15 @@ import { storeResetAll } from 'test/integration/integration.testUtil';
 jest.mock('database/executionHistoryDB');
 
 jest.mock('model/backend/util/digitalTwinAdapter', () => {
-  const adapterMocks = jest.requireActual(
-    'test/preview/__mocks__/adapterMocks',
-  );
+  const adapterMocks = jest.requireActual('test/__mocks__/adapterMocks');
   return adapterMocks.ADAPTER_MOCKS;
 });
 jest.mock('model/backend/util/init', () => {
-  const adapterMocks = jest.requireActual(
-    'test/preview/__mocks__/adapterMocks',
-  );
+  const adapterMocks = jest.requireActual('test/__mocks__/adapterMocks');
   return adapterMocks.INIT_MOCKS;
 });
 jest.mock('model/backend/gitlab/instance', () => {
-  const adapterMocks = jest.requireActual(
-    'test/preview/__mocks__/adapterMocks',
-  );
+  const adapterMocks = jest.requireActual('test/__mocks__/adapterMocks');
   return adapterMocks.GITLAB_MOCKS;
 });
 jest.mock('route/digitaltwins/execution/executionButtonHandlers', () => ({

@@ -39,9 +39,7 @@ import { ExecutionStatus } from 'model/backend/interfaces/execution';
 // Mock the pipelineHandler module
 jest.mock('route/digitaltwins/execution/executionButtonHandlers');
 jest.mock('model/backend/util/digitalTwinAdapter', () => {
-  const adapterMocks = jest.requireActual(
-    'test/preview/__mocks__/adapterMocks',
-  );
+  const adapterMocks = jest.requireActual('test/__mocks__/adapterMocks');
   const actual = jest.requireActual('model/backend/util/digitalTwinAdapter');
   return {
     ...adapterMocks.ADAPTER_MOCKS,

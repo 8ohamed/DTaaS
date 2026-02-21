@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useDispatch, useSelector } from 'react-redux';
 import useCart from 'model/store/CartAccess';
 import * as cart from 'model/store/cart.slice';
-import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryAsset } from 'test/__mocks__/global_mocks';
 
 jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),

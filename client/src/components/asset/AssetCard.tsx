@@ -75,7 +75,7 @@ function CardActionAreaContainer(asset: Asset, library?: boolean) {
           }}
         >
           <Description variant="body2" color="text.secondary">
-            {selectedAsset!.description}
+            {selectedAsset?.description}
           </Description>
         </CardContent>
       </Grid>

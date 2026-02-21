@@ -8,7 +8,7 @@ import {
   dispatchAddExecHistoryEntry,
   previewStore,
   previewStore as store,
-} from 'test/preview/integration/integration.testUtil';
+} from 'test/integration/integration.testUtil';
 import { JobSchema } from '@gitbeaker/rest';
 import DigitalTwin from 'model/backend/digitalTwin';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';

@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { Provider, useSelector } from 'react-redux';
 import store from 'store/store';
-import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
+import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
 import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter';
 
 jest.mock('react-redux', () => ({

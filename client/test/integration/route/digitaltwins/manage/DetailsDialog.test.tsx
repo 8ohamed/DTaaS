@@ -7,7 +7,7 @@ import {
   ADAPTER_MOCKS,
   INIT_MOCKS,
   GITLAB_MOCKS,
-} from 'test/preview/__mocks__/adapterMocks';
+} from 'test/__mocks__/adapterMocks';
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -21,10 +21,9 @@ import snackbarSlice from 'store/snackbar.slice';
 import fileSlice from 'model/store/file.slice';
 import libraryConfigFilesSlice from 'model/store/libraryConfigFiles.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
-import { mockBackendInstance } from 'test/__mocks__/global_mocks';
+import { mockBackendInstance , createMockDigitalTwinData } from 'test/__mocks__/global_mocks';
 import LibraryManager from 'model/backend/libraryManager';
-import { createMockDigitalTwinData } from 'test/preview/__mocks__/global_mocks';
-import { storeResetAll } from 'test/preview/integration/integration.testUtil';
+import { storeResetAll } from 'test/integration/integration.testUtil';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

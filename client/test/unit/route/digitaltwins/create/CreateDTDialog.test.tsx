@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from 'store/store';
 import { initDigitalTwin } from 'model/backend/util/init';
-import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
+import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
 import { validateFiles } from 'util/fileUtils';
 import { FileState, FileType } from 'model/backend/interfaces/sharedInterfaces';
 

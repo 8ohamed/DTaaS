@@ -1,7 +1,7 @@
 import * as PipelineChecks from 'route/digitaltwins/execution/executionStatusManager';
 import * as PipelineUtils from 'route/digitaltwins/execution/executionStatusHandlers';
 import * as PipelineCore from 'model/backend/gitlab/execution/pipelineCore';
-import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
+import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
 import { PipelineStatusParams } from 'route/digitaltwins/execution/executionStatusManager';
 import indexedDBService from 'database/executionHistoryDB';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';

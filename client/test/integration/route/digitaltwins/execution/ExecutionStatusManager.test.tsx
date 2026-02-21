@@ -5,8 +5,8 @@ import {
   DigitalTwinData,
 } from 'model/backend/state/digitalTwin.slice';
 import { extractDataFromDigitalTwin } from 'model/backend/util/digitalTwinAdapter';
-import { mockDigitalTwin } from 'test/preview/__mocks__/global_mocks';
-import { previewStore as store } from 'test/preview/integration/integration.testUtil';
+import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
+import { previewStore as store } from 'test/integration/integration.testUtil';
 
 jest.useFakeTimers();
 

@@ -13,7 +13,7 @@ import executionHistoryReducer, {
 } from 'model/backend/state/executionHistory.slice';
 import { v4 as uuidv4 } from 'uuid';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { createMockDigitalTwinData } from 'test/preview/__mocks__/global_mocks';
+import { createMockDigitalTwinData } from 'test/__mocks__/global_mocks';
 import '@testing-library/jest-dom';
 
 // Mock the dependencies

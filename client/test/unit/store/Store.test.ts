@@ -22,7 +22,7 @@ import fileSlice, {
   renameFile,
 } from 'model/store/file.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
-import { mockLibraryAsset } from 'test/preview/__mocks__/global_mocks';
+import { mockLibraryAsset } from 'test/__mocks__/global_mocks';
 import cartSlice, {
   addToCart,
   clearCart,
@@ -360,7 +360,7 @@ describe('reducers', () => {
 
   describe('cart reducer', () => {
     const asset1 = mockLibraryAsset;
-    const asset2 = { ...mockLibraryAsset, path: 'path2' };
+    const asset2 = { ...mockLibraryAsset, path: 'path2' } as unknown as LibraryAsset;
 
     it('should handle addToCart', () => {
       const newState = cartSlice(initialState.cart, addToCart(asset1));
