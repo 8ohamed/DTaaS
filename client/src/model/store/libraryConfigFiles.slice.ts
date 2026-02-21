@@ -4,20 +4,24 @@ import { RootState } from 'store/store';
 
 const initialState: LibraryConfigFile[] = [];
 
+interface LibraryFileKey {
+  fileName: string;
+  assetPath: string;
+  isNew: boolean;
+  isPrivate: boolean;
+}
+
 // Helper to find library file index
 const findLibraryFileIndex = (
   state: LibraryConfigFile[],
-  fileName: string,
-  assetPath: string,
-  isNew: boolean,
-  isPrivate: boolean,
+  key: LibraryFileKey,
 ) =>
   state.findIndex(
     (file) =>
-      file.fileName === fileName &&
-      file.assetPath === assetPath &&
-      file.isNew === isNew &&
-      file.isPrivate === isPrivate,
+      file.fileName === key.fileName &&
+      file.assetPath === key.assetPath &&
+      file.isNew === key.isNew &&
+      file.isPrivate === key.isPrivate,
   );
 
 const libraryFilesSlice = createSlice({
@@ -32,13 +36,12 @@ const libraryFilesSlice = createSlice({
 
       if (!fileName || !assetPath) return;
 
-      const index = findLibraryFileIndex(
-        state,
+      const index = findLibraryFileIndex(state, {
         fileName,
         assetPath,
         isNew,
         isPrivate,
-      );
+      });
 
       if (index >= 0) {
         state[index] = {

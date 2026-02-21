@@ -21,7 +21,10 @@ import snackbarSlice from 'store/snackbar.slice';
 import fileSlice from 'model/store/file.slice';
 import libraryConfigFilesSlice from 'model/store/libraryConfigFiles.slice';
 import LibraryAsset from 'model/backend/libraryAsset';
-import { mockBackendInstance , createMockDigitalTwinData } from 'test/__mocks__/global_mocks';
+import {
+  mockBackendInstance,
+  createMockDigitalTwinData,
+} from 'test/__mocks__/global_mocks';
 import LibraryManager from 'model/backend/libraryManager';
 import { storeResetAll } from 'test/integration/integration.testUtil';
 

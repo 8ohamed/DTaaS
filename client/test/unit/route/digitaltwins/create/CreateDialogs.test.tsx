@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import CreateDialogs from 'preview/route/digitaltwins/create/CreateDialogs';
+import CreateDialogs from 'route/digitaltwins/create/CreateDialogs';
 
 jest.mock('route/digitaltwins/create/ChangeFileNameDialog', () => ({
   __esModule: true,

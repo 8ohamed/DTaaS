@@ -360,7 +360,10 @@ describe('reducers', () => {
 
   describe('cart reducer', () => {
     const asset1 = mockLibraryAsset;
-    const asset2 = { ...mockLibraryAsset, path: 'path2' } as unknown as LibraryAsset;
+    const asset2 = {
+      ...mockLibraryAsset,
+      path: 'path2',
+    } as unknown as LibraryAsset;
 
     it('should handle addToCart', () => {
       const newState = cartSlice(initialState.cart, addToCart(asset1));

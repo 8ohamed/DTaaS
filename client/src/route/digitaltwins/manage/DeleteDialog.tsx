@@ -11,6 +11,7 @@ import { createDigitalTwinFromData } from 'model/backend/util/digitalTwinAdapter
 import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 import DigitalTwin, { formatName } from 'model/backend/digitalTwin';
 import { showSnackbar } from 'store/snackbar.slice';
+import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 
 interface DeleteDialogProps {
   readonly showDialog: boolean;
@@ -42,6 +43,31 @@ const handleDelete = async (
   );
 };
 
+const handleDeleteConfirm = async (
+  digitalTwinData: DigitalTwinData | undefined,
+  name: string,
+  setShowDialog: Dispatch<SetStateAction<boolean>>,
+  onDelete: () => void,
+  dispatch: ReturnType<typeof useDispatch>,
+) => {
+  if (!digitalTwinData) return;
+  try {
+    const digitalTwinInstance = await createDigitalTwinFromData(
+      digitalTwinData,
+      name,
+    );
+    await handleDelete(digitalTwinInstance, setShowDialog, onDelete, dispatch);
+  } catch (error) {
+    dispatch(
+      showSnackbar({
+        message: `Error: Failed to delete digital twin ${name}: ${error}`,
+        severity: 'error',
+      }),
+    );
+    setShowDialog(false);
+  }
+};
+
 function DeleteDialog({
   showDialog,
   setShowDialog,
@@ -67,42 +93,15 @@ function DeleteDialog({
         </Button>
         <Button
           color="primary"
-          onClick={async () => {
-            if (digitalTwinData) {
-              try {
-                const digitalTwinInstance = await createDigitalTwinFromData(
-                  digitalTwinData,
-                  name,
-                );
-
-                if (!digitalTwinInstance) {
-                  dispatch(
-                    showSnackbar({
-                      message: `Error: Failed to initialize digital twin ${name}`,
-                      severity: 'error',
-                    }),
-                  );
-                  setShowDialog(false);
-                  return;
-                }
-
-                handleDelete(
-                  digitalTwinInstance,
-                  setShowDialog,
-                  onDelete,
-                  dispatch,
-                );
-              } catch (error) {
-                dispatch(
-                  showSnackbar({
-                    message: `Error: Failed to delete digital twin ${name}: ${error}`,
-                    severity: 'error',
-                  }),
-                );
-                setShowDialog(false);
-              }
-            }
-          }}
+          onClick={() =>
+            handleDeleteConfirm(
+              digitalTwinData,
+              name,
+              setShowDialog,
+              onDelete,
+              dispatch,
+            )
+          }
         >
           Yes
         </Button>

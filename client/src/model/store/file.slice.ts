@@ -5,6 +5,9 @@ import { getFileTypeFromExtension } from 'util/fileUtils';
 
 const initialState: FileState[] = [];
 
+const findFileIndex = (state: FileState[], name: string, isNew: boolean) =>
+  state.findIndex((file) => file.name === name && file.isNew === isNew);
+
 const filesSlice = createSlice({
   name: 'files',
   initialState,
@@ -14,9 +17,7 @@ const filesSlice = createSlice({
 
       if (!name) return;
 
-      const index = state.findIndex(
-        (file) => file.name === name && file.isNew === isNew,
-      );
+      const index = findFileIndex(state, name, isNew);
 
       if (index >= 0) {
         state[index] = {

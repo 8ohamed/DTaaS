@@ -84,5 +84,4 @@ describe('AssetCardManage', () => {
     expect(screen.getByTestId('reconfigure-dialog')).toBeInTheDocument();
     expect(screen.getByTestId('delete-dialog')).toBeInTheDocument();
   });
-
 });

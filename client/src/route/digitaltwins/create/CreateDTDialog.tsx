@@ -108,6 +108,22 @@ const resetDialogAndForm = (
   setFileType('');
 };
 
+const executeCreation = async (
+  newDigitalTwinName: string,
+  files: FileState[],
+  cartAssets: LibraryAsset[],
+  libraryFiles: LibraryConfigFile[],
+  dispatch: ReturnType<typeof useDispatch>,
+) => {
+  const digitalTwin = await initDigitalTwin(newDigitalTwinName);
+  const result = await digitalTwin.create(files, cartAssets, libraryFiles);
+  if (result.startsWith('Error')) {
+    handleError(result, dispatch);
+  } else {
+    handleSuccess(digitalTwin, dispatch, newDigitalTwinName, files);
+  }
+};
+
 const handleConfirm = async (config: CreateDTConfig) => {
   const {
     files,
@@ -126,14 +142,13 @@ const handleConfirm = async (config: CreateDTConfig) => {
     return;
   }
 
-  const digitalTwin = await initDigitalTwin(newDigitalTwinName);
-  const result = await digitalTwin.create(files, cartAssets, libraryFiles);
-
-  if (result.startsWith('Error')) {
-    handleError(result, dispatch);
-  } else {
-    handleSuccess(digitalTwin, dispatch, newDigitalTwinName, files);
-  }
+  await executeCreation(
+    newDigitalTwinName,
+    files,
+    cartAssets,
+    libraryFiles,
+    dispatch,
+  );
 
   resetDialogAndForm(dialogState);
   dialogState.setNewDigitalTwinName('');

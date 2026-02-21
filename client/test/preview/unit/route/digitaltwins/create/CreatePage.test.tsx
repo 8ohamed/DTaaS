@@ -6,7 +6,7 @@ jest.mock('preview/route/digitaltwins/editor/Editor', () => ({
   default: () => <div data-testid="editor" />,
 }));
 
-jest.mock('preview/route/digitaltwins/create/CreateDialogs', () => ({
+jest.mock('route/digitaltwins/create/CreateDialogs', () => ({
   _esModule: true,
   default: () => <div data-testid="create-dialogs" />,
 }));
