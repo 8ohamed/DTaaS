@@ -7,7 +7,7 @@ import {
   clearEntries,
 } from 'model/backend/state/executionHistory.slice';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { setupStore } from './testSetup';
+import { setupStore, createMockEntry } from './testSetup';
 
 describe('executionHistory slice - reducers (advanced)', () => {
   let store: ReturnType<typeof setupStore>['store'];
@@ -17,23 +17,18 @@ describe('executionHistory slice - reducers (advanced)', () => {
   });
 
   it('should handle removeExecutionHistoryEntry', () => {
-    const entry1 = {
-      id: '1',
-      dtName: 'test-dt',
-      pipelineId: 123,
-      timestamp: Date.now(),
-      status: ExecutionStatus.COMPLETED,
-      jobLogs: [],
-    };
-
-    const entry2 = {
-      id: '2',
-      dtName: 'test-dt',
-      pipelineId: 456,
-      timestamp: Date.now(),
-      status: ExecutionStatus.RUNNING,
-      jobLogs: [],
-    };
+    const entry1 = createMockEntry(
+      '1',
+      'test-dt',
+      123,
+      ExecutionStatus.COMPLETED,
+    );
+    const entry2 = createMockEntry(
+      '2',
+      'test-dt',
+      456,
+      ExecutionStatus.RUNNING,
+    );
 
     store.dispatch(setExecutionHistoryEntries([entry1, entry2]));
     store.dispatch(removeExecutionHistoryEntry('1'));
@@ -43,30 +38,9 @@ describe('executionHistory slice - reducers (advanced)', () => {
 
   it('should handle removeEntriesForDT', () => {
     const entries = [
-      {
-        id: '1',
-        dtName: 'dt1',
-        pipelineId: 123,
-        timestamp: Date.now(),
-        status: ExecutionStatus.COMPLETED,
-        jobLogs: [],
-      },
-      {
-        id: '2',
-        dtName: 'dt2',
-        pipelineId: 456,
-        timestamp: Date.now(),
-        status: ExecutionStatus.RUNNING,
-        jobLogs: [],
-      },
-      {
-        id: '3',
-        dtName: 'dt1',
-        pipelineId: 789,
-        timestamp: Date.now(),
-        status: ExecutionStatus.FAILED,
-        jobLogs: [],
-      },
+      createMockEntry('1', 'dt1', 123, ExecutionStatus.COMPLETED),
+      createMockEntry('2', 'dt2', 456, ExecutionStatus.RUNNING),
+      createMockEntry('3', 'dt1', 789, ExecutionStatus.FAILED),
     ];
 
     store.dispatch(setExecutionHistoryEntries(entries));
@@ -88,14 +62,7 @@ describe('executionHistory slice - reducers (advanced)', () => {
 
   it('should handle clearEntries', () => {
     const entries = [
-      {
-        id: '1',
-        dtName: 'test-dt',
-        pipelineId: 123,
-        timestamp: Date.now(),
-        status: ExecutionStatus.COMPLETED,
-        jobLogs: [],
-      },
+      createMockEntry('1', 'test-dt', 123, ExecutionStatus.COMPLETED),
     ];
 
     store.dispatch(setExecutionHistoryEntries(entries));
@@ -106,14 +73,12 @@ describe('executionHistory slice - reducers (advanced)', () => {
   });
 
   it('should not remove entries when id does not match in removeExecutionHistoryEntry', () => {
-    const entry1 = {
-      id: '1',
-      dtName: 'test-dt',
-      pipelineId: 123,
-      timestamp: Date.now(),
-      status: ExecutionStatus.COMPLETED,
-      jobLogs: [],
-    };
+    const entry1 = createMockEntry(
+      '1',
+      'test-dt',
+      123,
+      ExecutionStatus.COMPLETED,
+    );
 
     store.dispatch(addExecutionHistoryEntry(entry1));
     store.dispatch(removeExecutionHistoryEntry('non-existent-id'));

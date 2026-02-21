@@ -35,6 +35,14 @@ describe('PipelineChecks - parentPipeline', () => {
     writable: false,
   });
 
+  const paramsWithStartTime = {
+    setButtonText,
+    digitalTwin,
+    setLogButtonDisabled,
+    dispatch: store.dispatch,
+    startTime,
+  };
+
   beforeEach(() => {
     const digitalTwinData: DigitalTwinData =
       extractDataFromDigitalTwin(digitalTwin);
@@ -81,8 +89,6 @@ describe('PipelineChecks - parentPipeline', () => {
     await PipelineChecks.startPipelineStatusCheck(params);
 
     expect(checkParentPipelineStatusSpy).toHaveBeenCalled();
-
-    checkParentPipelineStatusSpy.mockRestore();
   });
 
   it('checks parent pipeline status and returns success', async () => {
@@ -104,25 +110,11 @@ describe('PipelineChecks - parentPipeline', () => {
     );
     getPipelineJobsSpy.mockResolvedValue([]);
 
-    await PipelineChecks.checkParentPipelineStatus({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch: store.dispatch,
-      startTime,
-    });
+    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
 
-    expect(checkChildPipelineStatusSpy).toHaveBeenCalledWith({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch: store.dispatch,
-      startTime,
-    });
-
-    checkChildPipelineStatusSpy.mockRestore();
-    getPipelineStatusSpy.mockRestore();
-    getPipelineJobsSpy.mockRestore();
+    expect(checkChildPipelineStatusSpy).toHaveBeenCalledWith(
+      paramsWithStartTime,
+    );
   });
 
   it('checks parent pipeline status and returns failed', async () => {
@@ -144,19 +136,9 @@ describe('PipelineChecks - parentPipeline', () => {
     );
     getPipelineJobsSpy.mockResolvedValue([]);
 
-    await PipelineChecks.checkParentPipelineStatus({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch: store.dispatch,
-      startTime,
-    });
+    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
 
     expect(checkChildPipelineStatusSpy).toHaveBeenCalled();
-
-    checkChildPipelineStatusSpy.mockRestore();
-    getPipelineStatusSpy.mockRestore();
-    getPipelineJobsSpy.mockRestore();
   });
 
   it('checks parent pipeline status and returns timeout', async () => {
@@ -172,13 +154,7 @@ describe('PipelineChecks - parentPipeline', () => {
     const hasTimedOutSpy = jest.spyOn(PipelineCore, 'hasTimedOut');
     hasTimedOutSpy.mockReturnValue(true);
 
-    await PipelineChecks.checkParentPipelineStatus({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch: store.dispatch,
-      startTime,
-    });
+    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
 
     expect(handleTimeoutSpy).toHaveBeenCalled();
   });
@@ -212,13 +188,7 @@ describe('PipelineChecks - parentPipeline', () => {
       })
       .mockImplementation(() => Promise.resolve());
 
-    await PipelineChecks.checkParentPipelineStatus({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch: store.dispatch,
-      startTime,
-    });
+    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
 
     expect(delaySpy).toHaveBeenCalled();
 

@@ -3,6 +3,8 @@ import executionHistoryReducer, {
 } from 'model/backend/state/executionHistory.slice';
 import { configureStore } from '@reduxjs/toolkit';
 import { IExecutionHistoryStorage } from 'model/backend/interfaces/sharedInterfaces';
+import { DTExecutionResult } from 'model/backend/gitlab/types/executionHistory';
+import { ExecutionStatus } from 'model/backend/interfaces/execution';
 
 export const createMockStorageService =
   (): jest.Mocked<IExecutionHistoryStorage> => ({
@@ -39,6 +41,20 @@ export const createTestStore = () =>
   });
 
 export type TestStore = ReturnType<typeof createTestStore>;
+
+export const createMockEntry = (
+  id: string,
+  dtName: string,
+  pipelineId: number,
+  status: ExecutionStatus,
+): DTExecutionResult => ({
+  id,
+  dtName,
+  pipelineId,
+  timestamp: Date.now(),
+  status,
+  jobLogs: [],
+});
 
 export const setupStore = () => {
   const store = createTestStore();

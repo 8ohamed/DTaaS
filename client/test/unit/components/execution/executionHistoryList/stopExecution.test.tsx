@@ -7,9 +7,15 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExecutionHistoryList from 'components/execution/ExecutionHistoryList';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { createTestStore, TestStore } from './testSetup';
+import {
+  createTestStore,
+  createExecutionHistoryListContext,
+  setupBeforeEach,
+  teardownAfterEach,
+  useSelectorFromStore,
+} from './testSetup';
 
 jest.mock('route/digitaltwins/execution/executionButtonHandlers');
 jest.mock('model/backend/util/digitalTwinAdapter', () => {
@@ -38,29 +44,14 @@ jest.mock('database/executionHistoryDB', () => ({
   },
 }));
 
+const ctx = createExecutionHistoryListContext();
+
 describe('ExecutionHistoryList - stop execution', () => {
-  const dtName = 'test-dt';
-  const mockOnViewLogs = jest.fn();
-  const mockDispatch = jest.fn();
-  let testStore: TestStore;
+  const { dtName, mockOnViewLogs, mockDispatch } = ctx;
 
-  beforeEach(() => {
-    (useDispatch as jest.MockedFunction<typeof useDispatch>).mockReturnValue(
-      mockDispatch,
-    );
-    testStore = createTestStore();
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockReset();
-  });
+  beforeEach(() => setupBeforeEach(ctx));
 
-  afterEach(async () => {
-    mockOnViewLogs.mockClear();
-    testStore = createTestStore([]);
-    await act(async () => {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      });
-    });
-  });
+  afterEach(async () => teardownAfterEach(ctx));
 
   it('handles stop execution correctly', async () => {
     mockDispatch.mockClear();
@@ -102,16 +93,14 @@ describe('ExecutionHistoryList - stop execution', () => {
       jobLogs: [],
     };
 
-    testStore = createTestStore([mockRunningExecution]);
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
-      (selector) => selector(testStore.getState()),
-    );
+    ctx.testStore = createTestStore([mockRunningExecution]);
+    useSelectorFromStore(ctx);
     (useDispatch as jest.MockedFunction<typeof useDispatch>).mockReturnValue(
       mockDispatch,
     );
 
     render(
-      <Provider store={testStore}>
+      <Provider store={ctx.testStore}>
         <ExecutionHistoryList dtName={dtName} onViewLogs={mockOnViewLogs} />
       </Provider>,
     );

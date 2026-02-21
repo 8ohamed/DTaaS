@@ -1,19 +1,16 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExecutionHistoryList from 'components/execution/ExecutionHistoryList';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
 import { setSelectedExecutionId } from 'model/backend/state/executionHistory.slice';
 import {
   createTestStore,
-  TestStore,
   waitForAccordionTransitions,
+  createExecutionHistoryListContext,
+  setupBeforeEach,
+  teardownAfterEach,
+  useSelectorFromStore,
 } from './testSetup';
 
 jest.mock('route/digitaltwins/execution/executionButtonHandlers');
@@ -43,29 +40,14 @@ jest.mock('database/executionHistoryDB', () => ({
   },
 }));
 
+const ctx = createExecutionHistoryListContext();
+
 describe('ExecutionHistoryList - details and dialogs', () => {
-  const dtName = 'test-dt';
-  const mockOnViewLogs = jest.fn();
-  const mockDispatch = jest.fn();
-  let testStore: TestStore;
+  const { dtName, mockOnViewLogs, mockDispatch } = ctx;
 
-  beforeEach(() => {
-    (useDispatch as jest.MockedFunction<typeof useDispatch>).mockReturnValue(
-      mockDispatch,
-    );
-    testStore = createTestStore();
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockReset();
-  });
+  beforeEach(() => setupBeforeEach(ctx));
 
-  afterEach(async () => {
-    mockOnViewLogs.mockClear();
-    testStore = createTestStore([]);
-    await act(async () => {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      });
-    });
-  });
+  afterEach(async () => teardownAfterEach(ctx));
 
   it('handles accordion details rendering with no selected execution', async () => {
     const mockExecutions = [
@@ -78,13 +60,11 @@ describe('ExecutionHistoryList - details and dialogs', () => {
         jobLogs: [],
       },
     ];
-    testStore = createTestStore(mockExecutions);
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
-      (selector) => selector(testStore.getState()),
-    );
+    ctx.testStore = createTestStore(mockExecutions);
+    useSelectorFromStore(ctx);
 
     render(
-      <Provider store={testStore}>
+      <Provider store={ctx.testStore}>
         <ExecutionHistoryList dtName={dtName} onViewLogs={mockOnViewLogs} />
       </Provider>,
     );
@@ -121,12 +101,12 @@ describe('ExecutionHistoryList - details and dialogs', () => {
       status: ExecutionStatus.COMPLETED,
       jobLogs: [],
     };
-    testStore = createTestStore([executionWithNoLogs]);
-    testStore.dispatch(setSelectedExecutionId('exec-no-logs'));
+    ctx.testStore = createTestStore([executionWithNoLogs]);
+    ctx.testStore.dispatch(setSelectedExecutionId('exec-no-logs'));
 
     (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
       (selector) => {
-        const state = testStore.getState();
+        const state = ctx.testStore.getState();
         if (selector.toString().includes('selectSelectedExecution')) {
           return executionWithNoLogs;
         }
@@ -135,7 +115,7 @@ describe('ExecutionHistoryList - details and dialogs', () => {
     );
 
     render(
-      <Provider store={testStore}>
+      <Provider store={ctx.testStore}>
         <ExecutionHistoryList dtName={dtName} onViewLogs={mockOnViewLogs} />
       </Provider>,
     );
@@ -168,13 +148,11 @@ describe('ExecutionHistoryList - details and dialogs', () => {
         jobLogs: [],
       },
     ];
-    testStore = createTestStore(mockExecutions);
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
-      (selector) => selector(testStore.getState()),
-    );
+    ctx.testStore = createTestStore(mockExecutions);
+    useSelectorFromStore(ctx);
 
     render(
-      <Provider store={testStore}>
+      <Provider store={ctx.testStore}>
         <ExecutionHistoryList dtName={dtName} onViewLogs={mockOnViewLogs} />
       </Provider>,
     );
@@ -192,7 +170,7 @@ describe('ExecutionHistoryList - details and dialogs', () => {
 
   it('handles delete dialog confirm correctly', () => {
     mockDispatch.mockClear();
-    const mockExecutions = [
+    const testMockExecutions = [
       {
         id: 'exec1',
         dtName: 'test-dt',
@@ -202,13 +180,11 @@ describe('ExecutionHistoryList - details and dialogs', () => {
         jobLogs: [],
       },
     ];
-    testStore = createTestStore(mockExecutions);
-    (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
-      (selector) => selector(testStore.getState()),
-    );
+    ctx.testStore = createTestStore(testMockExecutions);
+    useSelectorFromStore(ctx);
 
     render(
-      <Provider store={testStore}>
+      <Provider store={ctx.testStore}>
         <ExecutionHistoryList dtName={dtName} onViewLogs={mockOnViewLogs} />
       </Provider>,
     );

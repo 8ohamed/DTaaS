@@ -1,7 +1,11 @@
 import { Dispatch, SetStateAction, Fragment } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { useDispatch } from 'react-redux';
-import { FileState, FileType , LibraryConfigFile } from 'model/backend/interfaces/sharedInterfaces';
+import {
+  FileState,
+  FileType,
+  LibraryConfigFile,
+} from 'model/backend/interfaces/sharedInterfaces';
 import { getFilteredFileNames } from 'util/fileUtils';
 import DigitalTwin from 'model/backend/digitalTwin';
 import LibraryAsset from 'model/backend/libraryAsset';

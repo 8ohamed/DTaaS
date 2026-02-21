@@ -1,9 +1,5 @@
 import * as PipelineUtils from 'route/digitaltwins/execution/executionStatusHandlers';
 import {
-  setDigitalTwin,
-  DigitalTwinData,
-} from 'model/backend/state/digitalTwin.slice';
-import {
   dispatchAddExecHistoryEntry,
   previewStore,
   previewStore as store,
@@ -11,28 +7,14 @@ import {
 import { JobSchema } from '@gitbeaker/rest';
 import DigitalTwin from 'model/backend/digitalTwin';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
-import { extractDataFromDigitalTwin } from 'model/backend/util/digitalTwinAdapter';
 import { mockBackendInstance } from 'test/__mocks__/global_mocks';
+import setupDigitalTwinBeforeEach from './testSetup';
 
 describe('PipelineUtils - execution history', () => {
   let digitalTwin: DigitalTwin;
 
   beforeEach(() => {
-    digitalTwin = new DigitalTwin('mockedDTName', mockBackendInstance);
-    (mockBackendInstance.getProjectId as jest.Mock).mockReturnValue(1234);
-
-    const digitalTwinData: DigitalTwinData =
-      extractDataFromDigitalTwin(digitalTwin);
-    store.dispatch(
-      setDigitalTwin({
-        assetName: 'mockedDTName',
-        digitalTwin: digitalTwinData,
-      }),
-    );
-
-    digitalTwin.execute = jest.fn().mockImplementation(async () => {
-      digitalTwin.lastExecutionStatus = ExecutionStatus.SUCCESS;
-    });
+    digitalTwin = setupDigitalTwinBeforeEach(store);
   });
 
   afterEach(() => {

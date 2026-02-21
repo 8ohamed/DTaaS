@@ -2,6 +2,7 @@ import * as PipelineChecks from 'route/digitaltwins/execution/executionStatusMan
 import indexedDBService from 'database/executionHistoryDB';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
 import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
+import { createMockEntry } from './testSetup';
 
 jest.mock('model/backend/digitalTwin', () => ({
   DigitalTwin: jest.fn().mockImplementation(() => mockDigitalTwin),
@@ -51,14 +52,12 @@ describe('ExecutionStatusManager - handleTimeout', () => {
 
   it('handles timeout with executionId and updates IndexedDB', async () => {
     const executionId = 'test-execution-id';
-    const mockExecution = {
-      id: executionId,
-      dtName: DTName,
-      pipelineId: 123,
-      timestamp: Date.now(),
-      status: ExecutionStatus.RUNNING,
-      jobLogs: [],
-    };
+    const mockExecution = createMockEntry(
+      executionId,
+      DTName,
+      123,
+      ExecutionStatus.RUNNING,
+    );
 
     const getByIdSpy = jest
       .spyOn(indexedDBService, 'getById')

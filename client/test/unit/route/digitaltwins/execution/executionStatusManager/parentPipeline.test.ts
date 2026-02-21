@@ -1,8 +1,8 @@
 import * as PipelineChecks from 'route/digitaltwins/execution/executionStatusManager';
 import * as PipelineCore from 'model/backend/gitlab/execution/pipelineCore';
 import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
-import { PipelineStatusParams } from 'route/digitaltwins/execution/executionStatusManager';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
+import { createExecutionStatusManagerSetup } from './testSetup';
 
 jest.mock('model/backend/digitalTwin', () => ({
   DigitalTwin: jest.fn().mockImplementation(() => mockDigitalTwin),
@@ -23,20 +23,20 @@ jest.mock('model/backend/gitlab/execution/pipelineCore', () => ({
 
 jest.useFakeTimers();
 
+const setup = createExecutionStatusManagerSetup();
+
 describe('ExecutionStatusManager - parentPipeline', () => {
-  const setButtonText = jest.fn();
-  const setLogButtonDisabled = jest.fn();
-  const dispatch = jest.fn();
-  const startTime = Date.now();
-  const digitalTwin = mockDigitalTwin;
-  const params: PipelineStatusParams = {
-    setButtonText,
+  const {
+    startTime,
     digitalTwin,
-    setLogButtonDisabled,
-    dispatch,
-  };
-  const paramsWithStartTime = { ...params, startTime };
-  const pipelineId = 1;
+    params,
+    paramsWithStartTime,
+    pipelineId,
+    spyOnGetPipelineJobs,
+    spyOnHandleTimeout,
+    spyOnGetPipelineStatus,
+    spyOnCheckPipelineStatus,
+  } = setup;
 
   Object.defineProperty(AbortSignal, 'timeout', {
     value: jest.fn(),
@@ -46,19 +46,6 @@ describe('ExecutionStatusManager - parentPipeline', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-
-  const spyOnGetPipelineJobs = () =>
-    jest.spyOn(digitalTwin.backend, 'getPipelineJobs').mockResolvedValue([]);
-  const spyOnHandleTimeout = () =>
-    jest.spyOn(PipelineChecks, 'handleTimeout').mockResolvedValue(undefined);
-  const spyOnGetPipelineStatus = (status: string) =>
-    jest
-      .spyOn(digitalTwin.backend, 'getPipelineStatus')
-      .mockResolvedValue(status);
-  const spyOnCheckPipelineStatus = () =>
-    jest
-      .spyOn(PipelineChecks, 'checkChildPipelineStatus')
-      .mockResolvedValue(undefined);
 
   it('starts pipeline status check', async () => {
     const checkParentPipelineStatus = jest

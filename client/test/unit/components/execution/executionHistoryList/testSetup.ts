@@ -6,6 +6,7 @@ import digitalTwinReducer, {
 } from 'model/backend/state/digitalTwin.slice';
 import executionHistoryReducer from 'model/backend/state/executionHistory.slice';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const mockExecutions: DTExecutionResult[] = [
   {
@@ -111,4 +112,47 @@ export const waitForAccordionTransitions = async () => {
       setTimeout(() => resolve(), 300);
     });
   });
+};
+
+export interface ExecutionHistoryListContext {
+  dtName: string;
+  mockOnViewLogs: jest.Mock;
+  mockDispatch: jest.Mock;
+  testStore: TestStore;
+}
+
+export const createExecutionHistoryListContext =
+  (): ExecutionHistoryListContext => ({
+    dtName: 'test-dt',
+    mockOnViewLogs: jest.fn(),
+    mockDispatch: jest.fn(),
+    testStore: createTestStore(),
+  });
+
+export const setupBeforeEach = (ctx: ExecutionHistoryListContext): void => {
+  (useDispatch as jest.MockedFunction<typeof useDispatch>).mockReturnValue(
+    ctx.mockDispatch,
+  );
+  ctx.testStore = createTestStore();
+  (useSelector as jest.MockedFunction<typeof useSelector>).mockReset();
+};
+
+export const teardownAfterEach = async (
+  ctx: ExecutionHistoryListContext,
+): Promise<void> => {
+  ctx.mockOnViewLogs.mockClear();
+  ctx.testStore = createTestStore([]);
+  await act(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 0);
+    });
+  });
+};
+
+export const useSelectorFromStore = (
+  ctx: ExecutionHistoryListContext,
+): void => {
+  (useSelector as jest.MockedFunction<typeof useSelector>).mockImplementation(
+    (selector) => selector(ctx.testStore.getState()),
+  );
 };

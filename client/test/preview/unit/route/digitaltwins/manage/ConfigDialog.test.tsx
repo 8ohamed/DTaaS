@@ -264,7 +264,10 @@ describe('ReconfigureDialog', () => {
       expect(setShowDialog).toHaveBeenCalledWith(false);
     });
 
-    expect(createDigitalTwinFromData).toHaveBeenCalledWith(mockDigitalTwin, name);
+    expect(createDigitalTwinFromData).toHaveBeenCalledWith(
+      mockDigitalTwin,
+      name,
+    );
     expect(mockDTAssets.updateFileContent).toHaveBeenCalledTimes(3);
   });
 
