@@ -1,98 +1,49 @@
-import { Gitlab } from '@gitbeaker/core';
-import { BackendInterface } from 'model/backend/interfaces/backendInterfaces';
-import GitlabAPI from 'model/backend/gitlab/backend';
 import LibraryAsset from 'model/backend/libraryAsset';
 import LibraryManager from 'model/backend/libraryManager';
 import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 import DigitalTwin from 'model/backend/digitalTwin';
 import FileHandler from 'model/backend/fileHandler';
 import DTAssets from 'model/backend/DTAssets';
+import {
+  mockBackendAPI,
+  mockBackendInstance,
+  mockGitlabClient,
+} from 'test/__mocks__/mockBackendData';
+import {
+  mockAppURL,
+  mockURLforDT,
+  mockURLforLIB,
+  mockURLforWorkbench,
+  mockClientID,
+  mockAuthority,
+  mockRedirectURI,
+  mockLogoutRedirectURI,
+  mockGitLabScopes,
+  mockUser,
+  mockAuthState,
+} from 'test/__mocks__/mockEnvConstants';
 
-export const mockAppURL = 'https://example.com/';
-export const mockURLforDT = 'https://example.com/URL_DT';
-export const mockURLforLIB = 'https://example.com/URL_LIB';
-export const mockURLforWorkbench = 'https://example.com/URL_WORKBENCH';
-export const mockClientID = 'mockedClientID';
-export const mockAuthority = 'https://example.com/AUTHORITY';
-export const mockRedirectURI = 'https://example.com/REDIRECT_URI';
-export const mockLogoutRedirectURI = 'https://example.com/LOGOUT_REDIRECT_URI';
-export const mockGitLabScopes = 'openid profile read_user read_repository api';
+export { mockBackendAPI, mockBackendInstance, mockGitlabClient };
 
-export type mockUserType = {
-  access_token: string;
-  profile: {
-    groups: string[] | string | undefined;
-    picture: string | undefined;
-    preferred_username: string | undefined;
-    profile: string | undefined;
-  };
+export {
+  mockAppURL,
+  mockURLforDT,
+  mockURLforLIB,
+  mockURLforWorkbench,
+  mockClientID,
+  mockAuthority,
+  mockRedirectURI,
+  mockLogoutRedirectURI,
+  mockGitLabScopes,
+  mockUser,
+  mockAuthState,
 };
 
-export const mockUser: mockUserType = {
-  access_token: 'example_token',
-  profile: {
-    groups: 'group-one',
-    picture: 'pfp.jpg',
-    preferred_username: 'username',
-    profile: 'example/username',
-  },
-};
-
-export type mockAuthStateType = {
-  user?: mockUserType | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  activeNavigator?: string;
-  error?: Error;
-};
-
-export const mockAuthState: mockAuthStateType = {
-  isAuthenticated: true,
-  isLoading: false,
-  user: mockUser,
-};
-
-export type mockGitlabInstanceType = {
-  projectId: number;
-  triggerToken: string;
-  getPipelineStatus: jest.Mock;
-};
-
-export const mockGitlabClient = new Gitlab({
-  host: 'mockedHost',
-  token: 'mockedToken',
-  requesterFn: jest.fn(),
-});
-
-export const mockBackendAPI = {
-  startPipeline: jest.fn(),
-  cancelPipeline: jest.fn(),
-  createRepositoryFile: jest.fn(),
-  editRepositoryFile: jest.fn(),
-  removeRepositoryFile: jest.fn(),
-  getRepositoryFileContent: jest.fn(),
-  listRepositoryFiles: jest.fn(),
-  getGroupByName: jest.fn(),
-  listGroupProjects: jest.fn(),
-  listPipelineJobs: jest.fn(),
-  getJobLog: jest.fn(),
-  getPipelineStatus: jest.fn(),
-  getTriggerToken: jest.fn(),
-} as unknown as GitlabAPI;
-
-export const mockBackendInstance: BackendInterface = {
-  projectName: 'mockedUsername',
-  api: mockBackendAPI,
-  logs: [],
-  init: jest.fn(),
-  getProjectId: jest.fn().mockReturnValue(1),
-  getCommonProjectId: jest.fn().mockReturnValue(3),
-  getExecutionLogs: jest.fn(),
-  getPipelineJobs: jest.fn(),
-  startPipeline: jest.fn(),
-  getJobTrace: jest.fn(),
-  getPipelineStatus: jest.fn(),
-};
+export type {
+  mockUserType,
+  mockAuthStateType,
+  mockGitlabInstanceType,
+} from 'test/__mocks__/mockEnvConstants';
 
 jest.mock('util/envUtil', () => ({
   ...jest.requireActual('util/envUtil'),

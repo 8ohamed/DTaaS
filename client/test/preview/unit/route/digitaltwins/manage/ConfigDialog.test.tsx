@@ -240,14 +240,14 @@ describe('ReconfigureDialog', () => {
   });
 
   it('saves changes and calls handleFileUpdate for each modified file', async () => {
-    const handleFileUpdateSpy = jest.spyOn(Reconfigure, 'handleFileUpdate');
+    const mockDTAssets = {
+      updateFileContent: jest.fn().mockResolvedValue(undefined),
+      updateLibraryFileContent: jest.fn().mockResolvedValue(undefined),
+    };
 
     (createDigitalTwinFromData as jest.Mock).mockResolvedValue({
       DTName: 'TestDigitalTwin',
-      DTAssets: {
-        updateFileContent: jest.fn().mockResolvedValue(undefined),
-        updateLibraryFileContent: jest.fn().mockResolvedValue(undefined),
-      },
+      DTAssets: mockDTAssets,
     });
 
     const saveButton = screen.getByRole('button', { name: /Save/i });
@@ -261,8 +261,11 @@ describe('ReconfigureDialog', () => {
     });
 
     await waitFor(() => {
-      expect(handleFileUpdateSpy).toHaveBeenCalledTimes(3);
+      expect(setShowDialog).toHaveBeenCalledWith(false);
     });
+
+    expect(createDigitalTwinFromData).toHaveBeenCalledWith(mockDigitalTwin, name);
+    expect(mockDTAssets.updateFileContent).toHaveBeenCalledTimes(3);
   });
 
   it('should not return new files from modified files', () => {

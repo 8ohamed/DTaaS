@@ -3,7 +3,6 @@ import * as PipelineUtils from 'route/digitaltwins/execution/executionStatusHand
 import * as PipelineCore from 'model/backend/gitlab/execution/pipelineCore';
 import { mockDigitalTwin } from 'test/__mocks__/global_mocks';
 import { PipelineStatusParams } from 'route/digitaltwins/execution/executionStatusManager';
-import indexedDBService from 'database/executionHistoryDB';
 import { ExecutionStatus } from 'model/backend/interfaces/execution';
 
 jest.mock('model/backend/digitalTwin', () => ({
@@ -25,8 +24,7 @@ jest.mock('model/backend/gitlab/execution/pipelineCore', () => ({
 
 jest.useFakeTimers();
 
-describe('ExecutionStatusManager', () => {
-  const DTName = 'testName';
+describe('ExecutionStatusManager - childPipeline', () => {
   const setButtonText = jest.fn();
   const setLogButtonDisabled = jest.fn();
   const dispatch = jest.fn();
@@ -50,7 +48,6 @@ describe('ExecutionStatusManager', () => {
     jest.restoreAllMocks();
   });
 
-  // Helper functions to reduce code duplication
   const spyOnGetPipelineJobs = () =>
     jest.spyOn(digitalTwin.backend, 'getPipelineJobs').mockResolvedValue([]);
   const spyOnHandleTimeout = () =>
@@ -59,144 +56,6 @@ describe('ExecutionStatusManager', () => {
     jest
       .spyOn(digitalTwin.backend, 'getPipelineStatus')
       .mockResolvedValue(status);
-  const spyOnCheckPipelineStatus = () =>
-    jest
-      .spyOn(PipelineChecks, 'checkChildPipelineStatus')
-      .mockResolvedValue(undefined);
-
-  it('handles timeout', async () => {
-    await PipelineChecks.handleTimeout(
-      DTName,
-      setButtonText,
-      setLogButtonDisabled,
-      dispatch,
-    );
-
-    expect(setButtonText).toHaveBeenCalled();
-    expect(setLogButtonDisabled).toHaveBeenCalledWith(false);
-  });
-
-  it('handles timeout with executionId and updates IndexedDB', async () => {
-    const executionId = 'test-execution-id';
-    const mockExecution = {
-      id: executionId,
-      dtName: DTName,
-      pipelineId: 123,
-      timestamp: Date.now(),
-      status: ExecutionStatus.RUNNING,
-      jobLogs: [],
-    };
-
-    const getByIdSpy = jest
-      .spyOn(indexedDBService, 'getById')
-      .mockResolvedValue(mockExecution);
-    const updateSpy = jest
-      .spyOn(indexedDBService, 'update')
-      .mockResolvedValue(undefined);
-
-    await PipelineChecks.handleTimeout(
-      DTName,
-      setButtonText,
-      setLogButtonDisabled,
-      dispatch,
-      executionId,
-    );
-
-    expect(getByIdSpy).toHaveBeenCalledWith(executionId);
-    expect(updateSpy).toHaveBeenCalledWith({
-      ...mockExecution,
-      status: ExecutionStatus.TIMEOUT,
-    });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringContaining('updateExecutionStatus'),
-      }),
-    );
-    expect(setButtonText).toHaveBeenCalledWith('Start');
-    expect(setLogButtonDisabled).toHaveBeenCalledWith(false);
-
-    getByIdSpy.mockRestore();
-    updateSpy.mockRestore();
-  });
-
-  it('handles timeout with executionId when execution not found in IndexedDB', async () => {
-    const executionId = 'test-execution-id';
-
-    const getByIdSpy = jest
-      .spyOn(indexedDBService, 'getById')
-      .mockResolvedValue(null);
-    const updateSpy = jest
-      .spyOn(indexedDBService, 'update')
-      .mockResolvedValue(undefined);
-
-    await PipelineChecks.handleTimeout(
-      DTName,
-      setButtonText,
-      setLogButtonDisabled,
-      dispatch,
-      executionId,
-    );
-
-    expect(getByIdSpy).toHaveBeenCalledWith(executionId);
-    expect(updateSpy).not.toHaveBeenCalled();
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: expect.stringContaining('updateExecutionStatus'),
-      }),
-    );
-
-    getByIdSpy.mockRestore();
-    updateSpy.mockRestore();
-  });
-
-  it('starts pipeline status check', async () => {
-    const checkParentPipelineStatus = jest
-      .spyOn(PipelineChecks, 'checkParentPipelineStatus')
-      .mockResolvedValue(undefined);
-
-    jest.spyOn(globalThis.Date, 'now').mockReturnValue(startTime);
-
-    spyOnGetPipelineStatus('success');
-    // Mock getPipelineJobs to return empty array to prevent fetchJobLogs from failing
-    spyOnGetPipelineJobs();
-
-    await PipelineChecks.startPipelineStatusCheck(params);
-
-    expect(checkParentPipelineStatus).toHaveBeenCalled();
-  });
-
-  it('checks parent pipeline status and returns success', async () => {
-    const checkChildPipelineStatus = spyOnCheckPipelineStatus();
-
-    spyOnGetPipelineStatus('success');
-    spyOnGetPipelineJobs();
-
-    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
-
-    expect(checkChildPipelineStatus).toHaveBeenCalled();
-  });
-
-  it('checks parent pipeline status and returns failed', async () => {
-    const checkChildPipelineStatus = spyOnCheckPipelineStatus();
-
-    spyOnGetPipelineStatus('failed');
-    spyOnGetPipelineJobs();
-
-    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
-
-    expect(checkChildPipelineStatus).toHaveBeenCalled();
-  });
-
-  it('checks parent pipeline status and returns timeout', async () => {
-    const handleTimeout = spyOnHandleTimeout();
-
-    spyOnGetPipelineStatus('running');
-    jest.spyOn(PipelineCore, 'hasTimedOut').mockReturnValue(true);
-
-    await PipelineChecks.checkParentPipelineStatus(paramsWithStartTime);
-
-    expect(handleTimeout).toHaveBeenCalled();
-  });
 
   it('handles pipeline completion with failed status', async () => {
     spyOnGetPipelineJobs();
@@ -256,6 +115,7 @@ describe('ExecutionStatusManager', () => {
     updateExecutionStatusSpy.mockRestore();
     jest.dontMock('route/digitaltwins/execution/executionStatusHandlers');
   });
+
   it('checks child pipeline status and returns timeout', async () => {
     const handleTimeout = spyOnHandleTimeout();
     spyOnGetPipelineStatus('running');
@@ -264,66 +124,6 @@ describe('ExecutionStatusManager', () => {
     await PipelineChecks.checkChildPipelineStatus(paramsWithStartTime);
 
     expect(handleTimeout).toHaveBeenCalled();
-  });
-
-  it('checks parent pipeline status with executionId and retrieves pipelineId from execution history', async () => {
-    const executionId = 'test-execution-id';
-    const mockExecution = {
-      id: executionId,
-      pipelineId: 999,
-      dtName: DTName,
-      timestamp: Date.now(),
-      status: ExecutionStatus.RUNNING,
-      jobLogs: [],
-    };
-
-    const getExecutionHistorySpy = jest
-      .spyOn(digitalTwin, 'getExecutionHistoryById')
-      .mockResolvedValue(mockExecution);
-    const checkChildPipelineStatus = spyOnCheckPipelineStatus();
-    spyOnGetPipelineStatus('success');
-    spyOnGetPipelineJobs();
-
-    await PipelineChecks.checkParentPipelineStatus({
-      ...paramsWithStartTime,
-      executionId,
-    });
-
-    expect(getExecutionHistorySpy).toHaveBeenCalledWith(executionId);
-    expect(digitalTwin.backend.getPipelineStatus).toHaveBeenCalledWith(
-      digitalTwin.backend.getProjectId(),
-      999,
-    );
-    expect(checkChildPipelineStatus).toHaveBeenCalled();
-
-    getExecutionHistorySpy.mockRestore();
-  });
-
-  it('checks parent pipeline status with executionId and falls back to digitalTwin.pipelineId', async () => {
-    const executionId = 'test-execution-id';
-
-    const getExecutionHistorySpy = jest
-      .spyOn(digitalTwin, 'getExecutionHistoryById')
-      .mockResolvedValue(undefined);
-    const checkChildPipelineStatus = spyOnCheckPipelineStatus();
-    spyOnGetPipelineStatus('success');
-    spyOnGetPipelineJobs();
-
-    digitalTwin.pipelineId = pipelineId;
-
-    await PipelineChecks.checkParentPipelineStatus({
-      ...paramsWithStartTime,
-      executionId,
-    });
-
-    expect(getExecutionHistorySpy).toHaveBeenCalledWith(executionId);
-    expect(digitalTwin.backend.getPipelineStatus).toHaveBeenCalledWith(
-      digitalTwin.backend.getProjectId(),
-      pipelineId,
-    );
-    expect(checkChildPipelineStatus).toHaveBeenCalled();
-
-    getExecutionHistorySpy.mockRestore();
   });
 
   it('checks child pipeline status and returns running', async () => {
@@ -355,7 +155,7 @@ describe('ExecutionStatusManager', () => {
     const mockExecution = {
       id: executionId,
       pipelineId: 500,
-      dtName: DTName,
+      dtName: 'testName',
       timestamp: Date.now(),
       status: ExecutionStatus.RUNNING,
       jobLogs: [],

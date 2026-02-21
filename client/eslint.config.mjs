@@ -89,6 +89,7 @@ export default [{
             "error",
             {
                 "caughtErrorsIgnorePattern": "^_",
+                "argsIgnorePattern": "^_",
             }
         ],
         "class-methods-use-this": "off",

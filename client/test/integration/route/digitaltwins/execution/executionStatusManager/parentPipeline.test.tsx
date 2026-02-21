@@ -16,7 +16,7 @@ jest.mock('model/backend/gitlab/execution/pipelineCore', () => ({
   getPollingInterval: jest.fn(() => 5000),
 }));
 
-describe('PipelineChecks', () => {
+describe('PipelineChecks - parentPipeline', () => {
   const digitalTwin = mockDigitalTwin;
 
   const setButtonText = jest.fn();
@@ -70,7 +70,6 @@ describe('PipelineChecks', () => {
   });
 
   it('starts pipeline status check', async () => {
-    // Create spy after the module is imported
     const checkParentPipelineStatusSpy = jest.spyOn(
       PipelineChecks,
       'checkParentPipelineStatus',
@@ -204,10 +203,8 @@ describe('PipelineChecks', () => {
 
     checkParentPipelineStatusSpy
       .mockImplementationOnce(async (_params) => {
-        // Call the original function for the first call
         checkParentPipelineStatusSpy.mockRestore();
         const result = await PipelineChecks.checkParentPipelineStatus(_params);
-        // Re-mock for subsequent calls
         checkParentPipelineStatusSpy.mockImplementation(() =>
           Promise.resolve(),
         );
@@ -229,109 +226,5 @@ describe('PipelineChecks', () => {
     getPipelineStatusSpy.mockRestore();
     hasTimedOutSpy.mockRestore();
     checkParentPipelineStatusSpy.mockRestore();
-  });
-
-  it('handles pipeline completion with failed status', async () => {
-    const getPipelineJobsSpy = jest.spyOn(
-      digitalTwin.backend,
-      'getPipelineJobs',
-    );
-    getPipelineJobsSpy.mockResolvedValue([]);
-
-    const mockFetchJobLogs = jest.fn().mockResolvedValue([]);
-
-    jest.doMock('model/backend/gitlab/execution/logFetching', () => ({
-      fetchJobLogs: mockFetchJobLogs,
-    }));
-
-    await PipelineChecks.handlePipelineCompletion(
-      1,
-      digitalTwin,
-      jest.fn(),
-      jest.fn(),
-      store.dispatch,
-      'failed',
-    );
-
-    const snackbarState = store.getState().snackbar;
-
-    const expectedSnackbarState = {
-      open: true,
-      message: 'Execution failed for MockedDTName',
-      severity: 'error',
-    };
-
-    expect(snackbarState).toEqual(expectedSnackbarState);
-
-    getPipelineJobsSpy.mockRestore();
-    jest.dontMock('model/backend/gitlab/execution/logFetching');
-  });
-
-  it('checks child pipeline status and returns timeout', async () => {
-    const completeParams = {
-      setButtonText: jest.fn(),
-      digitalTwin,
-      setLogButtonDisabled: jest.fn(),
-      dispatch: jest.fn(),
-      startTime: Date.now(),
-    };
-
-    const handleTimeoutSpy = jest.spyOn(PipelineChecks, 'handleTimeout');
-    handleTimeoutSpy.mockImplementation(() => Promise.resolve());
-
-    const getPipelineStatusSpy = jest.spyOn(
-      digitalTwin.backend,
-      'getPipelineStatus',
-    );
-    getPipelineStatusSpy.mockResolvedValue('running');
-
-    const hasTimedOutSpy = jest.spyOn(PipelineCore, 'hasTimedOut');
-    hasTimedOutSpy.mockReturnValue(true);
-
-    await PipelineChecks.checkChildPipelineStatus(completeParams);
-
-    expect(handleTimeoutSpy).toHaveBeenCalled();
-
-    handleTimeoutSpy.mockRestore();
-    getPipelineStatusSpy.mockRestore();
-    hasTimedOutSpy.mockRestore();
-  });
-
-  it('checks child pipeline status and returns running', async () => {
-    const delaySpy = jest.spyOn(PipelineCore, 'delay');
-    delaySpy.mockImplementation(() => Promise.resolve());
-
-    const getPipelineStatusSpy = jest.spyOn(
-      digitalTwin.backend,
-      'getPipelineStatus',
-    );
-    getPipelineStatusSpy
-      .mockResolvedValueOnce('running')
-      .mockResolvedValue('success');
-
-    const getPipelineJobsSpy = jest.spyOn(
-      digitalTwin.backend,
-      'getPipelineJobs',
-    );
-    getPipelineJobsSpy.mockResolvedValue([]);
-
-    const hasTimedOutSpy = jest.spyOn(PipelineCore, 'hasTimedOut');
-    hasTimedOutSpy.mockReturnValueOnce(false).mockReturnValue(true);
-
-    await PipelineChecks.checkChildPipelineStatus({
-      setButtonText,
-      digitalTwin,
-      setLogButtonDisabled,
-      dispatch,
-      startTime,
-    });
-
-    expect(getPipelineStatusSpy).toHaveBeenCalled();
-    expect(delaySpy).toHaveBeenCalled();
-
-    delaySpy.mockRestore();
-    getPipelineStatusSpy.mockRestore();
-    getPipelineJobsSpy.mockRestore();
-    hasTimedOutSpy.mockRestore();
   });
 });
