@@ -13,11 +13,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'store/store';
 
 interface ChangeFileNameDialogProps {
-  open: boolean;
-  setOpenChangeFileNameDialog: Dispatch<SetStateAction<boolean>>;
-  fileName: string;
-  setFileName: Dispatch<SetStateAction<string>>;
-  setFileType: Dispatch<SetStateAction<string>>;
+  readonly open: boolean;
+  readonly setOpenChangeFileNameDialog: Dispatch<SetStateAction<boolean>>;
+  readonly fileName: string;
+  readonly setFileName: Dispatch<SetStateAction<string>>;
+  readonly setFileType: Dispatch<SetStateAction<string>>;
 }
 
 const ChangeFileNameDialog: React.FC<ChangeFileNameDialogProps> = ({

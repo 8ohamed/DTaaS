@@ -10,12 +10,12 @@ import { defaultFiles } from 'model/backend/gitlab/digitalTwinConfig/constants';
 import { FileState } from 'model/backend/interfaces/sharedInterfaces';
 
 interface ConfirmDeleteDialogProps {
-  open: boolean;
-  setOpenConfirmDeleteDialog: Dispatch<SetStateAction<boolean>>;
-  setFileName: Dispatch<SetStateAction<string>>;
-  setFileContent: Dispatch<SetStateAction<string>>;
-  setFileType: Dispatch<SetStateAction<string>>;
-  setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
+  readonly open: boolean;
+  readonly setOpenConfirmDeleteDialog: Dispatch<SetStateAction<boolean>>;
+  readonly setFileName: Dispatch<SetStateAction<string>>;
+  readonly setFileContent: Dispatch<SetStateAction<string>>;
+  readonly setFileType: Dispatch<SetStateAction<string>>;
+  readonly setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
 }
 
 // Helper to reset form state

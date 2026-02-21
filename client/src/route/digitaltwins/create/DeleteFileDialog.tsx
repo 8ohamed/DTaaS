@@ -4,11 +4,11 @@ import { deleteFile } from 'model/store/file.slice';
 import { useDispatch } from 'react-redux';
 
 interface DeleteFileDialogProps {
-  open: boolean;
-  setOpenDeleteFileDialog: Dispatch<SetStateAction<boolean>>;
-  fileName: string;
-  setFileName: Dispatch<SetStateAction<string>>;
-  setFileContent: Dispatch<SetStateAction<string>>;
+  readonly open: boolean;
+  readonly setOpenDeleteFileDialog: Dispatch<SetStateAction<boolean>>;
+  readonly fileName: string;
+  readonly setFileName: Dispatch<SetStateAction<string>>;
+  readonly setFileContent: Dispatch<SetStateAction<string>>;
 }
 
 const DeleteFileDialog: React.FC<DeleteFileDialogProps> = ({

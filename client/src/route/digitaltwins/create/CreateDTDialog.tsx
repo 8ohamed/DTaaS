@@ -30,15 +30,15 @@ import {
 } from 'model/backend/state/digitalTwin.slice';
 
 interface CreateDTDialogProps {
-  open: boolean;
-  setOpenCreateDTDialog: Dispatch<SetStateAction<boolean>>;
-  newDigitalTwinName: string;
-  setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
-  errorMessage: string;
-  setErrorMessage: Dispatch<SetStateAction<string>>;
-  setFileName: Dispatch<SetStateAction<string>>;
-  setFileContent: Dispatch<SetStateAction<string>>;
-  setFileType: Dispatch<SetStateAction<string>>;
+  readonly open: boolean;
+  readonly setOpenCreateDTDialog: Dispatch<SetStateAction<boolean>>;
+  readonly newDigitalTwinName: string;
+  readonly setNewDigitalTwinName: Dispatch<SetStateAction<string>>;
+  readonly errorMessage: string;
+  readonly setErrorMessage: Dispatch<SetStateAction<string>>;
+  readonly setFileName: Dispatch<SetStateAction<string>>;
+  readonly setFileContent: Dispatch<SetStateAction<string>>;
+  readonly setFileType: Dispatch<SetStateAction<string>>;
 }
 
 // Configuration interfaces to reduce parameter count

@@ -24,15 +24,15 @@ interface AssetCardProps {
 }
 
 interface CardButtonsContainerExecuteProps {
-  assetName: string;
-  setShowLog: Dispatch<SetStateAction<boolean>>;
+  readonly assetName: string;
+  readonly setShowLog: Dispatch<SetStateAction<boolean>>;
 }
 
 interface CardButtonsContainerLibraryProps {
-  assetName: string;
-  assetPath: string;
-  assetPrivacy: boolean;
-  setShowDetails: Dispatch<SetStateAction<boolean>>;
+  readonly assetName: string;
+  readonly assetPath: string;
+  readonly assetPrivacy: boolean;
+  readonly setShowDetails: Dispatch<SetStateAction<boolean>>;
 }
 
 const Header = styled(Typography)`
@@ -50,7 +50,10 @@ const Description = styled(Typography)`
   text-overflow: ellipsis;
 `;
 
-function CardActionAreaContainer(asset: Asset, library?: boolean) {
+function CardActionAreaContainer({
+  library,
+  ...asset
+}: Asset & { readonly library?: boolean }) {
   const digitalTwin = useSelector(
     (state: RootState) => state.digitalTwin.digitalTwin[asset.name],
   );

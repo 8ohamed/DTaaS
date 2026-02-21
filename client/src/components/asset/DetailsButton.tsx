@@ -8,7 +8,7 @@ import { selectDigitalTwinByName } from 'store/selectors/digitalTwin.selectors';
 import { getAuthority } from 'util/envUtil';
 import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 
-interface DialogButtonProps {
+interface DetailsButtonProps {
   readonly assetName: string;
   readonly assetPrivacy: boolean;
   readonly setShowDetails: Dispatch<SetStateAction<boolean>>;
@@ -47,10 +47,10 @@ function DetailsButton({
   setShowDetails,
   library,
   assetPath,
-}: DialogButtonProps) {
+}: DetailsButtonProps) {
   const digitalTwin = useSelector(selectDigitalTwinByName(assetName));
   const libraryAsset = useSelector(
-    selectAssetByPathAndPrivacy(assetPath || '', assetPrivacy),
+    selectAssetByPathAndPrivacy(assetPath ?? '', assetPrivacy),
   );
 
   const asset = library ? libraryAsset : digitalTwin;

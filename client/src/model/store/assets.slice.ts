@@ -30,7 +30,7 @@ const assetsSlice = createSlice({
     },
     deleteAsset: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(
-        (asset) => asset.path !== action.payload && asset.isPrivate === true,
+        (asset) => !(asset.path === action.payload && asset.isPrivate === true),
       );
     },
   },
