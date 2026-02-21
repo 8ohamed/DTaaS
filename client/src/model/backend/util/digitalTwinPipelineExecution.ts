@@ -53,6 +53,9 @@ export async function executeDT(self: DigitalTwin): Promise<number | null> {
   }
 }
 
+const calcPipelineId = (pipeline: string, baseId: number): number =>
+  pipeline === 'parentPipeline' ? baseId : baseId + 1;
+
 export async function resolvePipelineIdFn(
   self: DigitalTwin,
   pipeline: string,
@@ -60,14 +63,9 @@ export async function resolvePipelineIdFn(
 ): Promise<number | null> {
   if (executionId) {
     const execution = await indexedDBService.getById(executionId);
-    if (execution) {
-      return pipeline === 'parentPipeline'
-        ? execution.pipelineId
-        : execution.pipelineId + 1;
-    }
-    return null;
+    return execution ? calcPipelineId(pipeline, execution.pipelineId) : null;
   }
-  return pipeline === 'parentPipeline' ? self.pipelineId : self.pipelineId! + 1;
+  return calcPipelineId(pipeline, self.pipelineId!);
 }
 
 export async function stopDT(

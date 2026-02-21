@@ -43,13 +43,16 @@ const handleDelete = async (
   );
 };
 
-const handleDeleteConfirm = async (
-  digitalTwinData: DigitalTwinData | undefined,
-  name: string,
-  setShowDialog: Dispatch<SetStateAction<boolean>>,
-  onDelete: () => void,
-  dispatch: ReturnType<typeof useDispatch>,
-) => {
+interface DeleteConfirmConfig {
+  digitalTwinData: DigitalTwinData | undefined;
+  name: string;
+  setShowDialog: Dispatch<SetStateAction<boolean>>;
+  onDelete: () => void;
+  dispatch: ReturnType<typeof useDispatch>;
+}
+
+const handleDeleteConfirm = async (config: DeleteConfirmConfig) => {
+  const { digitalTwinData, name, setShowDialog, onDelete, dispatch } = config;
   if (!digitalTwinData) return;
   try {
     const digitalTwinInstance = await createDigitalTwinFromData(
@@ -94,13 +97,13 @@ function DeleteDialog({
         <Button
           color="primary"
           onClick={() =>
-            handleDeleteConfirm(
+            handleDeleteConfirm({
               digitalTwinData,
               name,
               setShowDialog,
               onDelete,
               dispatch,
-            )
+            })
           }
         >
           Yes

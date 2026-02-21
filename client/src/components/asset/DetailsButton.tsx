@@ -41,6 +41,19 @@ const handleDigitalTwinClick = async (
   setShowDetails(true);
 };
 
+const getAssetClickHandler = (
+  asset: LibraryAsset | DigitalTwinData,
+  assetName: string,
+  library: boolean | undefined,
+  setShowDetails: Dispatch<SetStateAction<boolean>>,
+): (() => Promise<void>) => {
+  if (library) {
+    return () => handleLibraryAssetClick(asset as LibraryAsset, setShowDetails);
+  }
+  return () =>
+    handleDigitalTwinClick(asset as DigitalTwinData, assetName, setShowDetails);
+};
+
 const handleClick = async (
   asset: LibraryAsset | DigitalTwinData | undefined,
   assetName: string,
@@ -48,15 +61,7 @@ const handleClick = async (
   setShowDetails: Dispatch<SetStateAction<boolean>>,
 ) => {
   if (!asset) return;
-  if (library) {
-    await handleLibraryAssetClick(asset as LibraryAsset, setShowDetails);
-  } else {
-    await handleDigitalTwinClick(
-      asset as DigitalTwinData,
-      assetName,
-      setShowDetails,
-    );
-  }
+  await getAssetClickHandler(asset, assetName, library, setShowDetails)();
 };
 
 function DetailsButton({

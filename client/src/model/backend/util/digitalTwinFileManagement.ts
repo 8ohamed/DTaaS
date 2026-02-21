@@ -7,6 +7,31 @@ import {
 } from 'model/backend/interfaces/sharedInterfaces';
 import { getUpdatedLibraryFile } from 'model/backend/util/digitalTwinUtils';
 
+type FolderEntry = { assetPath: string; fileNames: string[] };
+
+const processSubFolders = async (
+  self: DigitalTwin,
+  folder: string,
+): Promise<FolderEntry[]> => {
+  const subFolders = await self.DTAssets.getFolders(folder);
+  const subFolderPromises = subFolders.map(async (subFolder) => {
+    const fileNames = await self.DTAssets.getLibraryConfigFileNames(subFolder);
+    return { assetPath: subFolder, fileNames };
+  });
+  return Promise.all(subFolderPromises);
+};
+
+const processFolderEntries = async (
+  self: DigitalTwin,
+  folder: string,
+): Promise<FolderEntry[]> => {
+  if (folder.endsWith('/common')) {
+    return processSubFolders(self, folder);
+  }
+  const fileNames = await self.DTAssets.getLibraryConfigFileNames(folder);
+  return [{ assetPath: folder, fileNames }];
+};
+
 export async function getAssetFilesFn(
   self: DigitalTwin,
 ): Promise<{ assetPath: string; fileNames: string[] }[]> {
@@ -21,20 +46,9 @@ export async function getAssetFilesFn(
       (folder) => !folder.includes(excludeFolder),
     );
 
-    const folderPromises = validFolders.map(async (folder) => {
-      if (folder.endsWith('/common')) {
-        const subFolders = await self.DTAssets.getFolders(folder);
-        const subFolderPromises = subFolders.map(async (subFolder) => {
-          const fileNames =
-            await self.DTAssets.getLibraryConfigFileNames(subFolder);
-          return { assetPath: subFolder, fileNames };
-        });
-        return Promise.all(subFolderPromises);
-      }
-
-      const fileNames = await self.DTAssets.getLibraryConfigFileNames(folder);
-      return [{ assetPath: folder, fileNames }];
-    });
+    const folderPromises = validFolders.map((folder) =>
+      processFolderEntries(self, folder),
+    );
 
     const nestedResults = await Promise.all(folderPromises);
     result.push(...nestedResults.flat());

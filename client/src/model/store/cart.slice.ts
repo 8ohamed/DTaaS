@@ -15,7 +15,7 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<LibraryAsset>) => {
       if (
-        !state.assets.find(
+        !state.assets.some(
           (asset) =>
             asset.path === action.payload.path &&
             asset.isPrivate === action.payload.isPrivate,

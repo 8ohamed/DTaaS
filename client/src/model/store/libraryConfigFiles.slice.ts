@@ -24,6 +24,27 @@ const findLibraryFileIndex = (
       file.isPrivate === key.isPrivate,
   );
 
+// Helper to upsert library file
+const upsertLibraryFile = (
+  state: LibraryConfigFile[],
+  index: number,
+  payload: LibraryConfigFile,
+) => {
+  const { fileName, assetPath, isNew, isPrivate, ...rest } = payload;
+  if (index >= 0) {
+    state[index] = { ...state[index], ...rest, isModified: true, isNew };
+  } else {
+    state.push({
+      fileName,
+      assetPath,
+      ...rest,
+      isModified: false,
+      isNew,
+      isPrivate,
+    });
+  }
+};
+
 const libraryFilesSlice = createSlice({
   name: 'libraryConfigFiles',
   initialState,
@@ -32,7 +53,7 @@ const libraryFilesSlice = createSlice({
       state,
       action: PayloadAction<LibraryConfigFile>,
     ) => {
-      const { fileName, assetPath, isNew, isPrivate, ...rest } = action.payload;
+      const { fileName, assetPath, isNew, isPrivate } = action.payload;
 
       if (!fileName || !assetPath) return;
 
@@ -43,23 +64,7 @@ const libraryFilesSlice = createSlice({
         isPrivate,
       });
 
-      if (index >= 0) {
-        state[index] = {
-          ...state[index],
-          ...rest,
-          isModified: true,
-          isNew,
-        };
-      } else {
-        state.push({
-          fileName,
-          assetPath,
-          ...rest,
-          isModified: false,
-          isNew,
-          isPrivate,
-        });
-      }
+      upsertLibraryFile(state, index, action.payload);
     },
 
     removeAllFiles: (state) => {

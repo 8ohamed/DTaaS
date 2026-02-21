@@ -4,11 +4,7 @@ import { DigitalTwinData } from 'model/backend/state/digitalTwin.slice';
 import DigitalTwin from 'model/backend/digitalTwin';
 import FileHandler from 'model/backend/fileHandler';
 import DTAssets from 'model/backend/DTAssets';
-import {
-  mockBackendAPI,
-  mockBackendInstance,
-  mockGitlabClient,
-} from 'test/__mocks__/mockBackendData';
+import { mockBackendInstance } from 'test/__mocks__/mockBackendData';
 import {
   mockAppURL,
   mockURLforDT,
@@ -19,12 +15,13 @@ import {
   mockRedirectURI,
   mockLogoutRedirectURI,
   mockGitLabScopes,
-  mockUser,
-  mockAuthState,
 } from 'test/__mocks__/mockEnvConstants';
 
-export { mockBackendAPI, mockBackendInstance, mockGitlabClient };
-
+export {
+  mockBackendAPI,
+  mockBackendInstance,
+  mockGitlabClient,
+} from 'test/__mocks__/mockBackendData';
 export {
   mockAppURL,
   mockURLforDT,
@@ -37,7 +34,7 @@ export {
   mockGitLabScopes,
   mockUser,
   mockAuthState,
-};
+} from 'test/__mocks__/mockEnvConstants';
 
 export type {
   mockUserType,

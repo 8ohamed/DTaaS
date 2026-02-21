@@ -8,27 +8,27 @@ const initialState: FileState[] = [];
 const findFileIndex = (state: FileState[], name: string, isNew: boolean) =>
   state.findIndex((file) => file.name === name && file.isNew === isNew);
 
+const upsertFile = (state: FileState[], index: number, payload: FileState) => {
+  const { name, isNew, ...rest } = payload;
+  if (index >= 0) {
+    state[index] = { ...state[index], ...rest, isModified: true, isNew };
+  } else {
+    state.push({ name, ...rest, isModified: false, isNew });
+  }
+};
+
 const filesSlice = createSlice({
   name: 'files',
   initialState,
   reducers: {
     addOrUpdateFile: (state, action: PayloadAction<FileState>) => {
-      const { name, isNew, ...rest } = action.payload;
+      const { name, isNew } = action.payload;
 
       if (!name) return;
 
       const index = findFileIndex(state, name, isNew);
 
-      if (index >= 0) {
-        state[index] = {
-          ...state[index],
-          ...rest,
-          isModified: true,
-          isNew,
-        };
-      } else {
-        state.push({ name, ...rest, isModified: false, isNew });
-      }
+      upsertFile(state, index, action.payload);
     },
 
     renameFile: (
