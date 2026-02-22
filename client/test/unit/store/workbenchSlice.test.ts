@@ -4,6 +4,10 @@ import workbenchReducer, {
   fetchWorkbenchServices,
   WorkbenchServicesState,
 } from 'store/workbench.slice';
+import { configureStore } from '@reduxjs/toolkit';
+
+const createTestStore = () =>
+  configureStore({ reducer: { workbench: workbenchReducer } });
 
 describe('workbench reducer', () => {
   const initialState: WorkbenchServicesState = {
@@ -78,5 +82,50 @@ describe('workbench reducer', () => {
     const action = { type: fetchWorkbenchServices.rejected.type };
     const newState = workbenchReducer(initialState, action);
     expect(newState.status).toBe('failed');
+  });
+
+  describe('fetchWorkbenchServices thunk', () => {
+    it('dispatches fulfilled and stores services when response is valid', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockServices,
+      });
+
+      const store = createTestStore();
+      await store.dispatch(
+        fetchWorkbenchServices('http://example.com/user1/services'),
+      );
+
+      expect(store.getState().workbench.status).toBe('succeeded');
+      expect(store.getState().workbench.services).toEqual(mockServices);
+    });
+
+    it('dispatches rejected when response JSON fails Zod validation', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ desktop: { invalid: 'shape' } }),
+      });
+
+      const store = createTestStore();
+      await store.dispatch(
+        fetchWorkbenchServices('http://example.com/user1/services'),
+      );
+
+      expect(store.getState().workbench.status).toBe('failed');
+    });
+
+    it('dispatches rejected when fetch response is not ok', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        statusText: 'Not Found',
+      });
+
+      const store = createTestStore();
+      await store.dispatch(
+        fetchWorkbenchServices('http://example.com/user1/services'),
+      );
+
+      expect(store.getState().workbench.status).toBe('failed');
+    });
   });
 });

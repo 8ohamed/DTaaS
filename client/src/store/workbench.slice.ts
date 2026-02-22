@@ -1,10 +1,15 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { z } from 'zod';
 
-export interface WorkbenchService {
-  name: string;
-  description: string;
-  endpoint: string;
-}
+const WorkbenchServiceSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  endpoint: z.string(),
+});
+
+const WorkbenchServicesSchema = z.record(z.string(), WorkbenchServiceSchema);
+
+export type WorkbenchService = z.infer<typeof WorkbenchServiceSchema>;
 
 export interface WorkbenchServicesState {
   services: Record<string, WorkbenchService>;
@@ -23,7 +28,8 @@ export const fetchWorkbenchServices = createAsyncThunk(
     if (!response.ok) {
       throw new Error(`Failed to fetch services: ${response.statusText}`);
     }
-    return (await response.json()) as Record<string, WorkbenchService>;
+    const data: unknown = await response.json();
+    return WorkbenchServicesSchema.parse(data);
   },
 );
 
