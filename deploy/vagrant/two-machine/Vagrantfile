@@ -17,6 +17,8 @@ Vagrant.configure(2) do |config|
         vb.memory = 6096
         vb.cpus = 3
         vb.name = opts["name"]
+        vb.customize ["modifyvm", :id, "--pae", "on"]
+        vb.customize ["modifyvm", :id, "--ioapic", "on"]
       end
 
       node.ssh.private_key_path = "vagrant"
