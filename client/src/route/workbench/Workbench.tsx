@@ -28,7 +28,10 @@ function WorkBenchContent() {
   useEffect(() => {
     if (servicesStatus === 'idle' && username) {
       dispatch(
-        fetchWorkbenchServices({ url: `${appURL}/${username}/services`, username }),
+        fetchWorkbenchServices({
+          url: `${appURL}/${username}/services`,
+          username,
+        }),
       );
     }
   }, [servicesStatus, username, appURL, dispatch]);

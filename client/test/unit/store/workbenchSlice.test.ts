@@ -85,6 +85,26 @@ describe('workbench reducer', () => {
   });
 
   describe('fetchWorkbenchServices thunk', () => {
+    async function assertFallbackBehavior(
+      fetchMock: jest.Mock,
+      username: string,
+    ) {
+      globalThis.fetch = fetchMock;
+      const store = createTestStore();
+      await store.dispatch(
+        fetchWorkbenchServices({
+          url: `http://example.com/${username}/services`,
+          username,
+        }),
+      );
+      expect(store.getState().workbench.status).toBe('succeeded');
+      expect(store.getState().workbench.services.desktop).toBeDefined();
+      expect(store.getState().workbench.services.desktop.endpoint).toContain(
+        username,
+      );
+      return store;
+    }
+
     it('dispatches fulfilled and stores services when response is valid', async () => {
       globalThis.fetch = jest.fn().mockResolvedValue({
         ok: true,
@@ -104,62 +124,32 @@ describe('workbench reducer', () => {
     });
 
     it('uses fallback when response JSON fails Zod validation', async () => {
-      globalThis.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ desktop: { invalid: 'shape' } }),
-      });
-
-      const store = createTestStore();
-      await store.dispatch(
-        fetchWorkbenchServices({
-          url: 'http://example.com/user1/services',
-          username: 'user1',
+      await assertFallbackBehavior(
+        jest.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({ desktop: { invalid: 'shape' } }),
         }),
+        'user1',
       );
-
-      expect(store.getState().workbench.status).toBe('succeeded');
-      expect(store.getState().workbench.services.desktop).toBeDefined();
-      expect(
-        store.getState().workbench.services.desktop.endpoint,
-      ).toContain('user1');
     });
 
     it('uses fallback when fetch response is not ok', async () => {
-      globalThis.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        statusText: 'Not Found',
-      });
-
-      const store = createTestStore();
-      await store.dispatch(
-        fetchWorkbenchServices({
-          url: 'http://example.com/user1/services',
-          username: 'user1',
+      await assertFallbackBehavior(
+        jest.fn().mockResolvedValue({
+          ok: false,
+          statusText: 'Not Found',
         }),
+        'user1',
       );
-
-      expect(store.getState().workbench.status).toBe('succeeded');
-      expect(store.getState().workbench.services.desktop).toBeDefined();
-      expect(
-        store.getState().workbench.services.desktop.endpoint,
-      ).toContain('user1');
     });
 
     it('replaces username placeholder in VNC endpoint when using fallback', async () => {
-      globalThis.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
-
-      const store = createTestStore();
-      await store.dispatch(
-        fetchWorkbenchServices({
-          url: 'http://example.com/alice/services',
-          username: 'alice',
-        }),
+      const store = await assertFallbackBehavior(
+        jest.fn().mockRejectedValue(new Error('Network error')),
+        'alice',
       );
-
-      expect(store.getState().workbench.status).toBe('succeeded');
       const endpoint =
         store.getState().workbench.services.desktop?.endpoint ?? '';
-      expect(endpoint).toContain('alice');
       expect(endpoint).not.toContain('username%2F');
     });
   });

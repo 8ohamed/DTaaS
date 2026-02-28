@@ -22,7 +22,9 @@ const initialState: WorkbenchServicesState = {
   status: 'idle',
 };
 
-function getFallbackServices(username: string): Record<string, WorkbenchService> {
+function getFallbackServices(
+  username: string,
+): Record<string, WorkbenchService> {
   const fallback = JSON.parse(JSON.stringify(servicesTemplate)) as Record<
     string,
     WorkbenchService
