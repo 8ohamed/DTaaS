@@ -104,18 +104,29 @@ def reconcile(output_dir, fix):
     Compares dtaas.users.registry.json (desired) against the live
     compose.users.yml services (actual), listing users that are missing
     (registered but not provisioned), unexpected (provisioned but not
-    registered), or drifted (config changed since provisioning, via
-    .dtaas.state.json). It also reports desired-status drift: a provisioned user
-    whose live container state does not match its registry desired_status
-    (paused/stopped/running); a user intentionally stopped/paused via
-    'dtaas user stop'/'pause' is treated as being in its desired state.
+    registered), drifted (config changed since provisioning, via
+    .dtaas.state.json), or absent (provisioned -- has a compose service -- but
+    its live container is gone entirely, e.g. an interrupted 'user add'). It
+    also reports desired-status drift: a provisioned user whose live container
+    state does not match its registry desired_status (paused/stopped/running);
+    a user intentionally stopped/paused via 'dtaas user stop'/'pause' is
+    treated as being in its desired state.
+
+    If Docker is unreachable, container state (absent/desired-status) cannot be
+    verified: reconcile warns and reports only the compose-file-based
+    membership drift, never 'In sync'; --fix refuses rather than report success
+    on a deployment it could not observe.
 
     Without --fix this is read-only. With --fix, missing and drifted users are
-    reprovisioned and every provisioned user is paused/stopped/started to match
+    fully reprovisioned (every registry user's workspace files/compose entry
+    is rewritten and every non-paused/stopped user is restarted); an absent
+    user's container alone is restarted, leaving already-running users
+    untouched. Every provisioned user is then paused/stopped/started to match
     its desired_status. --fix is equivalent to running 'dtaas user add', so it
-    operates on the current directory regardless of --output-dir. 'unexpected'
-    services are never touched by --fix -- remove those deliberately with
-    'dtaas user delete'.
+    always operates on the current directory; combining --fix with an
+    --output-dir other than the current directory is rejected, since it would
+    report on one deployment but fix another. 'unexpected' services are never
+    touched by --fix -- remove those deliberately with 'dtaas user delete'.
     """
     try:
         run_reconcile(output_dir, fix)

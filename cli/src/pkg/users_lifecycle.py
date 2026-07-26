@@ -9,18 +9,22 @@ restart them), and refreshes .dtaas.state.json. Rejecting a dtaas.toml
 starting user is the caller's job (cmd_user_utils.reject_starting_users).
 """
 
+from pathlib import Path
+from python_on_whales.exceptions import DockerException
 from . import deploy, utils
-from .constants import COMPOSE_USERS_YML
+from .constants import COMPOSE_USERS_YML, REGISTRY_FILE
 from .registry import load_registry, set_desired_status
 from .state import write_state
 
 
 # pylint: disable=protected-access
-
-
-def _load_services():
-    """Return compose.users.yml's service definitions, or {} when absent."""
-    compose, err = utils.import_yaml(COMPOSE_USERS_YML)
+def _load_services(output_dir="."):
+    """Return compose.users.yml's service definitions for *output_dir*, or {}
+    when absent. Defaults to the current directory for the pause/stop/resume/
+    enforce_desired_status call sites, which always act on the current
+    directory (see reconcile_drift for the --output-dir-aware reporting call
+    site)."""
+    compose, err = utils.import_yaml(str(Path(output_dir) / COMPOSE_USERS_YML))
     utils.check_error(err)
     services = (compose or {}).get("services", {})
     return services if isinstance(services, dict) else {}
@@ -151,21 +155,67 @@ def _drifted(name, details, live):
     return name, desired, actual
 
 
-def desired_status_drift():
-    """List (user, desired, actual) where a provisioned user's live container
-    state differs from its registry desired_status.
-
-    Users with no live container are omitted -- those are the 'missing' users
-    that 'config reconcile' handles via reprovisioning, not a state mismatch.
-    Returns [] when compose.users.yml is absent.
+def _snapshot(output_dir="."):
+    """One live-state read shared by reconcile_drift, so both drift checks
+    observe the deployment at the same instant. Returns (live, registry,
+    services). *live* queries only users with actual compose services (avoid
+    docker rejecting unknown service names). *live* is {} when compose absent,
+    None when Docker unreachable. Callers must check for None before trusting
+    an empty result.
     """
-    client = deploy._users_client(".")
-    registry = load_registry()
+    registry = load_registry(str(Path(output_dir) / REGISTRY_FILE))
+    client = deploy._users_client(output_dir)
     if client is None:
-        return []
-    live = _live_states(client, list(registry))
-    drifted = (_drifted(name, details, live) for name, details in registry.items())
-    return [entry for entry in drifted if entry is not None]
+        return {}, registry, {}
+    services = _load_services(output_dir)
+    targets = [name for name in registry if name in services]
+    try:
+        live = _live_states(client, targets)
+    except DockerException:
+        live = None
+    return live, registry, services
+
+
+def reconcile_drift(output_dir="."):
+    """(status_drift, absent, docker_reachable) for 'config reconcile', from a
+    single live-state snapshot of *output_dir* (see _snapshot). status_drift
+    lists (user, desired, actual) where a provisioned user's live state differs
+    from its registry desired_status; absent lists provisioned users (with a
+    compose service) that should be running but have no live container (e.g. an
+    interrupted 'user add'). docker_reachable is False only when Docker could
+    not be queried -- then both lists are [] and the caller must not read that
+    as 'in sync' (state was never verified); it is True when state was
+    observed, including when compose.users.yml is simply absent.
+    """
+    live, registry, services = _snapshot(output_dir)
+    if live is None:
+        return [], [], False
+    drifted = [
+        entry
+        for entry in (
+            _drifted(name, details, live) for name, details in registry.items()
+        )
+        if entry is not None
+    ]
+    absent = [
+        name
+        for name, details in registry.items()
+        if name in services
+        and (details or {}).get("desired_status", "running") == "running"
+        and live.get(name) is None
+    ]
+    return drifted, absent, True
+
+
+def desired_status_drift(output_dir="."):
+    """(user, desired, actual) where live state differs from desired_status.
+    Returns [] when compose absent or Docker unreachable. *output_dir*
+    defaults to "." for enforce_desired_status's CWD-scoped --fix action;
+    'config reconcile's reporting path calls reconcile_drift directly instead,
+    so both drift categories share one snapshot.
+    """
+    drift, _, _ = reconcile_drift(output_dir)
+    return drift
 
 
 def enforce_desired_status():

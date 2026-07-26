@@ -5,7 +5,8 @@ import stat
 from pathlib import Path
 
 import pytest
-from src.pkg.build import build, main, _copy_one, _SOURCES, _DEST_ROOT, _EXCLUDE
+from src.pkg.build import build, main, _copy_one, _ignore, _SOURCES, _DEST_ROOT
+from src.pkg.constants import SECRET_FILENAMES, SECRET_SUFFIXES
 
 
 def _force_remove(func, path, _excinfo):
@@ -38,24 +39,56 @@ def test_build_each_dir_is_non_empty():
         ), f"No files found in template directory for type '{deploy_type}'"
 
 
-def test_build_excludes_companion_from_workspace_localhost():
-    """companion/ must not appear in the workspace-localhost template."""
-    companion = _DEST_ROOT / "workspace-localhost" / "companion"
+@pytest.mark.parametrize(
+    "deploy_type", ["workspace-localhost", "workspace-secure-server"]
+)
+def test_build_places_workspace_env_under_config(deploy_type):
+    """#1719 moved the workspace .env template into config/; build copies it there."""
+    dest = _DEST_ROOT / deploy_type
     assert (
-        not companion.exists()
-    ), "companion/ should be excluded from workspace-localhost"
+        dest / "config" / ".env.example"
+    ).is_file(), f"config/.env.example missing from '{deploy_type}' template"
+    assert not (
+        dest / ".env.example"
+    ).exists(), f"stale root .env.example present in '{deploy_type}' template"
 
 
-def test_build_excludes_are_complete():
-    """No excluded directory name appears at the top level of any generated template."""
-    for deploy_type in _SOURCES:
-        dest = _DEST_ROOT / deploy_type
-        for excluded in _EXCLUDE:
-            assert not (
-                dest / excluded
-            ).exists(), (
-                f"Excluded directory '{excluded}' found in '{deploy_type}' template"
-            )
+def test_ignore_excludes_locally_populated_secret_files():
+    """_ignore drops gitignored secret filenames a dev machine may have populated.
+
+    These names are never committed to git (see .gitignore) but shutil.copytree
+    cannot know that -- a locally-configured .env or TLS key sitting in a
+    _SOURCES directory must not reach the packaged wheel.
+    """
+    names = [
+        ".env",
+        "conf.server",
+        "client.js",
+        "forward-auth-conf",
+        "privkey.pem",
+        "server.key",
+        "server.crt",
+        "client.p12",
+    ]
+    assert set(_ignore("config", names)) == set(names)
+
+
+def test_ignore_keeps_example_and_unrelated_files():
+    """_ignore only matches exact secret filenames/suffixes, not their .example
+    counterparts or unrelated tracked files."""
+    names = [".env.example", "client.js.example", "conf.server.example", "tls.yml"]
+    assert _ignore("config", names) == []
+
+
+def test_build_never_copies_excluded_secret_filenames():
+    """No file matching the secret-exclusion rules appears anywhere under the
+    real, built template tree."""
+    for path in _DEST_ROOT.rglob("*"):
+        if path.is_file():
+            assert path.name not in SECRET_FILENAMES, f"Excluded file leaked: {path}"
+            assert not path.name.endswith(
+                SECRET_SUFFIXES
+            ), f"Excluded file leaked: {path}"
 
 
 def test_copy_one_raises_when_source_missing():
