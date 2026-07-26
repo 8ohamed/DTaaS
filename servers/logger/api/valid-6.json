@@ -1,0 +1,15 @@
+{
+  "sessionId": "66666666-6666-4666-8666-666666666666",
+  "userHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "timestamp": "2026-03-24T20:06:00.000Z",
+  "event": "click",
+  "page": "/measurement",
+  "element": "button",
+  "label": "Export Measurement Results",
+  "context": {
+    "measurement": {
+      "button": "export",
+      "resultCount": 4
+    }
+  }
+}

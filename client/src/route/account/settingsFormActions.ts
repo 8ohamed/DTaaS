@@ -11,6 +11,7 @@ import {
   setPrimaryDTName,
   setSecondaryDTName,
   setLoggingEnabled,
+  setRemoteLoggingEnabled,
 } from 'store/settings.slice';
 
 export interface FormValues {
@@ -24,6 +25,7 @@ export interface FormValues {
   measurementPrimaryDTName: string;
   measurementSecondaryDTName: string;
   loggingEnabled: boolean;
+  remoteLoggingEnabled: boolean;
 }
 
 interface CurrentSettings {
@@ -37,11 +39,12 @@ interface CurrentSettings {
   MEASUREMENT_PRIMARY_DT_NAME: string;
   MEASUREMENT_SECONDARY_DT_NAME: string;
   LOGGING_ENABLED: boolean;
+  REMOTE_LOGGING_ENABLED: boolean;
 }
 
 type RequiredStringField = Exclude<
   keyof FormValues,
-  'measurementTrials' | 'loggingEnabled'
+  'measurementTrials' | 'loggingEnabled' | 'remoteLoggingEnabled'
 >;
 
 const requiredStringFields: RequiredStringField[] = [
@@ -164,6 +167,9 @@ export function dispatchChangedSettings(
 
   if (formValues.loggingEnabled !== current.LOGGING_ENABLED) {
     dispatch(setLoggingEnabled(formValues.loggingEnabled));
+  }
+  if (formValues.remoteLoggingEnabled !== current.REMOTE_LOGGING_ENABLED) {
+    dispatch(setRemoteLoggingEnabled(formValues.remoteLoggingEnabled));
   }
 
   return needsRefresh;

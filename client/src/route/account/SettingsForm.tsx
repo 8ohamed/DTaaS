@@ -42,6 +42,7 @@ function createFormValues(settings: {
   primaryDTName: string;
   secondaryDTName: string;
   loggingEnabled: boolean;
+  remoteLoggingEnabled: boolean;
 }): FormValues {
   return {
     groupName: settings.GROUP_NAME,
@@ -54,6 +55,7 @@ function createFormValues(settings: {
     measurementPrimaryDTName: settings.primaryDTName,
     measurementSecondaryDTName: settings.secondaryDTName,
     loggingEnabled: settings.loggingEnabled,
+    remoteLoggingEnabled: settings.remoteLoggingEnabled,
   };
 }
 
@@ -71,6 +73,7 @@ function resetFormValues(dispatch: ReturnType<typeof useDispatch>): FormValues {
     primaryDTName: DEFAULT_MEASUREMENT.primaryDTName,
     secondaryDTName: DEFAULT_MEASUREMENT.secondaryDTName,
     loggingEnabled: DEFAULT_SETTINGS.loggingEnabled,
+    remoteLoggingEnabled: DEFAULT_SETTINGS.remoteLoggingEnabled,
   });
 }
 
@@ -90,6 +93,7 @@ interface SettingsSnapshot {
   primaryDTName: string;
   secondaryDTName: string;
   loggingEnabled: boolean;
+  remoteLoggingEnabled: boolean;
 }
 
 function saveSettings(
@@ -110,6 +114,7 @@ function saveSettings(
     MEASUREMENT_PRIMARY_DT_NAME: current.primaryDTName,
     MEASUREMENT_SECONDARY_DT_NAME: current.secondaryDTName,
     LOGGING_ENABLED: current.loggingEnabled,
+    REMOTE_LOGGING_ENABLED: current.remoteLoggingEnabled,
   });
   updateFrozenSettings();
   return { errors: {}, needsRefresh };
@@ -129,6 +134,7 @@ const SettingsForm: React.FC = () => {
     RUNNER_TAG,
     BRANCH_NAME,
     loggingEnabled: LOGGING_ENABLED,
+    remoteLoggingEnabled: REMOTE_LOGGING_ENABLED,
   } = useSelector((state: RootState) => state.settings);
   const {
     trials: MEASUREMENT_TRIALS,
@@ -149,6 +155,7 @@ const SettingsForm: React.FC = () => {
     primaryDTName: MEASUREMENT_PRIMARY_DT_NAME,
     secondaryDTName: MEASUREMENT_SECONDARY_DT_NAME,
     loggingEnabled: LOGGING_ENABLED,
+    remoteLoggingEnabled: REMOTE_LOGGING_ENABLED,
   };
   const [formValues, setFormValues] = useState<FormValues>(
     createFormValues(currentSettings),
@@ -207,7 +214,7 @@ const SettingsForm: React.FC = () => {
   };
 
   // Sync local form state when Redux state changes (e.g. external reset)
-  const reduxKey = `${GROUP_NAME}|${DT_DIRECTORY}|${COMMON_LIBRARY_PROJECT_NAME}|${RUNNER_TAG}|${BRANCH_NAME}|${MEASUREMENT_TRIALS}|${MEASUREMENT_SECONDARY_RUNNER_TAG}|${MEASUREMENT_PRIMARY_DT_NAME}|${MEASUREMENT_SECONDARY_DT_NAME}|${LOGGING_ENABLED}`;
+  const reduxKey = `${GROUP_NAME}|${DT_DIRECTORY}|${COMMON_LIBRARY_PROJECT_NAME}|${RUNNER_TAG}|${BRANCH_NAME}|${MEASUREMENT_TRIALS}|${MEASUREMENT_SECONDARY_RUNNER_TAG}|${MEASUREMENT_PRIMARY_DT_NAME}|${MEASUREMENT_SECONDARY_DT_NAME}|${LOGGING_ENABLED}|${REMOTE_LOGGING_ENABLED}`;
   const [prevReduxKey, setPrevReduxKey] = useState(reduxKey);
   if (prevReduxKey !== reduxKey) {
     setPrevReduxKey(reduxKey);
@@ -220,7 +227,10 @@ const SettingsForm: React.FC = () => {
     const { checked, id, type, value } = event.target;
     const nextValue = type === 'checkbox' ? checked : value;
 
-    setFormValues((prev) => ({ ...prev, [id]: nextValue }));
+    setFormValues((prev) => ({
+      ...prev,
+      [id]: nextValue,
+    }));
     if (fieldErrors[id]) {
       setFieldErrors((prev) => ({ ...prev, [id]: false }));
     }

@@ -14,6 +14,7 @@ import {
   setPrimaryDTName,
   setSecondaryDTName,
   setLoggingEnabled,
+  setRemoteLoggingEnabled,
 } from 'store/settings.slice';
 
 const validFormValues = (): FormValues => ({
@@ -27,6 +28,7 @@ const validFormValues = (): FormValues => ({
   measurementPrimaryDTName: 'primary',
   measurementSecondaryDTName: 'secondary',
   loggingEnabled: true,
+  remoteLoggingEnabled: true,
 });
 const validCurrent = () => ({
   GROUP_NAME: 'group',
@@ -39,6 +41,7 @@ const validCurrent = () => ({
   MEASUREMENT_PRIMARY_DT_NAME: 'primary',
   MEASUREMENT_SECONDARY_DT_NAME: 'secondary',
   LOGGING_ENABLED: true,
+  REMOTE_LOGGING_ENABLED: true,
 });
 
 describe('validateSettingsForm', () => {
@@ -48,7 +51,7 @@ describe('validateSettingsForm', () => {
 
   type RequiredStringField = Exclude<
     keyof FormValues,
-    'measurementTrials' | 'loggingEnabled'
+    'measurementTrials' | 'loggingEnabled' | 'remoteLoggingEnabled'
   >;
 
   const requiredStringFields: RequiredStringField[] = [
@@ -205,6 +208,16 @@ describe('dispatchChangedSettings', () => {
     });
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith(setLoggingEnabled(false));
+    expect(needsRefresh).toBe(false);
+  });
+
+  it('dispatches setRemoteLoggingEnabled when remoteLoggingEnabled changes', () => {
+    const { dispatch, needsRefresh } = runDispatch({
+      ...validFormValues(),
+      remoteLoggingEnabled: false,
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith(setRemoteLoggingEnabled(false));
     expect(needsRefresh).toBe(false);
   });
 

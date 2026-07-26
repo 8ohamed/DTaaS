@@ -50,7 +50,11 @@ function TestComponent() {
   );
 }
 
-const createTestStore = (userName?: string, loggingEnabled = true) =>
+const createTestStore = (
+  userName?: string,
+  loggingEnabled = true,
+  remoteLoggingEnabled = false,
+) =>
   configureStore({
     reducer: combineReducers({ auth: authSlice, settings: settingsSlice }),
     preloadedState: {
@@ -59,6 +63,7 @@ const createTestStore = (userName?: string, loggingEnabled = true) =>
         ...DEFAULT_SETTINGS,
         ...DEFAULT_MEASUREMENT,
         loggingEnabled,
+        remoteLoggingEnabled,
       },
     },
   });
@@ -107,13 +112,23 @@ describe('useLogger', () => {
   });
 
   it('does not initialize when logging is disabled', async () => {
-    const store = createTestStore('alice', false);
+    const store = createTestStore('alice', false, false);
 
     await act(async () => {
       renderWithProviders(<TestComponent />, store);
     });
 
     expect(logger.initLogger).not.toHaveBeenCalled();
+  });
+
+  it('initializes when only remote logging is enabled', async () => {
+    const store = createTestStore('alice', false, true);
+
+    renderWithProviders(<TestComponent />, store);
+
+    await waitFor(() => {
+      expect(capturedInitCall).toBe('alice');
+    });
   });
 
   it('retries initialization on a later render after failure', async () => {
@@ -164,9 +179,7 @@ describe('useLogger', () => {
     });
 
     const button = container!.querySelector('button')!;
-    act(() => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'click',
@@ -199,9 +212,7 @@ describe('useLogger', () => {
     });
 
     const input = container!.querySelector('input')!;
-    act(() => {
-      fireEvent.change(input, { target: { value: 'abc' } });
-    });
+    fireEvent.change(input, { target: { value: 'abc' } });
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -245,9 +256,7 @@ describe('useLogger', () => {
     });
 
     const textarea = container!.querySelector('textarea')!;
-    act(() => {
-      fireEvent.change(textarea, { target: { value: 'some notes' } });
-    });
+    fireEvent.change(textarea, { target: { value: 'some notes' } });
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -258,9 +267,7 @@ describe('useLogger', () => {
     });
 
     const select = container!.querySelector('select')!;
-    act(() => {
-      fireEvent.change(select, { target: { value: 'beta' } });
-    });
+    fireEvent.change(select, { target: { value: 'beta' } });
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -294,9 +301,7 @@ describe('useLogger', () => {
     });
 
     const widget = container!.querySelector('div[data-logger-element]')!;
-    act(() => {
-      fireEvent.change(widget);
-    });
+    fireEvent.change(widget);
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -328,9 +333,7 @@ describe('useLogger', () => {
     });
 
     const input = container!.querySelector('input')!;
-    act(() => {
-      fireEvent.change(input, { target: { value: 'abc' } });
-    });
+    fireEvent.change(input, { target: { value: 'abc' } });
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -363,9 +366,7 @@ describe('useLogger', () => {
     });
 
     const checkbox = container!.querySelector('input')!;
-    act(() => {
-      fireEvent.click(checkbox);
-    });
+    fireEvent.click(checkbox);
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -398,9 +399,7 @@ describe('useLogger', () => {
     });
 
     const input = container!.querySelector('input')!;
-    act(() => {
-      fireEvent.change(input, { target: { value: 'secret' } });
-    });
+    fireEvent.change(input, { target: { value: 'secret' } });
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'change',
@@ -434,9 +433,7 @@ describe('useLogger', () => {
     });
 
     const button = container!.querySelector('button')!;
-    act(() => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     expect(logger.log).toHaveBeenCalledWith({
       event: 'click',
@@ -491,10 +488,8 @@ describe('useLogger', () => {
     const [wideButton, deepButton] = Array.from(
       container!.querySelectorAll('button'),
     );
-    act(() => {
-      fireEvent.click(wideButton);
-      fireEvent.click(deepButton);
-    });
+    fireEvent.click(wideButton);
+    fireEvent.click(deepButton);
 
     const mockLog = logger.log as jest.MockedFunction<typeof logger.log>;
 
@@ -526,9 +521,7 @@ describe('useLogger', () => {
     });
 
     const input = container!.querySelector('input')!;
-    act(() => {
-      fireEvent.click(input);
-    });
+    fireEvent.click(input);
 
     expect(logger.log).not.toHaveBeenCalled();
   });
@@ -548,9 +541,7 @@ describe('useLogger', () => {
     });
 
     const button = container!.querySelector('button')!;
-    act(() => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     expect(logger.log).not.toHaveBeenCalled();
   });
@@ -565,9 +556,7 @@ describe('useLogger', () => {
     });
 
     const button = container!.querySelector('button')!;
-    act(() => {
-      fireEvent.click(button);
-    });
+    fireEvent.click(button);
 
     expect(logger.log).not.toHaveBeenCalled();
   });

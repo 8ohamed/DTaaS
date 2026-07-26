@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getEffectiveRemoteLoggingEnabled } from 'store/settings.slice';
 import { wait } from 'util/auth/Authentication';
 
 export interface ValidationType {
@@ -31,9 +32,29 @@ const urlKeys = [
 ];
 
 const isConfiguredKey = (key: string): boolean =>
-  key === 'LOGGER_URL' ? Boolean(globalThis.env.LOGGER_URL?.trim()) : true;
+  key === 'LOGGER_URL'
+    ? Boolean(globalThis.env.LOGGER_URL?.trim()) &&
+      getEffectiveRemoteLoggingEnabled()
+    : true;
 
 const configuredKeys = (keys: string[]) => keys.filter(isConfiguredKey);
+
+function trimTrailingSlashes(url: string): string {
+  let end = url.length;
+  while (end > 0 && url[end - 1] === '/') {
+    end -= 1;
+  }
+  return url.slice(0, end);
+}
+
+function appendHealthPath(url: string): string {
+  return `${trimTrailingSlashes(url)}/health`;
+}
+
+async function loggerUrlIsReachable(url: string): Promise<ValidationType> {
+  const result = await urlIsReachable(appendHealthPath(url));
+  return result.error === undefined ? { ...result, value: url } : result;
+}
 
 function getValidationPromises(): Record<string, Promise<ValidationType>> {
   return {
@@ -52,7 +73,9 @@ function getValidationPromises(): Record<string, Promise<ValidationType>> {
     ...Object.fromEntries(
       configuredKeys(urlKeys).map((key) => [
         key,
-        urlIsReachable(globalThis.env[key] ?? ''),
+        key === 'LOGGER_URL'
+          ? loggerUrlIsReachable(globalThis.env[key] ?? '')
+          : urlIsReachable(globalThis.env[key] ?? ''),
       ]),
     ),
   };

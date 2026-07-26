@@ -1,0 +1,15 @@
+{
+  "sessionId": "not-a-uuid",
+  "userHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "timestamp": "2026-03-24T20:00:00.000Z",
+  "event": "click",
+  "page": "/preview/digitaltwins",
+  "element": "button",
+  "label": "Start",
+  "context": {
+    "dt": {
+      "name": "WaterTank",
+      "button": "start"
+    }
+  }
+}

@@ -31,6 +31,12 @@ component_management:
       paths:
         - servers/lib/**
     # this is an identifier that should not be changed
+    - component_id: logger_ms
+      # this is a display name, and can be changed freely
+      name: Logger Microservice
+      paths:
+        - servers/logger/**
+    # this is an identifier that should not be changed
     - component_id: runner
       # this is a display name, and can be changed freely
       name: Execution Runner

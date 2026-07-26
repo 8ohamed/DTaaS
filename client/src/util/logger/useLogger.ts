@@ -144,41 +144,41 @@ function registerDomEventLogger(handleEvent: (event: Event) => void) {
     );
 }
 
-function useLoggerReady(loggingEnabled: boolean, username: string): boolean {
+function useLoggerReady(loggerActive: boolean, username: string): boolean {
   const initRef = useRef(false);
   const [ready, setReady] = useState(isLoggerInitialized());
 
   // Deliberately no dependency array: the username can arrive on any later
   // render, and a failed init (initRef reset) retries the same way.
   useEffect(() => {
-    if (!loggingEnabled) return;
+    if (!loggerActive) return;
     startLogger(username, initRef, () => setReady(true));
   });
 
   return ready;
 }
 
-function useLoggerNavigation(loggingEnabled: boolean, ready: boolean): void {
+function useLoggerNavigation(loggerActive: boolean, ready: boolean): void {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    if (loggingEnabled && ready) logNavigation(pathname);
-  }, [loggingEnabled, ready, pathname]);
+    if (loggerActive && ready) logNavigation(pathname);
+  }, [loggerActive, ready, pathname]);
 }
 
-function useLoggerDomEvents(loggingEnabled: boolean): void {
+function useLoggerDomEvents(loggerActive: boolean): void {
   const handleEvent = useCallback(
     (event: Event) => {
-      if (!loggingEnabled) return;
+      if (!loggerActive) return;
       logDomEvent(event);
     },
-    [loggingEnabled],
+    [loggerActive],
   );
 
   useEffect(() => {
-    if (!loggingEnabled) return undefined;
+    if (!loggerActive) return undefined;
     return registerDomEventLogger(handleEvent);
-  }, [handleEvent, loggingEnabled]);
+  }, [handleEvent, loggerActive]);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -187,9 +187,13 @@ export function useLogger(): void {
   const loggingEnabled = useSelector(
     (state: RootState) => state.settings.loggingEnabled,
   );
+  const remoteLoggingEnabled = useSelector(
+    (state: RootState) => state.settings.remoteLoggingEnabled,
+  );
   const username = getLoggerUsername(stateUsername);
+  const loggerActive = loggingEnabled || remoteLoggingEnabled;
 
-  const ready = useLoggerReady(loggingEnabled, username);
-  useLoggerNavigation(loggingEnabled, ready);
-  useLoggerDomEvents(loggingEnabled);
+  const ready = useLoggerReady(loggerActive, username);
+  useLoggerNavigation(loggerActive, ready);
+  useLoggerDomEvents(loggerActive);
 }

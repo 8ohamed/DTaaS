@@ -10,7 +10,10 @@ import { hashUsername } from 'util/logger/hashUtils';
 import { getSessionId } from 'util/logger/sessionManager';
 import { sendBeacon } from 'util/logger/beaconLogger';
 import { addLog } from 'util/logger/indexedDBLogger';
-import { getLoggingEnabled } from 'model/backend/gitlab/digitalTwinConfig/settingsUtility';
+import {
+  getLoggingEnabled,
+  getRemoteLoggingEnabled,
+} from 'model/backend/gitlab/digitalTwinConfig/settingsUtility';
 import { sanitizeLogContext } from 'util/logger/contextUtils';
 
 const PERSISTENCE_FAILURE_MESSAGE =
@@ -42,6 +45,33 @@ function warnPersistenceFailureOnce(): void {
   loggerStore?.showSnackbar(PERSISTENCE_FAILURE_MESSAGE, 'warning');
 }
 
+function persistLogEvent(logEvent: LogEvent): void {
+  addLog(logEvent).catch(() => {
+    warnPersistenceFailureOnce();
+  });
+}
+
+function sendRemoteLogEvent(logEvent: LogEvent): void {
+  if (!loggerUrl.trim()) return;
+  sendBeacon(loggerUrl, logEvent);
+}
+
+function shouldCreateLogEvent(
+  localLoggingEnabled: boolean,
+  remoteLoggingEnabled: boolean,
+): boolean {
+  return initialized && (localLoggingEnabled || remoteLoggingEnabled);
+}
+
+function dispatchLogEvent(
+  logEvent: LogEvent,
+  localLoggingEnabled: boolean,
+  remoteLoggingEnabled: boolean,
+): void {
+  if (localLoggingEnabled) persistLogEvent(logEvent);
+  if (remoteLoggingEnabled) sendRemoteLogEvent(logEvent);
+}
+
 export interface LogInput {
   readonly event: LogEventType;
   readonly page: string;
@@ -70,7 +100,10 @@ export function log({
   label,
   context = {},
 }: LogInput): LogEvent | null {
-  if (!initialized || !getLoggingEnabled()) return null;
+  const localLoggingEnabled = getLoggingEnabled();
+  const remoteLoggingEnabled = getRemoteLoggingEnabled();
+  if (!shouldCreateLogEvent(localLoggingEnabled, remoteLoggingEnabled))
+    return null;
 
   const logEvent = createLogEvent({
     sessionId,
@@ -82,12 +115,7 @@ export function log({
     label,
     context: sanitizeLogContext(context),
   });
-  addLog(logEvent).catch(() => {
-    warnPersistenceFailureOnce();
-  });
-  if (loggerUrl.trim()) {
-    sendBeacon(loggerUrl, logEvent);
-  }
+  dispatchLogEvent(logEvent, localLoggingEnabled, remoteLoggingEnabled);
   return logEvent;
 }
 

@@ -1,0 +1,12 @@
+{
+  "sessionId": "44444444-4444-4444-8444-444444444444",
+  "userHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "timestamp": "2026-03-24T20:04:00.000Z",
+  "event": "change",
+  "page": "/digitaltwins/create",
+  "element": "editor",
+  "label": "Edited modelDescription.md",
+  "context": {
+    "file": "modelDescription.md"
+  }
+}

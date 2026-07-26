@@ -1,0 +1,17 @@
+{
+  "sessionId": "55555555-5555-4555-8555-555555555555",
+  "userHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "timestamp": "2026-03-24T20:05:00.000Z",
+  "event": "dismiss",
+  "page": "/preview/digitaltwins",
+  "element": "dialog",
+  "label": "Stop Measurement?",
+  "context": {
+    "measurement": {
+      "action": "stop",
+      "completedTasks": 3,
+      "totalTasks": 8
+    },
+    "reason": "escapeKeyDown"
+  }
+}

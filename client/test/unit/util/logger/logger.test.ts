@@ -233,6 +233,15 @@ describe('logger', () => {
     };
 
     await initLogger('testuser');
+    setSettingsStore({
+      getState: () => ({
+        settings: {
+          ...DEFAULT_SETTINGS,
+          loggingEnabled: true,
+          remoteLoggingEnabled: true,
+        },
+      }),
+    });
     const event = log({
       event: 'change',
       page: '/library',
@@ -256,6 +265,15 @@ describe('logger', () => {
     };
 
     await initLogger('testuser');
+    setSettingsStore({
+      getState: () => ({
+        settings: {
+          ...DEFAULT_SETTINGS,
+          loggingEnabled: true,
+          remoteLoggingEnabled: true,
+        },
+      }),
+    });
     const event = log({
       event: 'change',
       page: '/library',
@@ -275,6 +293,62 @@ describe('logger', () => {
     await initLogger('testuser');
     log({ event: 'click', page: '/library', element: 'tab', label: 'Data' });
     expect(beaconLogger.sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it('does not send beacon when remote logging is disabled', async () => {
+    const origEnv = globalThis.env;
+    globalThis.env = {
+      ...globalThis.env,
+      LOGGER_URL: 'https://example.com/logger',
+    };
+
+    await initLogger('testuser');
+    const event = log({
+      event: 'click',
+      page: '/library',
+      element: 'tab',
+      label: 'Data',
+    });
+
+    expect(event).not.toBeNull();
+    expect(indexedDBLogger.addLog).toHaveBeenCalledWith(event);
+    expect(beaconLogger.sendBeacon).not.toHaveBeenCalled();
+
+    globalThis.env = origEnv;
+  });
+
+  it('sends beacon without writing locally when only remote logging is enabled', async () => {
+    const origEnv = globalThis.env;
+    globalThis.env = {
+      ...globalThis.env,
+      LOGGER_URL: 'https://example.com/logger',
+    };
+    setSettingsStore({
+      getState: () => ({
+        settings: {
+          ...DEFAULT_SETTINGS,
+          loggingEnabled: false,
+          remoteLoggingEnabled: true,
+        },
+      }),
+    });
+
+    await initLogger('testuser');
+    const event = log({
+      event: 'click',
+      page: '/library',
+      element: 'tab',
+      label: 'Data',
+    });
+
+    expect(event).not.toBeNull();
+    expect(indexedDBLogger.addLog).not.toHaveBeenCalled();
+    expect(beaconLogger.sendBeacon).toHaveBeenCalledWith(
+      'https://example.com/logger',
+      event,
+    );
+
+    globalThis.env = origEnv;
   });
 
   it('does not send beacon when logger URL is blank', async () => {

@@ -13,6 +13,7 @@ type SettingsState = {
   RUNNER_TAG: string;
   BRANCH_NAME: string;
   loggingEnabled: boolean;
+  remoteLoggingEnabled: boolean;
 };
 
 type StoreReader = { getState: () => { settings: SettingsState } };
@@ -48,4 +49,8 @@ export const getBranchName = (): string =>
 export const getLoggingEnabled = (): boolean => {
   if (!_store) return false;
   return _store.getState().settings.loggingEnabled;
+};
+export const getRemoteLoggingEnabled = (): boolean => {
+  if (!_store) return false;
+  return _store.getState().settings.remoteLoggingEnabled;
 };
