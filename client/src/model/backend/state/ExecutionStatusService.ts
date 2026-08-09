@@ -11,6 +11,7 @@ import {
   isCanceledStatus,
   isSuccessStatus,
 } from 'model/backend/gitlab/execution/statusChecking';
+import { ExecutionStatus } from 'model/backend/interfaces/execution';
 
 class ExecutionStatusService {
   private static async resolveChildPipeline(
@@ -18,26 +19,78 @@ class ExecutionStatusService {
     backend: BackendInterface,
     executionStorage: IExecutionHistoryStorage,
   ): Promise<DTExecutionResult | null> {
-    const childPipelineId = execution.pipelineId + 1;
     try {
-      const childPipelineStatus = await backend.getPipelineStatus(
-        backend.getProjectId(),
-        childPipelineId,
+      return await ExecutionStatusService.updateFinishedChildPipeline(
+        execution,
+        backend,
+        executionStorage,
       );
-      if (!isFinishedStatus(childPipelineStatus)) {
-        return null;
-      }
-      const updated = {
-        ...execution,
-        status: mapGitlabStatusToExecutionStatus(childPipelineStatus),
-        jobLogs: await fetchJobLogs(backend, childPipelineId),
-      };
-      await executionStorage.update(updated);
-      return updated;
     } catch {
-      // Child pipeline might not exist yet or other error - silently ignore
+      return ExecutionStatusService.markExecutionError(
+        execution,
+        executionStorage,
+      );
+    }
+  }
+
+  private static async markExecutionError(
+    execution: DTExecutionResult,
+    executionStorage: IExecutionHistoryStorage,
+  ): Promise<DTExecutionResult> {
+    const updated = { ...execution, status: ExecutionStatus.ERROR };
+    await executionStorage.update(updated);
+    return updated;
+  }
+
+  private static async updateFinishedChildPipeline(
+    execution: DTExecutionResult,
+    backend: BackendInterface,
+    executionStorage: IExecutionHistoryStorage,
+  ): Promise<DTExecutionResult | null> {
+    const childPipeline = await ExecutionStatusService.getFinishedChildPipeline(
+      backend,
+      execution.pipelineId,
+    );
+    if (childPipeline == null) {
       return null;
     }
+    const updated = await ExecutionStatusService.createChildPipelineResult(
+      execution,
+      backend,
+      childPipeline.pipelineId,
+      childPipeline.status,
+    );
+    await executionStorage.update(updated);
+    return updated;
+  }
+
+  private static async getFinishedChildPipeline(
+    backend: BackendInterface,
+    parentPipelineId: number,
+  ): Promise<{ pipelineId: number; status: string } | null> {
+    const projectId = backend.getProjectId();
+    const pipelineId = await backend.getChildPipelineId(
+      projectId,
+      parentPipelineId,
+    );
+    if (pipelineId == null) {
+      return null;
+    }
+    const status = await backend.getPipelineStatus(projectId, pipelineId);
+    return isFinishedStatus(status) ? { pipelineId, status } : null;
+  }
+
+  private static async createChildPipelineResult(
+    execution: DTExecutionResult,
+    backend: BackendInterface,
+    childPipelineId: number,
+    childPipelineStatus: string,
+  ): Promise<DTExecutionResult> {
+    return {
+      ...execution,
+      status: mapGitlabStatusToExecutionStatus(childPipelineStatus),
+      jobLogs: await fetchJobLogs(backend, childPipelineId),
+    };
   }
 
   private static async processExecution(
@@ -58,6 +111,20 @@ class ExecutionStatusService {
       backend.getProjectId(),
       execution.pipelineId,
     );
+    return ExecutionStatusService.processParentStatus(
+      execution,
+      backend,
+      executionStorage,
+      parentPipelineStatus,
+    );
+  }
+
+  private static async processParentStatus(
+    execution: DTExecutionResult,
+    backend: BackendInterface,
+    executionStorage: IExecutionHistoryStorage,
+    parentPipelineStatus: string,
+  ): Promise<DTExecutionResult | null> {
     if (
       isFailureStatus(parentPipelineStatus) ||
       isCanceledStatus(parentPipelineStatus)
@@ -84,9 +151,6 @@ class ExecutionStatusService {
     digitalTwinsData: { [key: string]: DigitalTwinData },
     executionStorage: IExecutionHistoryStorage,
   ): Promise<DTExecutionResult[]> {
-    if (runningExecutions.length === 0) {
-      return [];
-    }
     const results = await Promise.all(
       runningExecutions.map(async (execution) => {
         try {
@@ -96,7 +160,10 @@ class ExecutionStatusService {
             executionStorage,
           );
         } catch {
-          return null;
+          return ExecutionStatusService.markExecutionError(
+            execution,
+            executionStorage,
+          );
         }
       }),
     );

@@ -6,23 +6,48 @@ import { BackendInterface } from 'model/backend/interfaces/backendInterfaces';
 import createGitlabInstance from 'model/backend/gitlab/gitlabFactory';
 import {
   delay,
-  getChildPipelineId,
+  hasTimedOut,
 } from 'model/backend/gitlab/execution/pipelineCore';
 import pollPipelineStatus from 'model/backend/gitlab/execution/pipelinePolling';
-import { isFailureStatus } from 'model/backend/gitlab/execution/statusChecking';
-import { BETWEEN_TRIAL_DELAY } from 'model/backend/gitlab/measure/constants';
+import {
+  isCanceledStatus,
+  isFailureStatus,
+} from 'model/backend/gitlab/execution/statusChecking';
+import {
+  BETWEEN_TRIAL_DELAY,
+  PIPELINE_ACCEPTANCE_DELAY,
+} from 'model/backend/gitlab/measure/constants';
+import {
+  MAX_EXECUTION_TIME,
+  PIPELINE_POLL_INTERVAL,
+} from 'model/backend/gitlab/digitalTwinConfig/constants';
 import {
   Configuration,
   ExecutionResult,
   Trial,
   Execution,
   measurementState,
+  getStore,
   getDefaultConfig,
 } from 'model/backend/gitlab/measure/measurement.execution';
 
 const abortOptions = {
   shouldAbort: () => measurementState.shouldStopPipelines,
 };
+
+function showCancellationWarning(pipelineId: number): void {
+  getStore().showSnackbar(
+    `Pipeline ${pipelineId} could not be cancelled and may still be running.`,
+    'warning',
+  );
+}
+
+function showChildDiscoveryWarning(parentPipelineId: number): void {
+  getStore().showSnackbar(
+    `Child pipeline for ${parentPipelineId} could not be verified and may still be running.`,
+    'warning',
+  );
+}
 
 function updatePipelineStatus(
   pipelineId: number,
@@ -38,17 +63,87 @@ function updatePipelineStatus(
   }
 }
 
+async function cancelPipelineAndChild(
+  backend: BackendInterface,
+  pipelineId: number,
+): Promise<void> {
+  const projectId = backend.getProjectId();
+  try {
+    await backend.api.cancelPipeline(projectId, pipelineId);
+  } catch {
+    showCancellationWarning(pipelineId);
+  }
+  const childPipelineId = await getChildPipelineIdForCancellation(
+    backend,
+    projectId,
+    pipelineId,
+  );
+  await cancelChildPipeline(backend, projectId, childPipelineId);
+}
+
+async function getChildPipelineIdForCancellation(
+  backend: BackendInterface,
+  projectId: ReturnType<BackendInterface['getProjectId']>,
+  pipelineId: number,
+): Promise<number | null> {
+  const knownChildPipelineId = measurementState.activePipelines.find(
+    (pipeline) => pipeline.pipelineId === pipelineId,
+  )?.childPipelineId;
+  if (knownChildPipelineId != null) return knownChildPipelineId;
+  try {
+    return await backend.getChildPipelineId(projectId, pipelineId);
+  } catch {
+    showChildDiscoveryWarning(pipelineId);
+    return null;
+  }
+}
+
+async function cancelChildPipeline(
+  backend: BackendInterface,
+  projectId: ReturnType<BackendInterface['getProjectId']>,
+  childPipelineId: number | null,
+): Promise<void> {
+  if (childPipelineId != null) {
+    await backend.api
+      .cancelPipeline(projectId, childPipelineId)
+      .catch(() => showCancellationWarning(childPipelineId));
+  }
+}
+
 export async function cancelActivePipelines(): Promise<void> {
   for (const { backend, pipelineId } of measurementState.activePipelines) {
-    try {
-      const projectId = backend.getProjectId();
-      await backend.api.cancelPipeline(projectId, pipelineId);
-      await backend.api
-        .cancelPipeline(projectId, getChildPipelineId(pipelineId))
-        .catch(() => {});
-    } catch {
-      // continue with others
+    await cancelPipelineAndChild(backend, pipelineId);
+  }
+}
+
+async function resolveChildPipelineId(
+  backend: BackendInterface,
+  parentPipelineId: number,
+  startTime: number,
+): Promise<number> {
+  const projectId = backend.getProjectId();
+  for (;;) {
+    const childPipelineId = await backend.getChildPipelineId(
+      projectId,
+      parentPipelineId,
+    );
+    if (childPipelineId != null) {
+      return childPipelineId;
     }
+    ensurePipelineCanContinue(parentPipelineId, startTime);
+    await delay(PIPELINE_POLL_INTERVAL);
+  }
+}
+
+function ensurePipelineCanContinue(
+  pipelineId: number,
+  startTime: number,
+): void {
+  if (abortOptions.shouldAbort()) {
+    throw new Error(`Pipeline ${pipelineId} stopped by user.`);
+  }
+  if (hasTimedOut(startTime, MAX_EXECUTION_TIME)) {
+    throw new Error(`Pipeline ${pipelineId} timed out.`);
   }
 }
 
@@ -59,10 +154,42 @@ async function initializeBackend(): Promise<BackendInterface> {
     throw new Error('Not authenticated. Missing access_token or username.');
   }
 
-  const authority = getAuthority();
-  const backend = createGitlabInstance(username, oauthToken, authority);
+  const backend = createGitlabInstance(username, oauthToken, getAuthority());
   await backend.init();
   return backend;
+}
+
+async function startPipeline(
+  digitalTwin: DigitalTwin,
+  dtName: string,
+  config: Configuration,
+): Promise<number> {
+  const pipelineId = await digitalTwin.execute(
+    true,
+    config['Runner tag'],
+    config['Branch name'],
+  );
+  if (!pipelineId) {
+    throw new Error(`Failed to start pipeline for ${dtName}.`);
+  }
+  return pipelineId;
+}
+
+async function retryRejectedPipeline(
+  digitalTwin: DigitalTwin,
+  dtName: string,
+  backend: BackendInterface,
+  config: Configuration,
+  pipelineId: number,
+): Promise<number> {
+  await delay(PIPELINE_ACCEPTANCE_DELAY);
+  const projectId = backend.getProjectId();
+  const status = await backend
+    .getPipelineStatus(projectId, pipelineId)
+    .catch(() => 'pending');
+  if (!isFailureStatus(status) && !isCanceledStatus(status)) return pipelineId;
+  await backend.api.cancelPipeline(projectId, pipelineId).catch(() => {});
+  return startPipeline(digitalTwin, dtName, config);
 }
 
 async function consumeStatusGenerator(
@@ -87,15 +214,14 @@ async function executeDigitalTwinPipeline(
   measurementState.currentTrialExecutionIndex += 1;
 
   const digitalTwin = new DigitalTwin(dtName, backend);
-  const pipelineId = await digitalTwin.execute(
-    true,
-    config['Runner tag'],
-    config['Branch name'],
+  const startedPipelineId = await startPipeline(digitalTwin, dtName, config);
+  const pipelineId = await retryRejectedPipeline(
+    digitalTwin,
+    dtName,
+    backend,
+    config,
+    startedPipelineId,
   );
-
-  if (!pipelineId) {
-    throw new Error(`Failed to start pipeline for ${dtName}.`);
-  }
 
   measurementState.currentTrialMinPipelineId ??= pipelineId;
 
@@ -122,7 +248,18 @@ async function executeDigitalTwinPipeline(
   await consumeStatusGenerator(parentGenerator, pipelineId, 'parent');
   await delay(pipelineTransitionDelayMs);
 
-  const childPipelineId = getChildPipelineId(pipelineId);
+  const childPipelineId = await resolveChildPipelineId(
+    backend,
+    pipelineId,
+    startTime,
+  );
+  const activePipelineEntry = measurementState.activePipelines.find(
+    (pipeline) => pipeline.pipelineId === pipelineId,
+  );
+  if (activePipelineEntry) {
+    activePipelineEntry.childPipelineId = childPipelineId;
+  }
+
   const childGenerator = pollPipelineStatus(
     backend,
     childPipelineId,

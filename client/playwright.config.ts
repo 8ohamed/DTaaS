@@ -26,6 +26,7 @@ export default defineConfig({
   retries: process.env.CI ? 0 : 1, // Disable retries on Github actions for now as setup always fails
   timeout: 90 * 1000, // 90 seconds per test
   globalTimeout: 25 * 60 * 1000,
+  // Run pipeline tests in parallel to test concurrent GitLab requests.
   workers: 3,
   testDir: './test/e2e/tests',
   testMatch: '**/*.test.ts',
@@ -64,14 +65,10 @@ export default defineConfig({
       testMatch: '**/*.setup.ts',
       use: { browserName: 'chromium' },
     },
-    // Pipeline-dependent tests run sequentially to avoid GitLab runner contention.
-    // Declared before chromium/firefox so the scheduler grants it a worker slot
-    // up front instead of it being starved by the uncapped chromium/firefox jobs
-    // -- saves about a minute
+    // Pipeline tests use the shared worker pool to test concurrent requests.
     {
       name: 'chromium-sequential',
       testMatch: /ConcurrentExecution|DigitalTwins|Measurement/,
-      workers: 1,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',
@@ -101,13 +98,13 @@ export default defineConfig({
     {
       name: 'firefox-sequential',
       testMatch: /ConcurrentExecution|DigitalTwins|Measurement/,
-      workers: 1,
       use: {
         ...devices['Desktop Firefox'],
         storageState: 'playwright/.auth/user.json',
       },
       timeout: 2 * 60 * 1000,
-      dependencies: ['chromium-sequential'],
+      // Start after setup so Firefox can run pipeline tests alongside Chromium.
+      dependencies: ['setup'],
     },
   ],
   globalSetup: 'test/e2e/setup/global.setup.ts',

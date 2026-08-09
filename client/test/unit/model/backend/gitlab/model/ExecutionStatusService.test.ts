@@ -34,10 +34,11 @@ describe('ExecutionStatusService', () => {
 
     (mockBackendInstance.getProjectId as jest.Mock).mockReturnValue(123);
     (mockBackendInstance.getPipelineStatus as jest.Mock).mockReset();
+    (mockBackendInstance.getChildPipelineId as jest.Mock).mockReset();
 
-    (createDigitalTwinFromData as jest.Mock).mockResolvedValue({
-      backend: mockBackendInstance,
-    });
+    (createDigitalTwinFromData as jest.Mock)
+      .mockReset()
+      .mockResolvedValue({ backend: mockBackendInstance });
     (logFetching.fetchJobLogs as jest.Mock).mockResolvedValue([
       { jobName: 'test-job', log: 'test log' },
     ]);
@@ -109,6 +110,9 @@ describe('ExecutionStatusService', () => {
       (mockBackendInstance.getPipelineStatus as jest.Mock)
         .mockResolvedValueOnce('success')
         .mockResolvedValueOnce('success');
+      (mockBackendInstance.getChildPipelineId as jest.Mock).mockResolvedValue(
+        101,
+      );
 
       const result = await ExecutionStatusService.checkRunningExecutions(
         [mockExecution],
@@ -126,6 +130,9 @@ describe('ExecutionStatusService', () => {
       (mockBackendInstance.getPipelineStatus as jest.Mock)
         .mockResolvedValueOnce('success')
         .mockResolvedValueOnce('failed');
+      (mockBackendInstance.getChildPipelineId as jest.Mock).mockResolvedValue(
+        101,
+      );
 
       const result = await ExecutionStatusService.checkRunningExecutions(
         [mockExecution],
@@ -165,9 +172,12 @@ describe('ExecutionStatusService', () => {
     });
 
     it('should handle child pipeline not existing yet', async () => {
-      (mockBackendInstance.getPipelineStatus as jest.Mock)
-        .mockResolvedValueOnce('success')
-        .mockRejectedValueOnce(new Error('Pipeline not found'));
+      (mockBackendInstance.getPipelineStatus as jest.Mock).mockResolvedValue(
+        'success',
+      );
+      (mockBackendInstance.getChildPipelineId as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await ExecutionStatusService.checkRunningExecutions(
         [mockExecution],
@@ -177,6 +187,28 @@ describe('ExecutionStatusService', () => {
 
       expect(result).toHaveLength(0);
       expect(mockExecutionStorage.update).not.toHaveBeenCalled();
+    });
+
+    it('marks history as ERROR when child discovery fails', async () => {
+      (mockBackendInstance.getPipelineStatus as jest.Mock).mockResolvedValue(
+        'success',
+      );
+      (mockBackendInstance.getChildPipelineId as jest.Mock).mockRejectedValue(
+        new Error('Network error'),
+      );
+
+      const result = await ExecutionStatusService.checkRunningExecutions(
+        [mockExecution],
+        mockDigitalTwinsData,
+        mockExecutionStorage,
+      );
+
+      expect(result).toEqual([
+        expect.objectContaining({ status: ExecutionStatus.ERROR }),
+      ]);
+      expect(mockExecutionStorage.update).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.ERROR }),
+      );
     });
 
     it('should handle errors gracefully and continue processing', async () => {
@@ -208,14 +240,27 @@ describe('ExecutionStatusService', () => {
         mockExecutionStorage,
       );
 
-      expect(result).toHaveLength(1);
-      expect(result[0].dtName).toBe('test-dt');
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            dtName: 'failing-dt',
+            status: ExecutionStatus.ERROR,
+          }),
+          expect.objectContaining({
+            dtName: 'test-dt',
+            status: ExecutionStatus.FAILED,
+          }),
+        ]),
+      );
     });
 
-    it('should check child pipeline with incremented id', async () => {
+    it('uses the bridge-derived child ID for status checks and logs', async () => {
       (mockBackendInstance.getPipelineStatus as jest.Mock)
         .mockResolvedValueOnce('success')
         .mockResolvedValueOnce('success');
+      (mockBackendInstance.getChildPipelineId as jest.Mock).mockResolvedValue(
+        102,
+      );
 
       await ExecutionStatusService.checkRunningExecutions(
         [mockExecution],
@@ -223,7 +268,19 @@ describe('ExecutionStatusService', () => {
         mockExecutionStorage,
       );
 
+      expect(mockBackendInstance.getChildPipelineId).toHaveBeenCalledWith(
+        123,
+        100,
+      );
       expect(mockBackendInstance.getPipelineStatus).toHaveBeenCalledWith(
+        123,
+        102,
+      );
+      expect(logFetching.fetchJobLogs).toHaveBeenCalledWith(
+        mockBackendInstance,
+        102,
+      );
+      expect(mockBackendInstance.getPipelineStatus).not.toHaveBeenCalledWith(
         123,
         101,
       );

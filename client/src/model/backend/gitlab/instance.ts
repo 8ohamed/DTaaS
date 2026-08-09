@@ -135,6 +135,25 @@ export class GitlabInstance implements BackendInterface {
     return this.api.getPipelineStatus(projectId, pipelineId);
   }
 
+  public async getChildPipelineId(
+    projectId: ProjectId,
+    parentPipelineId: number,
+  ): Promise<number | null> {
+    const bridges = await this.api.getPipelineBridges(
+      projectId,
+      parentPipelineId,
+    );
+    const childPipelineIds = bridges.flatMap((bridge) =>
+      bridge.downstreamPipelineId == null ? [] : [bridge.downstreamPipelineId],
+    );
+    if (childPipelineIds.length > 1) {
+      throw new Error(
+        `Parent pipeline ${parentPipelineId} has multiple downstream pipelines.`,
+      );
+    }
+    return childPipelineIds[0] ?? null;
+  }
+
   public getTriggerToken(): string | null {
     return this.triggerToken;
   }
