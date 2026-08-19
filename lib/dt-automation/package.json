@@ -1,0 +1,95 @@
+{
+  "name": "@into-cps-association/dt-automation",
+  "version": "0.1.0",
+  "description": "The DTaaS's data and business-logic layer including representations of digital twins, communication with data/execution managers like GitLab, file, pipeline and execution operations and maintaining Redux state for UI. Sits between the consuming application and DTaaS backend.",
+  "contributors": [
+    "Enok Maj",
+    "Marcus Neble Jensen",
+    "Vanessa Scherma"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --project tsconfig.json --emitDeclarationOnly && tsc-alias --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "prep": "qlty fmt && yarn format && yarn syntax && qlty check --fix && yarn build && yarn test:unit",
+    "clean": "node --eval \"const { rmSync } = require('node:fs'); ['coverage', 'dist'].forEach((path) => rmSync(path, { recursive: true, force: true }))\"",
+    "format": "prettier --write \"*.ts\" \"src/**/*.ts\" \"test/**/*.{ts,tsx}\"",
+    "syntax": "eslint . --fix",
+    "test:unit": "jest --config jest.config.json test/unit --setupFilesAfterEnv ./test/unit/jest.setup.ts",
+    "smoke:package": "yarn build && node scripts/smoke-package.mjs",
+    "validate:package": "yarn typecheck && yarn smoke:package"
+  },
+  "// smoke:package": "Builds the package, then verifies that a clean consumer can install and import its tarball.",
+  "// validate:package": "Type-checks the source before running the package smoke test.",
+  "// tsup": "Builds the package's ESM JavaScript file at dist/index.js.",
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "keywords": [
+    "dtaas",
+    "data model",
+    "business logic",
+    "digital twins"
+  ],
+  "author": "",
+  "homepage": "https://into-cps-association.github.io/DTaaS/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/INTO-CPS-Association/DTaaS.git"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "packageManager": "yarn@1.22.22",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "type": "module",
+  "// tsc-alias": "The declaration build rewrites internal src/* aliases to portable relative imports for npm consumers.",
+  "resolutions": {
+    "esbuild": "0.28.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/parser": "^8.64.0",
+    "eslint": "9.39.5",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.15.4",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^17.7.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "redux": "5.0.1",
+    "prettier": "3.9.5",
+    "tsc-alias": "1.9.1",
+    "ts-jest": "29.4.11",
+    "tsup": "8.5.1",
+    "typescript": "6.0.3"
+  },
+  "dependencies": {
+    "@gitbeaker/rest": "^43.8.0",
+    "@reduxjs/toolkit": "^2.10.1",
+    "uuid": "^14.0.1"
+  }
+}

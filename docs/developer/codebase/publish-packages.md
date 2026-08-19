@@ -15,6 +15,8 @@ Notable package roots:
 
 - `servers/lib` -> `@into-cps-association/libms`
 - `servers/execution/runner` -> `@into-cps-association/runner`
+- `servers/logger` -> `@into-cps-association/logger-ms`
+- `lib/dt-automation` -> `@into-cps-association/dt-automation`
 - `client` -> web client package metadata and build artefacts
 
 Typical publish prerequisites:
@@ -23,6 +25,9 @@ Typical publish prerequisites:
 2. Build output generation.
 3. Test execution.
 4. Registry authentication.
+
+The `dt-automation` workflow validates tarball contents and a clean consumer
+install before publishing.
 
 ## Private Registry Workflow (Development)
 
@@ -39,8 +44,9 @@ npm set registry http://localhost:4873/
 
 ## Docker Artifacts
 
-The repository includes dedicated Docker build configurations under `docker/`
-and deployment-level compose definitions under `deploy/`.
+The repository includes dedicated Docker build configurations under `developer/`,
+`client/`, `servers/lib/`, `servers/logger/`, and `deploy/dtaas/docker/`.
+Deployment-level compose definitions are under `deploy/`.
 
 When changing runtime dependencies, validate image builds and scenario startup
 paths before release tagging.
