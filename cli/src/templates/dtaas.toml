@@ -1,7 +1,7 @@
 # This is the config for DTaaS CLI
 
 name="Digital Twin as a Service (DTaaS)"
-version="2.0.0"
+version="2.1.0"
 owner="The INTO-CPS-Association"
 git-repo="https://github.com/into-cps-association/DTaaS.git"
 
@@ -66,6 +66,20 @@ username="username3"
 email="username3@intocps.org"
 groups=["default","dtaas","beta-testers","load-balanced-tier1"]
 load_balance=true
+
+# --- GitLab user provisioning for users added with 'dtaas user add' --------
+# When enabled, 'user add' creates each new user's GitLab account and a
+# Personal Access Token, using an admin provisioning PAT. Disabled
+# by default; existing deployments are unaffected unless this is set.
+# The provisioning PAT must be able to create users (an admin token), so it is
+# deliberately NOT a key here: export it as DTAAS_GITLAB_PAT instead and keep
+# the token off disk entirely. A [gitlab].pat key is still honoured if you add
+# one, this file is generated mode 0600 and gitignored, but the
+# environment variable is preferred.
+[gitlab]
+provision=false
+api_url="https://gitlab.com"
+ssl_verify=true
 
 # Installation-specific configuration
 # For non-localhost deployments, the starting usernames (USERNAME1,

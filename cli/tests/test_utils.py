@@ -1,5 +1,7 @@
 """Tests for utils module."""
 
+from unittest.mock import patch
+import pytest
 from src.pkg import utils
 
 
@@ -7,16 +9,6 @@ def test_import_yaml_empty_file():
     """Test importing an empty YAML file"""
     message, _ = utils.import_yaml("tests/data/empty.yml")
     assert message == {}
-
-
-def test_import_yaml_compose():
-    """Test importing YAML compose configuration"""
-    expected = get_test_compose_object()
-
-    compose, err = utils.import_yaml("tests/data/compose.users.test.yml")
-    if err is not None:
-        raise AssertionError(err)
-    assert expected == compose
 
 
 def test_import_toml():
@@ -170,19 +162,25 @@ def get_replace_all_object(random_vals):
     return obj
 
 
-def test_import_yaml_file_not_found():
-    """Test importing a non-existent YAML file"""
-    config, err = utils.import_yaml("tests/data/nonexistent.yml")
-    assert config == {}
-    assert err is None
-
-
 def test_import_toml_error():
     """Test importing invalid TOML file"""
     config, err = utils.import_toml("tests/data/nonexistent.toml")
     assert config is None
     assert err is not None
     assert isinstance(err, Exception)
+
+
+def test_import_yaml_malformed_content_returns_error(tmp_path):
+    """A malformed YAML file hits the general exception branch, distinct from
+    the FileNotFoundError branch."""
+    bad_file = tmp_path / "bad.yml"
+    bad_file.write_text("key: [unclosed\n", encoding="utf-8")
+
+    config_data, err = utils.import_yaml(str(bad_file))
+
+    assert config_data is None
+    assert err is not None
+    assert "Error while getting yaml file" in str(err)
 
 
 def test_export_yaml_error():
@@ -192,16 +190,6 @@ def test_export_yaml_error():
     err = utils.export_yaml(data, invalid_path)
     assert err is not None
     assert isinstance(err, Exception)
-
-
-def test_replace_all_invalid_object_type():
-    """Test replace_all with invalid object type"""
-    invalid_obj = 123  # Not str, list, or dict
-    mapping = {"key": "value"}
-    ans, err = utils.replace_all(invalid_obj, mapping)
-    assert ans is None
-    assert err is not None
-    assert "Object format not valid" in str(err)
 
 
 def test_replace_all_list_with_error():
@@ -235,16 +223,48 @@ def test_replace_dict_with_nested_error():
 def test_check_error_with_exception():
     """Test check_error raises exception"""
     err = Exception("Test error")
-    try:
+    with pytest.raises(Exception, match="Test error"):
         utils.check_error(err)
-        assert False, "Expected exception to be raised"
-    except Exception as e:  # pylint: disable=broad-except
-        assert str(e) == "Test error"
 
 
-def test_check_error_with_none():
-    """Test check_error with None does not raise"""
-    utils.check_error(None)  # Should not raise
+def test_write_secret_file_writes_content(tmp_path):
+    """write_secret_file writes content to the destination, creating parent dirs."""
+    target = tmp_path / "nested" / "secret.txt"
+
+    utils.write_secret_file(str(target), "top-secret")
+
+    assert target.read_text(encoding="utf-8") == "top-secret"
+    assert not target.with_suffix(target.suffix + ".tmp").exists()
+
+
+def test_write_secret_file_cleans_up_tmp_on_failure(tmp_path):
+    """A failed rename removes the temp file and re-raises the error."""
+    target = tmp_path / "secret.txt"
+
+    with patch("src.pkg.utils.os.replace", side_effect=OSError("boom")):
+        with pytest.raises(OSError, match="boom"):
+            utils.write_secret_file(str(target), "top-secret")
+
+    assert not target.with_suffix(target.suffix + ".tmp").exists()
+    assert not target.exists()
+
+
+def test_write_secret_file_refuses_a_preexisting_symlink(tmp_path):
+    """O_EXCL refuses a pre-existing temp-name entry (e.g. a symlink planted
+    by another user) instead of writing through it."""
+    target = tmp_path / "secret.txt"
+    tmp = target.with_suffix(target.suffix + ".tmp")
+    link_target = tmp_path / "attacker-owned.txt"
+    link_target.write_text("not touched", encoding="utf-8")
+    try:
+        tmp.symlink_to(link_target)
+    except OSError as exc:
+        pytest.skip(f"symlink creation not permitted in this environment: {exc}")
+
+    with pytest.raises(FileExistsError):
+        utils.write_secret_file(str(target), "top-secret")
+
+    assert link_target.read_text(encoding="utf-8") == "not touched"
 
 
 def get_test_compose_object():

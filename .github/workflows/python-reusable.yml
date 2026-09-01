@@ -90,6 +90,13 @@ jobs:
       - name: Install dev dependencies
         run: poetry install --with dev
 
+      - name: Run project build script
+        if: inputs.run-build-script
+        env:
+          SRC_DIR: ${{ inputs.src-directory }}
+        run: poetry run python -m "$SRC_DIR.pkg.build"
+        shell: bash
+
       - name: Check Docker availability (Linux)
         if: runner.os == 'Linux'
         run: docker --version
@@ -163,14 +170,42 @@ jobs:
       - name: Install runtime dependencies
         run: poetry install --only main
 
-      - name: Build deploy templates
+      - name: Run project build script
         if: inputs.run-build-script
-        run: python -m src.pkg.build
+        env:
+          SRC_DIR: ${{ inputs.src-directory }}
+        run: poetry run python -m "$SRC_DIR.pkg.build"
 
       - name: Build wheel and sdist
         run: |
           poetry build --format wheel
           poetry build --format sdist
+
+      - name: Reject direct-URL dependencies in built metadata
+        run: |
+          set -o pipefail
+
+          wheel_metadata=$(unzip -p dist/*.whl '*.dist-info/METADATA')
+          if [ -z "$wheel_metadata" ]; then
+            echo "::error::Failed to extract wheel METADATA (empty output)."
+            exit 1
+          fi
+          if echo "$wheel_metadata" | grep -E '^Requires-Dist:.*@ (file|git\+|https?)://'; then
+            echo "::error::Built wheel has a direct-URL dependency (shown above)."
+            exit 1
+          fi
+
+          sdist_metadata=$(tar -xOzf dist/*.tar.gz --wildcards '*/PKG-INFO')
+          if [ -z "$sdist_metadata" ]; then
+            echo "::error::Failed to extract sdist PKG-INFO (empty output)."
+            exit 1
+          fi
+          if echo "$sdist_metadata" | grep -E '^Requires-Dist:.*@ (file|git\+|https?)://'; then
+            echo "::error::Built sdist has a direct-URL dependency (shown above)."
+            exit 1
+          fi
+
+          echo "OK: no direct-URL dependencies in wheel or sdist metadata."
 
       - name: Upload dist artefacts
         # v7.0.1

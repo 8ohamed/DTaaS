@@ -1,0 +1,38 @@
+name: gitlab-common library
+
+'on':
+  push:
+    branches:
+      - 'feature/distributed-demo'
+    paths:
+      - 'lib/gitlab_common/**'
+      - '.github/workflows/gitlab-common.yml'
+      - '.github/workflows/python-reusable.yml'
+  pull_request:
+    paths:
+      - 'lib/gitlab_common/**'
+      - '.github/workflows/gitlab-common.yml'
+      - '.github/workflows/python-reusable.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-gitlab-common:
+    name: Test gitlab-common
+    permissions:
+      contents: read
+      actions: write
+    uses: ./.github/workflows/python-reusable.yml
+    with:
+      working-directory: lib/gitlab_common
+      src-directory: gitlab_common
+      tests-directory: tests
+      coverage-file: lib/gitlab_common/coverage.xml
+      artifact-name: gitlab-common
+      run-pyright: true

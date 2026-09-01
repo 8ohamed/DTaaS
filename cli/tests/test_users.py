@@ -18,6 +18,7 @@ def mock_config():
     )
     mock.get_tls.return_value = (False, None)
     mock.get_set_limits.return_value = (True, None)
+    mock.get_gitlab_provision.return_value = (False, None)
     return mock
 
 

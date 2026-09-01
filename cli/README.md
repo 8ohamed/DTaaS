@@ -109,7 +109,7 @@ Manage `dtaas.toml` independently of the rest of the project. This is the
 first step in the setup workflow generate a template, fill it in, then
 validate before running any other command.
 
-**Generate a fresh template**
+#### Generate a fresh template
 
 ```bash
 dtaas config generate
@@ -118,7 +118,7 @@ dtaas config generate
 This writes `dtaas.toml` and a sample `users.csv` (bulk input for
 `dtaas user add --file`) into the target directory.
 
-**Validate an existing file**
+#### Validate an existing file
 
 ```bash
 dtaas config validate
@@ -153,7 +153,10 @@ and `[workspace-secure-server]`; each is checked only when its section is
 present.
 
 `path` and `certs-src` are checked against the local filesystem, run
-`validate` on the deployment host.
+`validate` on the deployment host. If a check fails with a permission error
+(e.g. `certs-src` points under `/etc/letsencrypt`, which is root-owned), the
+CLI says so and prints the elevated form to re-run:
+`sudo -E env PATH="$PATH" dtaas <command>`.
 
 The `[common.resources]` limit fields (`cpus`, `pids_limit`, `mem_limit`,
 `shm_size`) are required only when `set_limits` is `true` (the default). With
@@ -187,7 +190,7 @@ dtaas deployment generate --type <name>
 | `--output-dir PATH` | `.` | Target directory (must already exist) |
 | `--force` | off | Overwrite files that already exist |
 
-**Available types**
+#### Available types
 
 | `--type` | Deployment scenario | Support level |
 |---|---|---|
@@ -568,6 +571,7 @@ the CLI-owned `dtaas.users.registry.json`
 | `--email TEXT` | — | Email for `USERNAME` (enables forward-auth routing) |
 | `--group TEXT` | `additional` | Group tag for `USERNAME`; repeat the flag for multiple groups, e.g. `--group dtaas --group testers` |
 | `--load-balance / --no-load-balance` | on | Mark `USERNAME` for load balancing |
+| `--password TEXT` | — | GitLab password for `USERNAME`; only used when GitLab provisioning is enabled (see below). Visible in shell history and the process list, prefer the `users.csv` `password` column (`chmod 600` it) or the interactive prompt for non-interactive/scripted use |
 
 Add a single user:
 
@@ -607,6 +611,101 @@ users are left untouched, so adding one user never recreates the rest. A
 username already declared in `dtaas.toml`'s `[[users]]` or the registry is
 **skipped with a warning**: it is never added twice or overwritten.
 
+#### GitLab provisioning (optional)
+
+When `[gitlab].provision = true` in `dtaas.toml` (off by default), `user add`
+also creates each new user's GitLab account and a Personal Access Token:
+
+```toml
+[gitlab]
+provision = true
+api_url = "https://gitlab.example.com"
+```
+
+The provisioning token must be able to create users (an admin token), so it is
+read from the `DTAAS_GITLAB_PAT` environment variable and is deliberately not
+part of the generated template:
+
+```bash
+export DTAAS_GITLAB_PAT="glpat-xxxxxxxxxxxxxxxxxxxx"
+```
+
+A `[gitlab].pat` key is still honoured if you prefer to set one, and takes
+precedence over the environment variable.
+
+For a self-hosted GitLab behind an internal CA, set `[gitlab].ssl_verify` to
+the CA bundle's path instead of leaving TLS verification on the system trust
+store (which will fail) or disabling it outright:
+
+```toml
+[gitlab]
+ssl_verify = "/etc/ssl/certs/corp-ca.pem"  # or true (default) / false
+```
+
+Setting `ssl_verify = false` disables certificate verification for all
+GitLab API traffic, including the admin PAT and every provisioned user's
+password, the CLI prints a warning whenever it is disabled.
+
+Each provisioned user needs an initial GitLab password, supplied via
+`--password` (prompted interactively with hidden input if omitted, for a
+single-user add) or via a `password` column in `users.csv`:
+
+```csv
+username,email,groups,load_balance,password
+alice,alice@intocps.org,additional,true,S3cur3-p4ss
+bob,bob@intocps.org,additional;beta-testers,false,An0ther-p4ss
+```
+
+`--password` is visible in shell history and to anyone on the host who can
+list processes (`ps`), since the OS records a command's actual arguments.
+For a single interactive add, omit it and use the hidden prompt instead. For
+scripted/non-interactive use, prefer the CSV `password` column above and
+`chmod 600 users.csv` -- the CLI does not manage permissions on a CSV path
+you supply yourself (it only chmods the sample file `dtaas config generate`
+writes).
+
+Re-running `dtaas user add` with the same `USERNAME`/CSV row and password
+retries GitLab provisioning for an already-registered user without touching
+their container e.g. after account creation failed outright (a network
+blip), or after the account was created but PAT issuance failed. The CLI
+tracks the GitLab account id it created internally, so a retry reissues a
+token directly rather than asking GitLab to create the account again (whose
+"already exists" response can't be trusted to mean "created by this CLI"
+it could just as easily be someone else's account with the same name).
+
+A retry only fills gaps: once a token has been issued for a user, the CLI
+records that in the registry (`gitlab_pat_issued`) and a further re-run
+issues no second token, reporting the user as skipped. This keeps a repeated
+`user add` (the natural response to a partial failure) from minting a fresh
+365-day PAT on every pass and leaving the earlier ones live but untracked. If
+a token really is lost or revoked, issue a replacement from GitLab directly.
+
+The password is used only to create the GitLab account and is never written
+to `dtaas.users.registry.json`, `.dtaas.state.json`, or logs. A user missing
+a password when provisioning is enabled has their GitLab step skipped with a
+warning. An already-existing GitLab account is left with its current
+password and issued no new token, and is reported with an explicit warning
+(its credentials were not created by this run and are unknown to it) rather
+than as an unremarkable success. Container provisioning is unaffected by any
+GitLab outcome containers are already up by the time GitLab provisioning
+runs but a GitLab failure (a missing/skipped password does not count) now
+makes the `user add` command itself exit non-zero, so scripts can detect it.
+
+Issued tokens are saved to `gitlab_user_tokens.json` as `{"username":
+"token"}`, in the current working directory alongside `dtaas.toml` and
+`dtaas.users.registry.json` (not fixed to `--output-dir`). Each `user add`
+run merges newly issued tokens into the existing file rather than
+overwriting it, so it accumulates one token per user across runs (the
+`gitlab_pat_issued` guard above stops a second token being issued for a user
+who already has one). If a user's entry is ever replaced, the previous value
+is kept under a `"<username> (superseded <timestamp>)"` key and a warning is
+printed the old token is still live on GitLab and needs manual revocation.
+Treat the file as a credential store, the same as `dtaas.toml`.
+
+`dtaas.toml`, `users.csv`, and `gitlab_user_tokens.json` are all written mode
+`0600` and are gitignored, since each can hold a credential: the provisioning
+PAT, user passwords, and the issued user tokens respectively.
+
 A `USERNAME` or `--file` is required (not both) — a bare `dtaas user add`
 with neither is rejected rather than silently reprovisioning the whole
 registry. To (re)provision **every** registry user at once (e.g. after
@@ -622,6 +721,7 @@ instead.
 | `--email TEXT` | — | Email for `USERNAME` (enables forward-auth routing) |
 | `--group TEXT` | `additional` | Group tag for `USERNAME`; repeat the flag for multiple groups, e.g. `--group dtaas --group testers` |
 | `--load-balance / --no-load-balance` | on | Mark `USERNAME` for load balancing |
+| `--password TEXT` | — | GitLab password for `USERNAME`; only used when GitLab provisioning is enabled (see below). Visible in shell history and the process list, prefer the `users.csv` `password` column (`chmod 600` it) or the interactive prompt for non-interactive/scripted use |
 
 For each username the CLI checks whether `files/<username>/` already exists.
 If not, a new directory with the correct structure is created from
@@ -636,7 +736,7 @@ the container for the change to take effect:
 docker compose --env-file config/.env up -d --force-recreate traefik-forward-auth
 ```
 
-**Resource limits (optional)**
+#### Resource limits (optional)
 
 By default each user container is created with the CPU, memory, process, and
 shared-memory caps from `[common.resources]`, merged in from the
@@ -868,7 +968,7 @@ Optional ○
 
 Not-Used —
 
-**Server deployments**
+#### Server deployments
 
 | Section | `localhost` | `insecure-server` | `secure-server` | `secure-server-gitlab` |
 |---|:---:|:---:|:---:|:---:|
@@ -882,7 +982,7 @@ Not-Used —
 | `[secure-server]` | — | — | ✅ | — |
 | `[secure-server-gitlab]` | — | — | — | ✅ |
 
-**Workspace deployments**
+#### Workspace deployments
 
 | Section | `workspace-localhost` | `workspace-secure-server` |
 |---|:---:|:---:|

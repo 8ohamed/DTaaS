@@ -1,13 +1,15 @@
 [tool.poetry]
 name = "dtaas-services"
-version = "0.4.3"
+version = "0.4.4"
 description = "DTaaS Platform Services Management CLI"
 authors = ["Mohamed Abdulkarim"]
 license = "INTO-CPS-Association"
 readme = "README.md"
 packages = [{include = "dtaas_services"}]
 include = [
-    { path = "dtaas_services/templates/**/*", format = ["sdist", "wheel"] }
+    { path = "dtaas_services/templates/**/*", format = ["sdist", "wheel"] },
+    { path = "dtaas_services/gitlab_common/**/*", format = ["sdist", "wheel"] },
+    { path = "dtaas_services/py.typed", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.dependencies]
@@ -19,7 +21,6 @@ rich = "^15.0.0"
 httpx = "^0.28.1"
 python-gitlab = "^8.3.0"
 psycopg = {version = "^3.3", extras = ["binary"]}
-dtaas-gitlab = {path = "../../../lib", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"

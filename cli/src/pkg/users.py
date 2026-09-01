@@ -16,6 +16,11 @@ from .users_compose import (
     setup_compose_structure,
     stop_user_containers,
 )
+from .users_gitlab import (
+    gitlab_candidates,
+    gitlab_failure_exc,
+    provision_gitlab_users,
+)
 from .users_utils import (
     add_conf_server_entry,
     remove_conf_server_entry,
@@ -125,13 +130,10 @@ def _resolve_start_only(start_only, skip_start):
 def _provision_users(ctx, start_only=None):
     """Create workspace files, compose entries, and forward-auth rules.
 
-    Authorising each user in the forward-auth config happens before starting
-    their container: writing conf.server first means a later 'compose up'
-    failure cannot leave the forward-auth rules stale. Every registry user is
-    written to compose (so the file stays complete), but only *start_only*
-    users are started -- None starts all, a list starts just those. A user
-    paused or stopped via 'dtaas user pause'/'stop' is never started --
-    see _skip_start_users.
+    conf.server is written before starting containers, so a later 'compose
+    up' failure can't leave forward-auth rules stale. Every registry user is
+    written to compose, but only *start_only* users are started (None = all);
+    a paused/stopped user is never started see _skip_start_users.
     """
     create_user_files(ctx.user_list, ctx.config["path"] + "/files")
     err = add_users_to_compose(ctx.user_list, ctx.compose, ctx.config)
@@ -144,22 +146,36 @@ def _provision_users(ctx, start_only=None):
     )
 
 
-def add_users(config_obj, start_only=None):
+def _add_users(config_obj, start_only, passwords):
+    """Provision the registry's users; return an Exception to surface, or None.
+
+    Raises propagate to add_users, which catches and returns them.
+    """
+    ctx = _load_add_context(config_obj)
+    if ctx is None:
+        return None  # empty registry: nothing to provision
+    setup_compose_structure(ctx.compose)
+    _provision_users(ctx, start_only)
+    if not passwords:
+        return None
+    candidates = gitlab_candidates(ctx, start_only, passwords)
+    return gitlab_failure_exc(provision_gitlab_users(config_obj, candidates))
+
+
+def add_users(config_obj, start_only=None, passwords=None):
     """add cli command handler.
 
-    *start_only* restricts which users' containers are started (None = all
-    provisioned users; a list = just those). The registry is always fully
-    written to compose regardless, so the file stays complete.
+    *start_only* restricts which users' containers are started (None = all;
+    a list = just those); the registry is always fully written to compose.
+    *passwords* ({username: password}) drives GitLab provisioning when
+    enabled, targeting every named user regardless of start_only; omit it to
+    skip GitLab entirely (e.g. 'config reconcile --fix'). A GitLab failure is
+    returned as an error (non-zero exit) without undoing container work.
     """
     try:
-        ctx = _load_add_context(config_obj)
-        if ctx is None:
-            return None  # empty registry: nothing to provision
-        setup_compose_structure(ctx.compose)
-        _provision_users(ctx, start_only)
+        return _add_users(config_obj, start_only, passwords)
     except Exception as e:
         return e
-    return None
 
 
 def _delete_context(usernames):

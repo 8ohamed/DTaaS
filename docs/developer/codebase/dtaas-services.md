@@ -70,6 +70,10 @@ deploy/services/cli/
 │   │       ├── postgres/
 │   │       ├── thingsboard/
 │   │       └── gitlab/
+│   ├── gitlab_common/      # vendored from lib/gitlab_common (gitignored)
+│   │   ├── client.py
+│   │   ├── users.py
+│   │   └── validators.py
 │   └── templates/
 ├── tests/
 ├── README.md
@@ -106,6 +110,43 @@ Files in `dtaas_services/pkg/` provide reusable logic:
 - `thingsboard/`: setup, sysadmin/tenant workflows, credential-driven user setup.
 - `influxdb/`, `rabbitmq.py`, `mongodb.py`, `postgres/`: permissions,
   readiness checks, and account/bootstrap routines.
+
+### Shared GitLab Layer
+
+`gitlab_common` holds provider-agnostic GitLab operations
+(`get_gitlab_client`, `validate_user_row`, `create_user`, `create_user_pat`).
+Every function takes explicit arguments and performs no environment,
+filesystem, console, or process-global state changes.
+
+Its single source of truth is `lib/gitlab_common/`, a standalone Poetry
+package with its own tests. Each consumer **copies** it into its own tree
+rather than depending on it:
+
+```text
+lib/gitlab_common/gitlab_common/     <-- edit and test here
+        |  copied by dtaas_services/pkg/build.py
+        v
+dtaas_services/gitlab_common/        <-- gitignored, never committed
+```
+
+Run `poetry run python -m dtaas_services.pkg.build` before testing or
+packaging; CI does this via `run-build-script: true`. It is a plain script,
+not a Poetry build hook, because a hook makes poetry-core emit a
+platform-specific wheel instead of `py3-none-any`. Copying (rather than a
+path dependency) keeps `dtaas-services` and the DTaaS CLI independent of each
+other and keeps local paths out of published wheel metadata, which PyPI
+rejects.
+
+Deployment-specific glue stays in `pkg/services/gitlab/`: URL derivation from
+`GITLAB_PORT`/`HOSTNAME`, token-file persistence, docker health checks, and
+Rich console output. Two consequences are deliberate:
+
+- Suppressing urllib3's `InsecureRequestWarning` when `SSL_VERIFY=false`
+  happens in `pkg/services/gitlab/_api.py`, not in `gitlab_common`, so
+  importing the shared module never silences warnings for unrelated consumers.
+- `gitlab_common` defaults Personal Access Tokens to least-privilege
+  repository-only scopes. `pkg/services/gitlab/users.py` opts into the broader
+  `api` scope explicitly via `PatOptions`.
 
 ## Configuration Inputs
 
