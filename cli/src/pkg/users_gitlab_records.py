@@ -52,26 +52,27 @@ def _save_gitlab_tokens(tokens):
     utils.write_secret_file(path, json.dumps(existing, indent=2))
 
 
-def _persist_gitlab_tokens(results):
-    """Save newly issued PATs and record that they were issued."""
-    tokens = {r.username: r.token for r in results if r.token}
-    if tokens:
-        _save_gitlab_tokens(tokens)
-        set_gitlab_pat_issued(list(tokens))
+def persist_account_result(result):
+    """Persist one user's changed GitLab id and newly issued PAT.
 
-
-def persist_gitlab_results(results):
-    """Persist changed GitLab user ids, issued PATs, and created projects.
-
-    Recording gitlab_pat_issued alongside the saved token is what stops a
-    later re-run from minting a second PAT for the same account;
-    gitlab_projects_created does the same job for the template projects,
-    separately, so each half is retried only while it is still missing.
+    Called as soon as the account step is done, before the project step's
+    server side import, which can hold the run for minutes: a token kept in
+    memory over that wait is one an interrupted run loses while it stays live
+    on GitLab, and the next run would then mint a second one. Recording
+    gitlab_pat_issued alongside the saved token is what prevents that.
     """
-    new_user_ids = {r.username: r.new_id for r in results if r.new_id is not None}
-    if new_user_ids:
-        set_gitlab_user_ids(new_user_ids)
-    _persist_gitlab_tokens(results)
-    provisioned = [r.username for r in results if r.projects_done]
-    if provisioned:
-        set_gitlab_projects_created(provisioned)
+    if result.new_id is not None:
+        set_gitlab_user_ids({result.username: result.new_id})
+    if result.token:
+        _save_gitlab_tokens({result.username: result.token})
+        set_gitlab_pat_issued([result.username])
+
+
+def persist_projects_result(result):
+    """Record that one user's template projects are in place.
+
+    gitlab_projects_created is kept apart from gitlab_pat_issued so each half
+    is retried only while it is still missing.
+    """
+    if result.projects_done:
+        set_gitlab_projects_created([result.username])

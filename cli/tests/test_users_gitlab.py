@@ -8,9 +8,8 @@ is covered by test_pkg_gitlab/test_projects.py.
 
 from unittest.mock import patch, MagicMock
 import pytest
+from src.gitlab_common import ProjectTemplates
 from src.pkg import users
-from src.pkg import users_gitlab
-from src.pkg import gitlab as gitlabPkg
 from src.pkg.gitlab.provisioner import ProvisionResult
 
 TEMPLATE_KEYS = {
@@ -18,7 +17,7 @@ TEMPLATE_KEYS = {
     "common_branch": "common-template",
     "user_branch": "user-template",
 }
-TEMPLATES = gitlabPkg.ProjectTemplates(
+TEMPLATES = ProjectTemplates(
     TEMPLATE_KEYS["templates_url"],
     TEMPLATE_KEYS["common_branch"],
     TEMPLATE_KEYS["user_branch"],
@@ -125,12 +124,6 @@ def _run_add(mock_config, mock_registry, details, start_only=("alice",)):
     return users.add_users(
         mock_config, start_only=list(start_only), passwords={"alice": "S3cur3-p4ss"}
     )
-
-
-def test_gitlab_target_usernames_start_only_none_means_all_registry_users():
-    """start_only=None (config reconcile --fix) targets every registry user."""
-    ctx = MagicMock(user_list=["alice", "bob"])
-    assert users_gitlab._gitlab_target_usernames(ctx, None, {}) == ["alice", "bob"]
 
 
 def test_add_users_skips_gitlab_when_provision_disabled(
@@ -411,18 +404,77 @@ def test_add_users_without_a_template_still_provisions_accounts(
     assert "no project template in dtaas.toml" in capsys.readouterr().out
 
 
-def test_add_users_with_a_half_configured_template_names_the_gap(
+def test_add_users_with_a_half_configured_template_fails_the_user(
     mock_config, mock_registry, gitlab_env, mock_gitlab_projects, capsys
 ):
-    """Only some of the template keys set is reported as the mistake it is,
-    without taking the account step down with it."""
+    """Only some of the template keys set is a typo rather than an opt out, so
+    it fails the command instead of quietly leaving the user without
+    repositories. The account and its token are still provisioned and kept."""
     mock_config.get_gitlab_templates.return_value = (
         None,
         Exception("Config file error: gitlab project template is incomplete"),
     )
     err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
 
-    assert err is None
+    assert err is not None
+    assert "alice" in str(err)
     gitlab_env["ensure"].assert_called_once()
+    gitlab_env["pat_issued"].assert_called_once_with(["alice"])
+    gitlab_env["projects_created"].assert_not_called()
     mock_gitlab_projects.assert_not_called()
     assert "template is incomplete" in capsys.readouterr().out
+
+
+def test_add_users_retries_projects_without_a_password(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """The documented retry path, a token issued earlier and projects still
+    missing, needs no password: the account half is the only half that uses
+    one, and it is the half being skipped."""
+    mock_registry["load"].return_value = {
+        "alice": {"email": "a@x.io", "gitlab_user_id": 42, "gitlab_pat_issued": True}
+    }
+    err = users.add_users(mock_config, start_only=["alice"], passwords={})
+
+    assert err is None
+    gitlab_env["ensure"].assert_not_called()
+    assert mock_gitlab_projects.call_args.args[1].user_id == 42
+
+
+def test_add_users_persists_the_token_before_waiting_on_the_import(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """The project step blocks on a server side import for as long as it
+    takes, so a token still held in memory at that point is one an interrupted
+    run loses while it stays live on GitLab. It goes to disk first."""
+    seen = {}
+
+    def _projects(*_args):
+        seen["pat_issued"] = gitlab_env["pat_issued"].call_args
+        return True
+
+    mock_gitlab_projects.side_effect = _projects
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is None
+    assert seen["pat_issued"].args == (["alice"],)
+
+
+def test_add_users_without_passwords_does_not_fail_on_a_client_error(
+    mock_config, mock_registry, mock_utils, mock_user_operations, capsys
+):
+    """A plain 'user add' now reaches the GitLab step so project-only retries
+    work without credentials. A user who asked for no GitLab work must not be
+    failed by it: an unusable client is only the failure of users who had
+    work waiting."""
+    mock_config.get_gitlab_provision.return_value = (True, None)
+    mock_registry["load"].return_value = {"alice": {"email": "a@x.io"}}
+
+    with patch(
+        "src.pkg.users_gitlab.gitlabPkg.resolve_client",
+        return_value=(None, Exception("no PAT configured")),
+    ):
+        err = users.add_users(mock_config, start_only=["alice"], passwords={})
+
+    assert err is None
+    assert "GitLab provisioning skipped" in capsys.readouterr().out

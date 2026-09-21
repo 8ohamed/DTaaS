@@ -1,29 +1,56 @@
 """Creates a provisioned user's GitLab projects from the configured template.
 
-Deployment specific glue over project_api.create_user_project: it turns the
-[gitlab] template settings into the two repositories every DTaaS user gets
-(common and user), resolves the GitLab account id to create them under, and
-reports each outcome on the console. The GitLab API work itself stays in
-project_api.py, the way users_gitlab.py stays out of provisioner.py.
+Deployment specific glue over gitlab_common.ensure_user_projects: it turns
+the [gitlab] settings of dtaas.toml into the template every DTaaS user's two
+repositories are seeded from, resolves the GitLab account id to create them
+under, and reports each outcome on the console. The GitLab API work and the
+common/user pairing itself are gitlab_common's, the way users_gitlab.py
+stays out of provisioner.py.
 """
 
 from dataclasses import dataclass
 
 import click
 
-from ..constants import COMMON_PROJECT_NAME, USER_PROJECT_NAME
-from .project_api import ProjectSpec, create_user_project
-from .provisioner import find_user_id
+from ...gitlab_common import (
+    COMMON_PROJECT_NAME,
+    USER_PROJECT_NAME,
+    ProjectTemplates,
+    ensure_user_projects,
+    find_user_id,
+)
+
+NO_TEMPLATE_NOTICE = (
+    "GitLab project creation skipped: no project template in dtaas.toml. "
+    "Set [gitlab] templates_url, common_branch and user_branch (the "
+    "generated dtaas.toml ships the DTaaS values)."
+)
 
 
-@dataclass(frozen=True)
-class ProjectTemplates:
-    """The [gitlab] template settings: one template repository, and the branch
-    of it each of the two projects is seeded from."""
+def resolve_templates(config_obj):
+    """The [gitlab] project template settings, read from dtaas.toml.
 
-    url: str
-    common_branch: str
-    user_branch: str
+    Mirrors client.resolve_client: the one place the deployment's config is
+    turned into what the project calls below need.
+
+    Returns:
+        Tuple of (templates, error). Both are empty when dtaas.toml
+        configures no template at all, a supported opt out reported here as
+        a one line notice. A half configured [gitlab] block is a typo rather
+        than an opt out, the rule config validate already applies, so it
+        yields the error text and the caller fails the users it affects.
+    """
+    values, err = config_obj.get_gitlab_templates()
+    if err is not None:
+        click.echo(f"GitLab project creation failed: {err}")
+        return None, str(err)
+    if values is None:
+        click.echo(NO_TEMPLATE_NOTICE)
+        return None, ""
+    templates = ProjectTemplates(
+        values["templates_url"], values["common_branch"], values["user_branch"]
+    )
+    return templates, ""
 
 
 @dataclass(frozen=True)
@@ -36,57 +63,21 @@ class ProjectTarget:
     user_id: int | None = None
 
 
-def project_specs(templates):
-    """The two projects every provisioned user gets, in creation order."""
-    return [
-        ProjectSpec(COMMON_PROJECT_NAME, templates.url, templates.common_branch),
-        ProjectSpec(USER_PROJECT_NAME, templates.url, templates.user_branch),
-    ]
-
-
-def _describe(spec, result):
-    """The report lines for one project's outcome: a cleanly created project
-    says nothing here, since provision_user_projects summarises those."""
-    if not result.ok:
-        return (f"project '{spec.name}' failed: {result.error}",)
-    if result.already_exists:
-        return (f"project '{spec.name}' already exists and was left unchanged",)
-    return tuple(f"project '{spec.name}': {warning}" for warning in result.warnings)
-
-
-def ensure_user_projects(gl, user_id, templates):
-    """Create the common and user projects for the account *user_id*.
-
-    Idempotent through project_api.create_user_project: a project the user
-    already owns is reported and left untouched, never re-imported. Both
-    projects are attempted even when the first one fails, so a single bad
-    branch name does not hide a second problem.
-
-    Returns:
-        Tuple of (ok, messages); *ok* is True when both projects exist
-        afterwards, and *messages* are lines to report for this user.
-    """
-    outcomes = [
-        (spec, create_user_project(gl, user_id, spec))
-        for spec in project_specs(templates)
-    ]
-    messages = tuple(m for spec, result in outcomes for m in _describe(spec, result))
-    return all(result.ok for _, result in outcomes), messages
-
-
 def _resolve_user_id(gl, target):
     """*target*'s GitLab id, looked up by username when it is not known.
 
-    A looked up id belongs to an account this CLI did not create (see
-    provisioner.py), so the admin is told whose namespace is being written to.
+    The lookup is reported without saying whose account it is: an id missing
+    from the registry means an account this CLI did not create, but also one
+    it created before the id reached the registry, and the two are not
+    distinguishable from here.
     """
     if target.user_id is not None:
         return target.user_id
     user_id = find_user_id(gl, target.username)
     if user_id is not None:
         click.echo(
-            f"Warning: the GitLab account '{target.username}' was not created by "
-            "this CLI; its projects are created in that account's namespace."
+            f"Note: the GitLab id for '{target.username}' was resolved by "
+            "username; the projects are created in that account's namespace."
         )
     return user_id
 
@@ -105,6 +96,10 @@ def provision_user_projects(gl, target, templates):
             "their GitLab user id could not be resolved."
         )
         return False
+    click.echo(
+        f"Creating the GitLab projects for '{target.username}'; importing the "
+        "template can take a few minutes."
+    )
     ok, messages = ensure_user_projects(gl, user_id, templates)
     for message in messages:
         click.echo(f"GitLab projects for '{target.username}': {message}")

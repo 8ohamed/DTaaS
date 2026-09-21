@@ -16,11 +16,8 @@ from .users_compose import (
     setup_compose_structure,
     stop_user_containers,
 )
-from .users_gitlab import (
-    gitlab_candidates,
-    gitlab_failure_exc,
-    provision_gitlab_users,
-)
+from .users_gitlab import gitlab_failure_exc, provision_gitlab_users
+from .users_gitlab_targets import gitlab_candidates
 from .users_utils import (
     add_conf_server_entry,
     remove_conf_server_entry,
@@ -156,8 +153,8 @@ def _add_users(config_obj, start_only, passwords):
         return None  # empty registry: nothing to provision
     setup_compose_structure(ctx.compose)
     _provision_users(ctx, start_only)
-    if not passwords:
-        return None
+    if passwords is None:
+        return None  # no GitLab work was asked for (config reconcile --fix)
     candidates = gitlab_candidates(ctx, start_only, passwords)
     return gitlab_failure_exc(provision_gitlab_users(config_obj, candidates))
 
@@ -168,9 +165,12 @@ def add_users(config_obj, start_only=None, passwords=None):
     *start_only* restricts which users' containers are started (None = all;
     a list = just those); the registry is always fully written to compose.
     *passwords* ({username: password}) drives GitLab provisioning when
-    enabled, targeting every named user regardless of start_only; omit it to
-    skip GitLab entirely (e.g. 'config reconcile --fix'). A GitLab failure is
-    returned as an error (non-zero exit) without undoing container work.
+    enabled, targeting every named user regardless of start_only; omit it
+    (None, not an empty map) to skip GitLab entirely, as 'config reconcile
+    --fix' does. An empty map still runs the GitLab step, because only the
+    account half needs a password: it is how the projects of an account that
+    already exists are retried. A GitLab failure is returned as an error
+    (non-zero exit) without undoing container work.
     """
     try:
         return _add_users(config_obj, start_only, passwords)

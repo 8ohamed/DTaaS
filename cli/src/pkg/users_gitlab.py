@@ -5,10 +5,13 @@ mirroring the users_compose.py / users_utils.py split. Driven by the
 `[gitlab].provision` flag in dtaas.toml; a GitLab failure never undoes the
 container provisioning users.py has already done.
 
-Each user gets two steps, tracked independently in the registry: an account
-with a Personal Access Token, and the common/user projects seeded from the
-configured template. A run that completes one and fails the other retries
-only the missing half.
+Each user gets two steps, tracked independently in the registry and persisted
+as each one finishes: an account with a Personal Access Token, and the
+common/user projects seeded from the configured template. A run that
+completes one and fails the other retries only the missing half, and an
+interrupted run keeps what it had already done. Who is provisioned is
+decided in users_gitlab_targets.py, and the disk writes live in
+users_gitlab_records.py.
 """
 
 from dataclasses import dataclass
@@ -16,70 +19,29 @@ import click
 from . import gitlab as gitlabPkg
 from . import utils
 from .constants import GITLAB_USER_TOKENS_FILE
-from .users_gitlab_records import persist_gitlab_results
+from .users_gitlab_records import persist_account_result, persist_projects_result
 
-
-def _gitlab_target_usernames(ctx, start_only, passwords):
-    """Registry users to attempt GitLab provisioning for this run.
-
-    Mirrors _provision_users' start_only scoping, plus any already-registered
-    user who supplied a password again this run even though their container
-    isn't being (re)started the explicit retry path after a prior PAT-
-    issuance failure, without touching anyone else.
-    """
-    if start_only is None:
-        started = ctx.user_list
-    else:
-        started = [name for name in start_only if name in ctx.user_list]
-    retries = [
-        name for name in passwords if name in ctx.user_list and name not in started
-    ]
-    return started + retries
-
-
-@dataclass
-class _GitlabCandidate:
-    """One registry user queued for GitLab provisioning this run."""
-
-    username: str
-    email: str
-    existing_user_id: object
-    password: object
-    pat_issued: bool = False
-    projects_created: bool = False
+PAT_ISSUED_NOTICE = (
+    "a Personal Access Token was already issued on an earlier run (see "
+    f"{GITLAB_USER_TOKENS_FILE}). A re-run does not reissue one."
+)
 
 
 @dataclass
 class _GitlabUserResult:
-    """Outcome of provisioning one _GitlabCandidate."""
+    """Outcome of provisioning one GitlabCandidate.
+
+    *has_account* is False only when the account step was skipped for want of
+    a password and the candidate has no account from an earlier run: there is
+    then no namespace for the projects to be created in.
+    """
 
     username: str
     new_id: object
     token: object
     failed: bool
     projects_done: bool = False
-
-
-def gitlab_candidates(ctx, start_only, passwords):
-    """A _GitlabCandidate for every user targeted for GitLab provisioning.
-
-    Scoping mirrors _gitlab_target_usernames; a target with no password keeps
-    a None password here and is reported skipped by _provision_one_gitlab_user.
-    """
-    candidates = []
-    for username in _gitlab_target_usernames(ctx, start_only, passwords):
-        details = ctx.users_section.get(username) or {}
-        candidates.append(
-            _GitlabCandidate(
-                username,
-                details.get("email", ""),
-                details.get("gitlab_user_id"),
-                passwords.get(username),
-                bool(details.get("gitlab_pat_issued")),
-                bool(details.get("gitlab_projects_created")),
-            )
-        )
-    return candidates
+    has_account: bool = True
 
 
 def _changed_user_id(result, existing_user_id):
@@ -92,10 +54,36 @@ def _changed_user_id(result, existing_user_id):
 @dataclass(frozen=True)
 class _GitlabRun:
     """What every candidate in this run shares: the GitLab client and the
-    project template settings read from dtaas.toml."""
+    project template settings read from dtaas.toml.
+
+    *template_error* holds the complaint about a half configured [gitlab]
+    block, which fails the users it affects instead of skipping them.
+    """
 
     gl: object
     templates: object
+    template_error: str = ""
+
+    @property
+    def wants_projects(self):
+        """False only when dtaas.toml configures no template at all, the one
+        case in which skipping the project step is what the admin asked for."""
+        return self.templates is not None or bool(self.template_error)
+
+
+def _has_gitlab_work(candidate):
+    """True when this candidate has GitLab work left to attempt.
+
+    A password means an account to create; without one there is still the
+    project half to retry, but only for a user who has an account already.
+    Neither leaves nothing to do, so a client that cannot be built is not
+    their failure to carry.
+    """
+    if candidate.password:
+        return True
+    if candidate.projects_created:
+        return False
+    return bool(candidate.pat_issued or candidate.existing_user_id)
 
 
 def _report_account(username, result):
@@ -113,20 +101,33 @@ def _report_account(username, result):
     return result.token
 
 
+def _account_skipped(candidate, reason, has_account=True):
+    """Report that this candidate's account step was not run, as a skip
+    rather than a failure, and carry on to their projects."""
+    click.echo(
+        f"GitLab account provisioning skipped for '{candidate.username}': {reason}"
+    )
+    return _GitlabUserResult(
+        candidate.username, None, None, False, has_account=has_account
+    )
+
+
 def _account_step(run, candidate):
     """Create one candidate's GitLab account and Personal Access Token.
 
-    A candidate whose PAT was already issued is skipped rather than reissued
-    (a second token would be live on GitLab with no record of it), but that
-    is a skip, not a failure, so their projects can still be created.
+    Skipped without a password (there is nothing to create an account with)
+    and skipped when the PAT was already issued, since a second token would
+    be live on GitLab with no record of it. Both are skips, not failures, so
+    the projects of an account that already exists can still be created.
     """
-    if candidate.pat_issued:
-        click.echo(
-            f"GitLab provisioning skipped for '{candidate.username}': a Personal "
-            "Access Token was already issued on an earlier run (see "
-            f"{GITLAB_USER_TOKENS_FILE}). A re-run does not reissue one."
+    if not candidate.password:
+        return _account_skipped(
+            candidate,
+            "no password supplied.",
+            has_account=bool(candidate.pat_issued or candidate.existing_user_id),
         )
-        return _GitlabUserResult(candidate.username, None, None, False)
+    if candidate.pat_issued:
+        return _account_skipped(candidate, PAT_ISSUED_NOTICE)
     result = gitlabPkg.ensure_user_resources(
         run.gl,
         gitlabPkg.GitlabUser(
@@ -144,15 +145,33 @@ def _account_step(run, candidate):
     )
 
 
+def _skip_projects(run, candidate, account):
+    """True when the project step has nothing to do for this candidate.
+
+    No template configured, no account for the projects to belong to, an
+    account step that failed, or projects an earlier run already created.
+    """
+    return (
+        not run.wants_projects
+        or not account.has_account
+        or account.failed
+        or candidate.projects_created
+    )
+
+
 def _projects_step(run, candidate, account):
     """Create the candidate's template projects, updating *account* in place.
 
-    Skipped when no template is configured, when the account step failed
-    (there may be no account to own them) and when an earlier run already
-    created them. The account id comes from this run or from the registry;
-    with neither, provision_user_projects looks it up by username.
+    A half configured template fails the candidate here rather than skipping
+    them: the complaint is already on the console, and passing it off as a
+    successful run would leave the user without repositories. The account id
+    comes from this run or from the registry; with neither,
+    provision_user_projects looks it up by username.
     """
-    if run.templates is None or account.failed or candidate.projects_created:
+    if _skip_projects(run, candidate, account):
+        return account
+    if run.template_error:
+        account.failed = True
         return account
     target = gitlabPkg.ProjectTarget(
         candidate.username, account.new_id or candidate.existing_user_id
@@ -167,49 +186,22 @@ def _projects_step(run, candidate, account):
 def _provision_one_gitlab_user(run, candidate):
     """Provision one candidate's GitLab account, PAT and projects.
 
-    A candidate with no password is reported skipped, not failed: without one
-    there is no account to create, and an account from an earlier run is only
-    retried when its password is supplied again.
+    Each half is persisted as soon as it is done. The project step waits on
+    a server side import that can take minutes, so a token held in memory
+    until the end of the run is a token an interrupted run would lose while
+    it stays live on GitLab.
     """
-    if not candidate.password:
-        click.echo(
-            f"GitLab provisioning skipped for '{candidate.username}': "
-            "no password supplied."
-        )
-        return _GitlabUserResult(candidate.username, None, None, False)
-    return _projects_step(run, candidate, _account_step(run, candidate))
+    account = _account_step(run, candidate)
+    persist_account_result(account)
+    result = _projects_step(run, candidate, account)
+    persist_projects_result(result)
+    return result
 
 
 def _issue_gitlab_resources(run, candidates):
-    """Provision every candidate, persist ids, tokens and projects, and return
-    the usernames that failed."""
+    """Provision every candidate and return the usernames that failed."""
     results = [_provision_one_gitlab_user(run, candidate) for candidate in candidates]
-    persist_gitlab_results(results)
     return [r.username for r in results if r.failed]
-
-
-def _resolve_templates(config_obj):
-    """The [gitlab] project template settings, or None when there are none.
-
-    A dtaas.toml that configures no template is not a failure: accounts and
-    tokens are still provisioned and only the project step is skipped, with
-    one notice per run. A half configured template is reported the same way,
-    naming what is missing.
-    """
-    values, err = config_obj.get_gitlab_templates()
-    if err is not None:
-        click.echo(f"GitLab project creation skipped: {err}")
-        return None
-    if values is None:
-        click.echo(
-            "GitLab project creation skipped: no project template in "
-            "dtaas.toml. Set [gitlab] templates_url, common_branch and "
-            "user_branch (the generated dtaas.toml ships the DTaaS values)."
-        )
-        return None
-    return gitlabPkg.ProjectTemplates(
-        values["templates_url"], values["common_branch"], values["user_branch"]
-    )
 
 
 def provision_gitlab_users(config_obj, candidates):
@@ -223,7 +215,9 @@ def provision_gitlab_users(config_obj, candidates):
     rather than calling create_user again; any new id is persisted. A
     candidate already marked gitlab_pat_issued is skipped, so re-running the
     command never mints a second token for the same account, and one already
-    marked gitlab_projects_created keeps the projects it has.
+    marked gitlab_projects_created keeps the projects it has. A password is
+    needed by the account half alone, so retrying the projects of an account
+    that already exists takes no credentials.
     """
     provision, err = config_obj.get_gitlab_provision()
     utils.check_error(err)
@@ -232,8 +226,9 @@ def provision_gitlab_users(config_obj, candidates):
     gl, err = gitlabPkg.resolve_client(config_obj)
     if err is not None:
         click.echo(f"GitLab provisioning skipped: {err}")
-        return [c.username for c in candidates]
-    run = _GitlabRun(gl, _resolve_templates(config_obj))
+        return [c.username for c in candidates if _has_gitlab_work(c)]
+    templates, template_error = gitlabPkg.resolve_templates(config_obj)
+    run = _GitlabRun(gl, templates, template_error)
     return _issue_gitlab_resources(run, candidates)
 
 

@@ -93,23 +93,3 @@ def ensure_user_resources(gl, user: GitlabUser) -> ProvisionResult:
     if user.existing_user_id is not None:
         return _issue_pat(gl, user.username, user.existing_user_id, retry=True)
     return _create_user_and_pat(gl, user)
-
-
-def find_user_id(gl: gitlab.Gitlab, username: str) -> int | None:
-    """Look up an existing account's numeric id by username.
-
-    create_user reports an account it did not create as ALREADY_EXISTS with
-    no user_id (see _ALREADY_EXISTS_MESSAGE), yet project creation needs one.
-    Looking the id up here keeps that a single, explicit call rather than an
-    assumption about the 409 path.
-
-    Returns:
-        The account id, or None when no such account is visible to the
-        caller or the lookup itself failed (which is logged).
-    """
-    try:
-        users = gl.users.list(username=username)
-    except gitlab.exceptions.GitlabError as exc:
-        logger.warning("Failed to look up GitLab user '%s': %s", username, exc)
-        return None
-    return users[0].id if users else None

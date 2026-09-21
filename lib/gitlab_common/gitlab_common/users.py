@@ -155,3 +155,23 @@ def create_user_pat(
         return True, token
     except gitlab.exceptions.GitlabError as exc:
         return False, f"Failed to create PAT for '{username}': {exc}"
+
+
+def find_user_id(gl: gitlab.Gitlab, username: str) -> int | None:
+    """Look up an existing account's numeric id by username.
+
+    create_user reports an account it did not create as ALREADY_EXISTS with
+    no user_id, yet creating that account's projects needs one. Looking the
+    id up here keeps that a single, explicit call rather than an assumption
+    about the 409 path.
+
+    Returns:
+        The account id, or None when no such account is visible to the
+        caller or the lookup itself failed (which is logged).
+    """
+    try:
+        users = gl.users.list(username=username)
+    except gitlab.exceptions.GitlabError as exc:
+        logger.warning("Failed to look up GitLab user '%s': %s", username, exc)
+        return None
+    return users[0].id if users else None

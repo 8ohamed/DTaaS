@@ -2,13 +2,11 @@
 
 from unittest.mock import MagicMock, patch
 import pytest
-from src.pkg.gitlab.project_api import ProjectResult
+from src.gitlab_common import ProjectTemplates
 from src.pkg.gitlab.projects import (
     ProjectTarget,
-    ProjectTemplates,
-    ensure_user_projects,
-    project_specs,
     provision_user_projects,
+    resolve_templates,
 )
 
 USERNAME = "alice"
@@ -18,70 +16,18 @@ TEMPLATES = ProjectTemplates(
     "common-template",
     "user-template",
 )
-CREATED = ProjectResult(True, project_id=1)
 
 
 @pytest.fixture
-def mock_create():
-    """Patch the shared create_user_project primitive."""
+def mock_pair():
+    """Patch the shared project pair, which gitlab_common owns and tests."""
     with patch(
-        "src.pkg.gitlab.projects.create_user_project", return_value=CREATED
+        "src.pkg.gitlab.projects.ensure_user_projects", return_value=(True, ())
     ) as mock:
         yield mock
 
 
-def test_project_specs_seed_each_project_from_its_branch():
-    """Both projects come from one template, each from its own branch."""
-    specs = project_specs(TEMPLATES)
-    assert [(s.name, s.branch) for s in specs] == [
-        ("common", "common-template"),
-        ("user", "user-template"),
-    ]
-    assert {s.import_url for s in specs} == {TEMPLATES.url}
-
-
-def test_ensure_user_projects_creates_both(mock_create):
-    """Two clean creations report success and need no explaining."""
-    ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
-    assert ok is True
-    assert not messages
-    assert mock_create.call_count == 2
-
-
-def test_ensure_user_projects_reports_an_existing_project(mock_create):
-    """A project the user already owns is reported and left alone."""
-    mock_create.side_effect = [
-        ProjectResult(True, project_id=1, already_exists=True),
-        CREATED,
-    ]
-    ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
-    assert ok is True
-    assert "already exists" in messages[0]
-    assert "common" in messages[0]
-
-
-def test_ensure_user_projects_attempts_both_after_a_failure(mock_create):
-    """One bad branch name must not hide a second problem."""
-    failed = ProjectResult(False, error="branch 'nope' is not there")
-    mock_create.side_effect = [failed, failed]
-    ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
-    assert ok is False
-    assert len(messages) == 2
-    assert mock_create.call_count == 2
-
-
-def test_ensure_user_projects_passes_warnings_through(mock_create):
-    """A leftover template branch is reported without failing the project."""
-    mock_create.side_effect = [
-        ProjectResult(True, project_id=1, warnings=("branch stayed",)),
-        CREATED,
-    ]
-    ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
-    assert ok is True
-    assert messages == ("project 'common': branch stayed",)
-
-
-def test_provision_user_projects_uses_a_known_id(mock_create, capsys):
+def test_provision_user_projects_uses_a_known_id(mock_pair, capsys):
     """A known account id is used directly, with no lookup."""
     with patch("src.pkg.gitlab.projects.find_user_id") as mock_find:
         ok = provision_user_projects(
@@ -89,28 +35,71 @@ def test_provision_user_projects_uses_a_known_id(mock_create, capsys):
         )
     assert ok is True
     mock_find.assert_not_called()
-    assert mock_create.call_args.args[1] == USER_ID
+    assert mock_pair.call_args.args[1] == USER_ID
     assert "GitLab projects ready for 'alice'" in capsys.readouterr().out
 
 
-def test_provision_user_projects_looks_up_an_unknown_id(mock_create, capsys):
-    """An account this CLI did not create is resolved by username, and the
-    admin is told whose namespace is being written to."""
+def test_provision_user_projects_looks_up_an_unknown_id(mock_pair, capsys):
+    """An id missing from the registry is resolved by username, and said so
+    without claiming whose account it is: an account this CLI created before
+    its id was recorded looks exactly the same from here."""
     with patch("src.pkg.gitlab.projects.find_user_id", return_value=99):
         ok = provision_user_projects(
             MagicMock(), ProjectTarget(USERNAME), TEMPLATES
         )
     assert ok is True
-    assert mock_create.call_args.args[1] == 99
-    assert "was not created by this CLI" in capsys.readouterr().out
+    assert mock_pair.call_args.args[1] == 99
+    out = capsys.readouterr().out
+    assert "resolved by username" in out
+    assert "not created by this CLI" not in out
 
 
-def test_provision_user_projects_without_an_id_fails(mock_create, capsys):
+def test_provision_user_projects_without_an_id_fails(mock_pair, capsys):
     """An unresolvable account is a failure, not a silent skip."""
     with patch("src.pkg.gitlab.projects.find_user_id", return_value=None):
         ok = provision_user_projects(
             MagicMock(), ProjectTarget(USERNAME), TEMPLATES
         )
     assert ok is False
-    mock_create.assert_not_called()
+    mock_pair.assert_not_called()
     assert "could not be resolved" in capsys.readouterr().out
+
+
+def _config(values=None, err=None):
+    """A config object returning one get_gitlab_templates outcome."""
+    config_obj = MagicMock()
+    config_obj.get_gitlab_templates.return_value = (values, err)
+    return config_obj
+
+
+def test_resolve_templates_reads_the_three_keys():
+    """The [gitlab] template keys become the settings the project calls take."""
+    templates, err = resolve_templates(
+        _config(
+            {
+                "templates_url": TEMPLATES.url,
+                "common_branch": "common-template",
+                "user_branch": "user-template",
+            }
+        )
+    )
+    assert err == ""
+    assert templates == TEMPLATES
+
+
+def test_resolve_templates_treats_no_template_as_an_opt_out(capsys):
+    """A dtaas.toml predating the feature keeps working: a notice, no error."""
+    templates, err = resolve_templates(_config())
+    assert (templates, err) == (None, "")
+    assert "skipped" in capsys.readouterr().out
+
+
+def test_resolve_templates_reports_a_half_configured_block(capsys):
+    """Some keys set is a typo rather than an opt out, so it is an error the
+    caller fails the affected users with, not a silent skip."""
+    templates, err = resolve_templates(_config(err=Exception("also set gitlab.x")))
+    assert templates is None
+    assert "also set gitlab.x" in err
+    assert "failed" in capsys.readouterr().out
+
+

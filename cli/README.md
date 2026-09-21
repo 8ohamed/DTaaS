@@ -665,27 +665,37 @@ built-in fallback. `dtaas config generate` writes them with the values above,
 so a fresh installation gets the standard DTaaS template. A `dtaas.toml`
 predating them (one written before this feature) provisions accounts and
 tokens as before and prints a one-line notice that project creation was
-skipped: add the three keys to turn it on. Setting only some of them is
-reported as an error by `dtaas config validate`, since it is a typo rather
-than an opt out. Point them at your own repository and branches to hand new
-users a different starting point.
+skipped: add the three keys to turn it on. Setting only some of them is a
+typo rather than an opt out, so `dtaas config validate` reports it as an
+error and `dtaas user add` fails the users it affects rather than leaving
+them quietly without repositories (their accounts and tokens are still
+provisioned and kept). Point the keys at your own repository and branches to
+hand new users a different starting point.
 
 GitLab imports the template repository itself, which has two consequences for
 a self-hosted instance: the **Repository by URL** import source must be
 enabled (Admin Area, Settings, General, Import and export settings) and the
 GitLab server, not the machine running the CLI, must be able to reach
-`templates_url`. The import copies every branch, so the CLI then makes the
-configured branch the project's default branch and deletes the others; a
+`templates_url`. An import GitLab never starts is reported against those two
+prerequisites by name. The import copies every branch, so the CLI then makes
+the configured branch the project's default branch and deletes the others; a
 branch that cannot be deleted (a protected branch, say) is reported as a
-warning and leaves the project in place.
+warning and leaves the project in place. The import runs on the server and
+can take minutes, so each project is announced before the wait.
 
-A project the user already owns is left exactly as it is, contents included,
-and reported as already existing. Once both projects exist the user is marked
-`gitlab_projects_created` in the registry and later runs skip the step. That
-marker is separate from `gitlab_pat_issued`, so a user whose token was issued
-but whose projects failed is retried for the projects alone on the next
-`dtaas user add` with their password. A failure to create either project
-makes the command exit non-zero, like any other GitLab failure.
+A project that already holds content of its own is left exactly as it is and
+reported as already existing. A project an earlier run created but did not
+finish seeding (its import broke, timed out, or the run was interrupted) is
+finished on the next run instead of being reported as ready, so a failed run
+never marks a user done with an empty repository.
+
+Once both projects exist the user is marked `gitlab_projects_created` in the
+registry and later runs skip the step. That marker is separate from
+`gitlab_pat_issued`, so a user whose token was issued but whose projects
+failed is retried for the projects alone on the next `dtaas user add`. That
+retry needs no password: only the account half uses one. A failure to create
+either project makes the command exit non-zero, like any other GitLab
+failure.
 
 Each provisioned user needs an initial GitLab password, supplied via
 `--password` (prompted interactively with hidden input if omitted, for a
@@ -723,13 +733,15 @@ a token really is lost or revoked, issue a replacement from GitLab directly.
 
 The password is used only to create the GitLab account and is never written
 to `dtaas.users.registry.json`, `.dtaas.state.json`, or logs. A user missing
-a password when provisioning is enabled has their GitLab step skipped with a
-warning. An already-existing GitLab account is left with its current
+a password when provisioning is enabled has their account step skipped with
+a warning; if they already have an account, their projects are still
+attempted, which is what makes a project-only retry work without
+credentials. An already-existing GitLab account is left with its current
 password and issued no new token, and is reported with an explicit warning
 (its credentials were not created by this run and are unknown to it) rather
 than as an unremarkable success. Its `common` and `user` projects are still
-created: the account is looked up by username and the CLI warns, before
-creating them, that it is writing into a namespace it did not create.
+created: the account is looked up by username, and the CLI says so before
+creating them.
 Container provisioning is unaffected by any
 GitLab outcome containers are already up by the time GitLab provisioning
 runs but a GitLab failure (a missing/skipped password does not count) now

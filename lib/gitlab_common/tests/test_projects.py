@@ -1,12 +1,10 @@
-"""Tests for one user's GitLab project creation (pkg/gitlab/project_api.py)."""
+"""Tests for one user's GitLab project creation (gitlab_common/projects.py)."""
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
-import pytest
 from gitlab.exceptions import GitlabCreateError, GitlabDeleteError, GitlabGetError
-from src.pkg.gitlab import project_api
-from src.pkg.gitlab.project_api import ProjectSpec, create_user_project
+from gitlab_common.projects import ProjectSpec, create_user_project
 
 PROJECT_ID = 42
 USER_ID = 7
@@ -18,18 +16,24 @@ OTHER_BRANCHES = ("main", "common-template")
 SPEC = ProjectSpec("user", TEMPLATE_URL, BRANCH)
 
 
-@pytest.fixture(autouse=True)
-def _no_poll_delay(monkeypatch):
-    """Keep the import poll loop instant; the wait itself is not under test."""
-    monkeypatch.setattr(project_api, "IMPORT_POLL_SECONDS", 0)
-
-
 def _project(import_status="finished", branches=(BRANCH,) + OTHER_BRANCHES):
-    """A project mock whose repository holds *branches*."""
+    """A project mock whose repository holds *branches*, as a fresh import
+    leaves it: no default branch of its own yet."""
     project = MagicMock()
     project.id = PROJECT_ID
     project.import_status = import_status
+    project.empty_repo = False
+    project.default_branch = None
     project.branches.list.return_value = [SimpleNamespace(name=n) for n in branches]
+    return project
+
+
+def _owned(default_branch=BRANCH, empty_repo=False):
+    """A project mock as it is found in the namespace on a later run: seeded
+    by default, or left behind unseeded by a run that failed."""
+    project = _project()
+    project.default_branch = default_branch
+    project.empty_repo = empty_repo
     return project
 
 
@@ -89,15 +93,63 @@ def test_create_user_project_unprotects_before_deleting():
     assert sorted(unprotected) == sorted(OTHER_BRANCHES)
 
 
-def test_create_user_project_existing_project_is_untouched():
-    """A project already in the namespace is reported, never re-imported."""
-    gl, user, project = _client(existing=True)
+def test_create_user_project_seeded_project_is_untouched():
+    """A project already seeded from the template is reported, never
+    re-imported, so a repeated run keeps the user's work."""
+    gl, user, project = _client(project=_owned(), existing=True)
     result = create_user_project(gl, USER_ID, SPEC)
     assert result.already_exists is True
     assert result.ok is True
     assert result.project_id == PROJECT_ID
     user.projects.create.assert_not_called()
     project.branches.delete.assert_not_called()
+
+
+def test_create_user_project_leaves_a_project_of_the_users_own_alone():
+    """Content that is not the template (no template branch in it) belongs to
+    the user, whatever its default branch is, and is never touched."""
+    project = _owned(default_branch="main")
+    project.branches.get.side_effect = GitlabGetError("404", response_code=404)
+    gl, _, _ = _client(project=project, existing=True)
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.already_exists is True
+    assert result.ok is True
+    project.branches.delete.assert_not_called()
+
+
+def test_create_user_project_resumes_an_empty_project_from_a_failed_run():
+    """A run that created the project and then failed to seed it leaves an
+    empty repository behind. Reporting that as ready would mark the user done
+    with nothing in it, so the seeding is finished instead."""
+    gl, user, project = _client(
+        project=_owned(default_branch=None, empty_repo=True), existing=True
+    )
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is True
+    assert result.already_exists is False
+    assert project.default_branch == BRANCH
+    user.projects.create.assert_not_called()
+    assert sorted(_deleted_branches(project)) == sorted(OTHER_BRANCHES)
+
+
+def test_create_user_project_resumes_a_project_left_on_the_wrong_branch():
+    """An import that finished before the run died leaves the template
+    branches in place but the default branch unset, which is also finished
+    here rather than reported as a ready project."""
+    gl, _, project = _client(project=_owned(default_branch="main"), existing=True)
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is True
+    assert result.already_exists is False
+    assert project.default_branch == BRANCH
+
+
+def test_create_user_project_reports_an_unscheduled_import():
+    """An import GitLab never started fails, naming the import source, rather
+    than blaming the branch name for the missing repository."""
+    gl, _, _ = _client(project=_project(import_status="none"))
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is False
+    assert "Repository by URL" in result.error
 
 
 def test_create_user_project_reports_a_create_failure():
@@ -112,23 +164,6 @@ def test_create_user_project_reports_a_create_failure():
     project.branches.delete.assert_not_called()
 
 
-def test_create_user_project_waits_for_the_import():
-    """The default branch is only set once the import reports finished."""
-    gl, _, project = _client(project=_project(import_status="started"))
-    statuses = iter(["started", "finished"])
-
-    def _get(ref, **_kwargs):
-        if isinstance(ref, str):
-            raise GitlabGetError("404 Project Not Found", response_code=404)
-        project.import_status = next(statuses, "finished")
-        return project
-
-    gl.projects.get.side_effect = _get
-    result = create_user_project(gl, USER_ID, SPEC)
-    assert result.ok is True
-    assert project.default_branch == BRANCH
-
-
 def test_create_user_project_reports_a_failed_import():
     """A failed import is reported with GitLab's own detail, not as success."""
     project = _project(import_status="failed")
@@ -138,16 +173,6 @@ def test_create_user_project_reports_a_failed_import():
     assert result.ok is False
     assert "could not reach the template URL" in result.error
     assert result.project_id == PROJECT_ID
-
-
-def test_create_user_project_times_out_on_a_stuck_import(monkeypatch):
-    """An import that never finishes fails instead of hanging forever."""
-    monkeypatch.setattr(project_api, "IMPORT_POLL_ATTEMPTS", 2)
-    gl, _, project = _client(project=_project(import_status="started"))
-    result = create_user_project(gl, USER_ID, SPEC)
-    assert result.ok is False
-    assert "timed out" in result.error
-    project.branches.delete.assert_not_called()
 
 
 def test_create_user_project_reports_a_missing_template_branch():
@@ -182,11 +207,3 @@ def test_create_user_project_warns_when_branches_cannot_be_listed():
     result = create_user_project(gl, USER_ID, SPEC)
     assert result.ok is True
     assert "could not list the imported branches" in result.warnings[0]
-
-
-def test_create_user_project_without_an_import_needs_no_wait():
-    """import_status 'none' means there is nothing to wait for."""
-    gl, _, project = _client(project=_project(import_status="none", branches=(BRANCH,)))
-    result = create_user_project(gl, USER_ID, SPEC)
-    assert result.ok is True
-    assert _deleted_branches(project) == []

@@ -9,6 +9,7 @@ from gitlab_common import (
     PatOptions,
     create_user,
     create_user_pat,
+    find_user_id,
 )
 
 TEST_TOKEN = "glpat-test-token-1234567890"  # noqa: S105 # NOSONAR
@@ -145,3 +146,25 @@ def test_create_user_pat_empty_token():
     ok, error = create_user_pat(gl, 42, TEST_USERNAME)
     assert ok is False
     assert "Empty token" in error
+
+
+def test_find_user_id_returns_the_matching_account():
+    """An existing account is resolved to its numeric id."""
+    gl = MagicMock()
+    gl.users.list.return_value = [Mock(id=11)]
+    assert find_user_id(gl, TEST_USERNAME) == 11
+    assert gl.users.list.call_args.kwargs == {"username": TEST_USERNAME}
+
+
+def test_find_user_id_without_a_match_is_none():
+    """No account of that name resolves to None rather than an error."""
+    gl = MagicMock()
+    gl.users.list.return_value = []
+    assert find_user_id(gl, TEST_USERNAME) is None
+
+
+def test_find_user_id_swallows_a_lookup_failure():
+    """A failed lookup is None, so a caller reports it as an unresolved user."""
+    gl = MagicMock()
+    gl.users.list.side_effect = GitlabError("500 Server Error")
+    assert find_user_id(gl, TEST_USERNAME) is None
