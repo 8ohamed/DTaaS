@@ -6,8 +6,9 @@ mutated atomically by the CLI and never hand-edited, the way useradd owns
 
 Shape: {"users": {"alice": {"email": ..., "groups": [...],
 "load_balance": bool, "desired_status": "running", "gitlab_user_id": 42,
-"gitlab_pat_issued": true}}}. See set_desired_status()/set_gitlab_user_ids()/
-set_gitlab_pat_issued() for the last three fields.
+"gitlab_pat_issued": true, "gitlab_projects_created": true}}}. See
+set_desired_status()/set_gitlab_user_ids()/set_gitlab_pat_issued()/
+set_gitlab_projects_created() for the last four fields.
 """
 
 import csv
@@ -124,6 +125,19 @@ def set_gitlab_pat_issued(usernames, path=REGISTRY_FILE):
     usernames already in the registry are updated; persisted atomically.
     """
     return _apply_user_field("gitlab_pat_issued", dict.fromkeys(usernames, True), path)
+
+
+def set_gitlab_projects_created(usernames, path=REGISTRY_FILE):
+    """Mark that each username's GitLab projects have been created.
+
+    Tracked separately from gitlab_pat_issued: a run can issue the token and
+    still fail to create the projects, and the next 'dtaas user add' must
+    retry only the half that is missing. Only usernames already in the
+    registry are updated; persisted atomically.
+    """
+    return _apply_user_field(
+        "gitlab_projects_created", dict.fromkeys(usernames, True), path
+    )
 
 
 def _parse_load_balance(value):

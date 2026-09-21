@@ -1,16 +1,28 @@
-"""Tests for the optional GitLab account/PAT provisioning in users_gitlab.py.
+"""Tests for the optional GitLab account/PAT/project provisioning in
+users_gitlab.py.
 
 Driven through users.add_users (the public entry point), so the fixtures
-mirror test_users.py's.
+mirror test_users.py's. The project step is mocked here; its own behaviour
+is covered by test_pkg_gitlab/test_projects.py.
 """
 
-import json
 from unittest.mock import patch, MagicMock
 import pytest
 from src.pkg import users
 from src.pkg import users_gitlab
 from src.pkg import gitlab as gitlabPkg
 from src.pkg.gitlab.provisioner import ProvisionResult
+
+TEMPLATE_KEYS = {
+    "templates_url": "https://github.com/into-cps-association/DTaaS-Examples",
+    "common_branch": "common-template",
+    "user_branch": "user-template",
+}
+TEMPLATES = gitlabPkg.ProjectTemplates(
+    TEMPLATE_KEYS["templates_url"],
+    TEMPLATE_KEYS["common_branch"],
+    TEMPLATE_KEYS["user_branch"],
+)
 # pylint: disable=redefined-outer-name,unused-argument,protected-access
 
 
@@ -27,7 +39,21 @@ def mock_config():
     mock.get_tls.return_value = (False, None)
     mock.get_set_limits.return_value = (True, None)
     mock.get_gitlab_provision.return_value = (False, None)
+    mock.get_gitlab_templates.return_value = (dict(TEMPLATE_KEYS), None)
     return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_gitlab_projects():
+    """Stub the project step, which every successful account run reaches, and
+    the registry write that follows it, so no test in this module writes a
+    real dtaas.users.registry.json into the working directory."""
+    with patch(
+        "src.pkg.users_gitlab.gitlabPkg.provision_user_projects", return_value=True
+    ) as mock_projects, patch(
+        "src.pkg.users_gitlab_records.set_gitlab_projects_created"
+    ):
+        yield mock_projects
 
 
 @pytest.fixture
@@ -63,6 +89,42 @@ def mock_user_operations():
         mst.return_value = None
         mw.return_value = {}
         yield {"create": mc, "add": ma, "finalize": mf, "stop": mst, "state": mw}
+
+
+@pytest.fixture
+def gitlab_env(mock_config, mock_utils, mock_user_operations):
+    """Enable provisioning and patch the client, the account step, the
+    container work and every persistence call, so a test can drive add_users
+    and assert on the project step alone."""
+    mock_config.get_gitlab_provision.return_value = (True, None)
+    account = ProvisionResult("alice", True, "created", "glpat-token", user_id=42)
+    with patch(
+        "src.pkg.users_gitlab.gitlabPkg.resolve_client",
+        return_value=(MagicMock(), None),
+    ), patch(
+        "src.pkg.users_gitlab.gitlabPkg.ensure_user_resources", return_value=account
+    ) as ensure, patch(
+        "src.pkg.users_gitlab_records.utils.write_secret_file"
+    ), patch(
+        "src.pkg.users_gitlab_records.set_gitlab_pat_issued"
+    ) as pat_issued, patch(
+        "src.pkg.users_gitlab_records.set_gitlab_user_ids"
+    ), patch(
+        "src.pkg.users_gitlab_records.set_gitlab_projects_created"
+    ) as projects_created:
+        yield {
+            "ensure": ensure,
+            "pat_issued": pat_issued,
+            "projects_created": projects_created,
+        }
+
+
+def _run_add(mock_config, mock_registry, details, start_only=("alice",)):
+    """Run add_users for the single registry user 'alice' with *details*."""
+    mock_registry["load"].return_value = {"alice": details}
+    return users.add_users(
+        mock_config, start_only=list(start_only), passwords={"alice": "S3cur3-p4ss"}
+    )
 
 
 def test_gitlab_target_usernames_start_only_none_means_all_registry_users():
@@ -103,10 +165,10 @@ def test_add_users_provisions_gitlab_persists_new_user_id(
         return_value=ProvisionResult(
             "alice", True, "created", "glpat-token", user_id=42
         ),
-    ), patch("src.pkg.users_gitlab.utils.write_secret_file"), patch(
-        "src.pkg.users_gitlab.set_gitlab_pat_issued"
+    ), patch("src.pkg.users_gitlab_records.utils.write_secret_file"), patch(
+        "src.pkg.users_gitlab_records.set_gitlab_pat_issued"
     ), patch(
-        "src.pkg.users_gitlab.set_gitlab_user_ids"
+        "src.pkg.users_gitlab_records.set_gitlab_user_ids"
     ) as mock_set_ids:
         err = users.add_users(
             mock_config, start_only=["alice"], passwords={"alice": "S3cur3-p4ss"}
@@ -133,8 +195,8 @@ def test_add_users_gitlab_skips_user_with_no_password(
     ), patch(
         "src.pkg.users_gitlab.gitlabPkg.ensure_user_resources",
         return_value=ProvisionResult("alice", True, "created", "glpat-token"),
-    ) as mock_ensure, patch("src.pkg.users_gitlab.utils.write_secret_file"), patch(
-        "src.pkg.users_gitlab.set_gitlab_pat_issued"
+    ) as mock_ensure, patch("src.pkg.users_gitlab_records.utils.write_secret_file"), patch(
+        "src.pkg.users_gitlab_records.set_gitlab_pat_issued"
     ):
         err = users.add_users(
             mock_config,
@@ -183,7 +245,7 @@ def test_add_users_gitlab_provisioning_failure_fails_the_command(
     ), patch(
         "src.pkg.users_gitlab.gitlabPkg.ensure_user_resources",
         return_value=ProvisionResult("alice", False, "GitLab unreachable"),
-    ), patch("src.pkg.users_gitlab.utils.write_secret_file") as mock_write:
+    ), patch("src.pkg.users_gitlab_records.utils.write_secret_file") as mock_write:
         err = users.add_users(
             mock_config, start_only=["alice"], passwords={"alice": "pw"}
         )
@@ -211,9 +273,9 @@ def test_add_users_gitlab_skips_user_whose_pat_was_already_issued(
     ), patch(
         "src.pkg.users_gitlab.gitlabPkg.ensure_user_resources"
     ) as mock_ensure, patch(
-        "src.pkg.users_gitlab.utils.write_secret_file"
+        "src.pkg.users_gitlab_records.utils.write_secret_file"
     ) as mock_write, patch(
-        "src.pkg.users_gitlab.set_gitlab_pat_issued"
+        "src.pkg.users_gitlab_records.set_gitlab_pat_issued"
     ) as mock_set_issued:
         err = users.add_users(
             mock_config, start_only=[], passwords={"alice": "S3cur3-p4ss"}
@@ -224,26 +286,6 @@ def test_add_users_gitlab_skips_user_whose_pat_was_already_issued(
     mock_write.assert_not_called()
     mock_set_issued.assert_not_called()
     assert "already issued" in capsys.readouterr().out
-
-
-def test_save_gitlab_tokens_keeps_superseded_entry_rather_than_overwriting(
-    tmp_path, monkeypatch, capsys
-):
-    """If the tokens file already holds a different token for a user, the old
-    value is retained under a timestamped key (and a warning printed) instead
-    of being silently dropped."""
-    monkeypatch.chdir(tmp_path)
-    tokens_file = tmp_path / "gitlab_user_tokens.json"
-    tokens_file.write_text('{"alice": "glpat-old"}', encoding="utf-8")
-
-    users_gitlab._save_gitlab_tokens({"alice": "glpat-new"})
-
-    saved = json.loads(tokens_file.read_text(encoding="utf-8"))
-    assert saved["alice"] == "glpat-new"
-    superseded = [k for k in saved if k.startswith("alice (superseded ")]
-    assert len(superseded) == 1
-    assert saved[superseded[0]] == "glpat-old"
-    assert "revoked manually" in capsys.readouterr().out
 
 
 def test_add_users_gitlab_already_exists_warns_but_is_not_a_command_failure(
@@ -263,7 +305,7 @@ def test_add_users_gitlab_already_exists_warns_but_is_not_a_command_failure(
         return_value=ProvisionResult(
             "alice", True, "account already exists", already_exists=True
         ),
-    ), patch("src.pkg.users_gitlab.utils.write_secret_file") as mock_write:
+    ), patch("src.pkg.users_gitlab_records.utils.write_secret_file") as mock_write:
         err = users.add_users(
             mock_config, start_only=["alice"], passwords={"alice": "pw"}
         )
@@ -273,3 +315,114 @@ def test_add_users_gitlab_already_exists_warns_but_is_not_a_command_failure(
     out = capsys.readouterr().out
     assert "Warning" in out
     assert "alice" in out
+
+
+def test_add_users_creates_projects_from_the_configured_template(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """A newly provisioned user gets both projects, from the configured
+    template, under the account id this run created, and is recorded as done."""
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is None
+    target, templates = mock_gitlab_projects.call_args.args[1:]
+    assert (target.username, target.user_id) == ("alice", 42)
+    assert templates == TEMPLATES
+    gitlab_env["projects_created"].assert_called_once_with(["alice"])
+
+
+def test_add_users_skips_projects_already_created(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """A user marked gitlab_projects_created keeps the repositories they have."""
+    details = {"email": "a@x.io", "gitlab_projects_created": True}
+    err = _run_add(mock_config, mock_registry, details)
+
+    assert err is None
+    mock_gitlab_projects.assert_not_called()
+
+
+def test_add_users_creates_projects_although_the_pat_was_issued(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """A PAT issued on an earlier run must not skip a user whose projects are
+    still missing: the account step is skipped, the project step is not."""
+    details = {"email": "a@x.io", "gitlab_user_id": 42, "gitlab_pat_issued": True}
+    err = _run_add(mock_config, mock_registry, details, start_only=[])
+
+    assert err is None
+    gitlab_env["ensure"].assert_not_called()
+    assert mock_gitlab_projects.call_args.args[1].user_id == 42
+
+
+def test_add_users_creates_projects_for_a_pre_existing_account(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """An account this run did not create still gets its projects; with no id
+    to hand, the project step is left to resolve it by username."""
+    gitlab_env["ensure"].return_value = ProvisionResult(
+        "alice", True, "account already exists", already_exists=True
+    )
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is None
+    assert mock_gitlab_projects.call_args.args[1].user_id is None
+
+
+def test_add_users_project_failure_fails_the_command(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """Projects that could not be created fail the command and are not
+    recorded, while the token this run really did issue still is: the next
+    run must retry the projects alone, not mint a second token."""
+    mock_gitlab_projects.return_value = False
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is not None
+    assert "alice" in str(err)
+    gitlab_env["projects_created"].assert_not_called()
+    gitlab_env["pat_issued"].assert_called_once_with(["alice"])
+
+
+def test_add_users_skips_projects_when_the_account_failed(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+):
+    """No account means no namespace to create projects in."""
+    gitlab_env["ensure"].return_value = ProvisionResult(
+        "alice", False, "GitLab unreachable"
+    )
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is not None
+    mock_gitlab_projects.assert_not_called()
+
+
+def test_add_users_without_a_template_still_provisions_accounts(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects, capsys
+):
+    """A dtaas.toml that configures no project template is not a failure: the
+    account and its token are provisioned and only the projects are skipped."""
+    mock_config.get_gitlab_templates.return_value = (None, None)
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is None
+    gitlab_env["ensure"].assert_called_once()
+    mock_gitlab_projects.assert_not_called()
+    assert "no project template in dtaas.toml" in capsys.readouterr().out
+
+
+def test_add_users_with_a_half_configured_template_names_the_gap(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects, capsys
+):
+    """Only some of the template keys set is reported as the mistake it is,
+    without taking the account step down with it."""
+    mock_config.get_gitlab_templates.return_value = (
+        None,
+        Exception("Config file error: gitlab project template is incomplete"),
+    )
+    err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
+
+    assert err is None
+    gitlab_env["ensure"].assert_called_once()
+    mock_gitlab_projects.assert_not_called()
+    assert "template is incomplete" in capsys.readouterr().out

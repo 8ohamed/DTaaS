@@ -2,7 +2,11 @@
 
 from unittest.mock import MagicMock, Mock
 from gitlab.exceptions import GitlabCreateError, GitlabError
-from src.pkg.gitlab.provisioner import GitlabUser, ensure_user_resources
+from src.pkg.gitlab.provisioner import (
+    GitlabUser,
+    ensure_user_resources,
+    find_user_id,
+)
 
 USERNAME = "alice"
 EMAIL = "alice@example.org"
@@ -137,3 +141,25 @@ def test_ensure_user_resources_pat_failure_after_user_created():
 
     assert result.ok is False
     assert "PAT issuance failed" in result.message
+
+
+def test_find_user_id_returns_the_matching_account():
+    """An existing account is resolved to its numeric id."""
+    gl = MagicMock()
+    gl.users.list.return_value = [Mock(id=11)]
+    assert find_user_id(gl, USERNAME) == 11
+    assert gl.users.list.call_args.kwargs == {"username": USERNAME}
+
+
+def test_find_user_id_without_a_match_is_none():
+    """No account of that name resolves to None rather than an error."""
+    gl = MagicMock()
+    gl.users.list.return_value = []
+    assert find_user_id(gl, USERNAME) is None
+
+
+def test_find_user_id_swallows_a_lookup_failure():
+    """A failed lookup is None, so a caller reports it as an unresolved user."""
+    gl = MagicMock()
+    gl.users.list.side_effect = GitlabError("500 Server Error")
+    assert find_user_id(gl, USERNAME) is None

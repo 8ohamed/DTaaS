@@ -11,6 +11,7 @@ from src.pkg.registry import (
     read_csv_users,
     set_desired_status,
     set_gitlab_pat_issued,
+    set_gitlab_projects_created,
     set_gitlab_user_ids,
     _parse_csv_row,
     _partition_new,
@@ -141,3 +142,18 @@ def test_set_gitlab_pat_issued_marks_only_known_users(tmp_path):
 
     assert updated == ["alice"]
     assert load_registry(path)["alice"]["gitlab_pat_issued"] is True
+
+
+def test_set_gitlab_projects_created_is_tracked_apart_from_the_pat(tmp_path):
+    """The project marker is its own field, so a user whose PAT was issued but
+    whose projects failed is still retried for the projects alone."""
+    path = str(tmp_path / "dtaas.users.registry.json")
+    register_new_users({"alice": {"email": "a@x.io"}}, [], path)
+    set_gitlab_pat_issued(["alice"], path)
+
+    updated = set_gitlab_projects_created(["alice", "ghost"], path)
+
+    assert updated == ["alice"]
+    details = load_registry(path)["alice"]
+    assert details["gitlab_projects_created"] is True
+    assert details["gitlab_pat_issued"] is True

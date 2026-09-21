@@ -614,7 +614,8 @@ username already declared in `dtaas.toml`'s `[[users]]` or the registry is
 #### GitLab provisioning (optional)
 
 When `[gitlab].provision = true` in `dtaas.toml` (off by default), `user add`
-also creates each new user's GitLab account and a Personal Access Token:
+also creates each new user's GitLab account, a Personal Access Token, and the
+two repositories their workspace expects:
 
 ```toml
 [gitlab]
@@ -645,6 +646,46 @@ ssl_verify = "/etc/ssl/certs/corp-ca.pem"  # or true (default) / false
 Setting `ssl_verify = false` disables certificate verification for all
 GitLab API traffic, including the admin PAT and every provisioned user's
 password, the CLI prints a warning whenever it is disabled.
+
+##### The `common` and `user` repositories
+
+Every provisioned user gets two private projects in their own GitLab
+namespace, `<username>/common` and `<username>/user`, each seeded from one
+branch of a template repository:
+
+```toml
+[gitlab]
+templates_url = "https://github.com/into-cps-association/DTaaS-Examples"
+common_branch = "common-template"
+user_branch   = "user-template"
+```
+
+These three keys are the only place the template is defined; the CLI has no
+built-in fallback. `dtaas config generate` writes them with the values above,
+so a fresh installation gets the standard DTaaS template. A `dtaas.toml`
+predating them (one written before this feature) provisions accounts and
+tokens as before and prints a one-line notice that project creation was
+skipped: add the three keys to turn it on. Setting only some of them is
+reported as an error by `dtaas config validate`, since it is a typo rather
+than an opt out. Point them at your own repository and branches to hand new
+users a different starting point.
+
+GitLab imports the template repository itself, which has two consequences for
+a self-hosted instance: the **Repository by URL** import source must be
+enabled (Admin Area, Settings, General, Import and export settings) and the
+GitLab server, not the machine running the CLI, must be able to reach
+`templates_url`. The import copies every branch, so the CLI then makes the
+configured branch the project's default branch and deletes the others; a
+branch that cannot be deleted (a protected branch, say) is reported as a
+warning and leaves the project in place.
+
+A project the user already owns is left exactly as it is, contents included,
+and reported as already existing. Once both projects exist the user is marked
+`gitlab_projects_created` in the registry and later runs skip the step. That
+marker is separate from `gitlab_pat_issued`, so a user whose token was issued
+but whose projects failed is retried for the projects alone on the next
+`dtaas user add` with their password. A failure to create either project
+makes the command exit non-zero, like any other GitLab failure.
 
 Each provisioned user needs an initial GitLab password, supplied via
 `--password` (prompted interactively with hidden input if omitted, for a
@@ -686,7 +727,10 @@ a password when provisioning is enabled has their GitLab step skipped with a
 warning. An already-existing GitLab account is left with its current
 password and issued no new token, and is reported with an explicit warning
 (its credentials were not created by this run and are unknown to it) rather
-than as an unremarkable success. Container provisioning is unaffected by any
+than as an unremarkable success. Its `common` and `user` projects are still
+created: the account is looked up by username and the CLI warns, before
+creating them, that it is writing into a namespace it did not create.
+Container provisioning is unaffected by any
 GitLab outcome containers are already up by the time GitLab provisioning
 runs but a GitLab failure (a missing/skipped password does not count) now
 makes the `user add` command itself exit non-zero, so scripts can detect it.

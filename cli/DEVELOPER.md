@@ -87,6 +87,10 @@ checks are syntactic, but `path` and `certs-src` are verified against the local
 filesystem (the directory must exist), so `validate` is expected to run on the
 deployment host.
 
+The `[gitlab]` section's own checks live in `src/pkg/config_validate_gitlab.py`
+(`check_gitlab`), called from `config_validate.py`'s check list; they were
+split out to keep that module within its line count.
+
 `platform update --config` is backed by _src/pkg/config_update.py_, which
 re-applies `dtaas.toml` to an installed deployment in place. It reuses the
 existing substitution engine rather than duplicating it:
@@ -146,8 +150,10 @@ section.
 `src/pkg/gitlab/` is built on `gitlab_common` (vendored from
 `lib/gitlab_common` by `src/pkg/build.py`, like the deploy templates below
 see [lib/gitlab_common/README.md](../lib/gitlab_common/README.md) for why it
-is copied rather than depended on) for the client and user/PAT primitives, so
-no GitLab client or idempotency code is reimplemented in the CLI:
+is copied rather than depended on) for the client and user/PAT primitives,
+so no GitLab client or account idempotency code is reimplemented in the CLI.
+Project provisioning is the CLI's own: only this package needs it, so it is
+not carried into the shared module.
 
 - `client.py`'s `resolve_client(config_obj)` reads `[gitlab].api_url` and
   `[gitlab].pat` (falling back to the `DTAAS_GITLAB_PAT` environment
@@ -159,6 +165,33 @@ no GitLab client or idempotency code is reimplemented in the CLI:
   `gitlab_common.create_user`/`create_user_pat`. It is idempotent: an
   already-existing account is left with its current credentials and gets no
   new PAT.
+- `projects.py`'s `provision_user_projects(gl, target, templates)` creates
+  the user's two repositories, `common` and `user`, from the `[gitlab]`
+  template settings (`ProjectTemplates`: one `templates_url`, one branch per
+  project). Those keys have no built-in default:
+  `config.gitlab_template_values` returns None when none of them is set, and
+  `users_gitlab._resolve_templates` then skips only the project step, with
+  one notice per run, leaving account and token provisioning untouched. A
+  partly configured template is an error instead of a skip, and
+  `config_validate_gitlab.py` calls the same function so `config validate`
+  reports it before `user add` runs. The GitLab work is
+  `project_api.create_user_project`, the project half of `provisioner.py`
+  and shaped like it (API only, no console output or config), which creates
+  the project in the user's own namespace with GitLab's import by URL and
+  then reduces it to the configured branch: that branch becomes the default
+  branch and the other imported branches are deleted, since an import copies
+  all of them and GitLab offers no per branch import. The import is
+  asynchronous, so `import_status` is polled (10 minutes at most) before the
+  branches are touched, which also means the instance needs the "Repository
+  by URL" import source enabled and network access to the template. A
+  project the user already owns is reported and left untouched, contents
+  included; a branch that survives deletion is a warning rather than a
+  failure. `ProjectTarget.user_id` is the account id when it is known
+  (created this run, or stored in the registry); with neither,
+  `provisioner.find_user_id` resolves it by username, which is the only way
+  a pre-existing account (the 409 path above, which carries no id) gets its
+  projects, and the admin is warned that the namespace was not created by
+  this CLI.
 
 This is wired into `dtaas user add` (`pkg/users_gitlab.py`'s `provision_gitlab_users`)
 behind the `[gitlab].provision` flag (default `false`, so existing
@@ -174,8 +207,14 @@ same CSV after a partial failure) skips a user who already has a token rather
 than minting a second one. A GitLab failure for one user (or for the whole
 step, e.g. an unreachable instance) is reported and does not affect container
 provisioning, which has already completed by that point, nor other users.
-Scoped today to what `gitlab_common` provides user creation and PAT
-issuance; group/project provisioning is not implemented.
+The account half and the project half are tracked separately in the
+registry (`gitlab_pat_issued` vs `gitlab_projects_created`) because they fail
+independently: a run that issues a token but cannot create the projects must
+retry only the projects on the next `user add`, and the PAT skip must not
+swallow the project step. `users_gitlab.py` holds that flow
+(`_account_step`, `_projects_step`) and `users_gitlab_records.py` the disk
+half of it: the 0600 token file and the registry markers. Group provisioning
+is still not implemented.
 
 ### User registry and runtime state
 

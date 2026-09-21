@@ -313,6 +313,61 @@ def test_get_gitlab_ssl_verify_reads_ca_bundle_path_unchanged(mock_utils):
     assert err is None
 
 
+def test_get_gitlab_templates_unset_is_not_an_error(mock_utils):
+    """No template keys means project creation is not configured, which the
+    caller skips; there is no built-in repository to fall back on."""
+    mock_utils.return_value = ({"gitlab": {"provision": True}}, None)
+    cfg = config.Config()
+    templates, err = cfg.get_gitlab_templates()
+    assert templates is None
+    assert err is None
+
+
+def test_get_gitlab_templates_reads_configured_values(mock_utils):
+    """Configured template values are used verbatim, trimmed."""
+    mock_utils.return_value = (
+        {
+            "gitlab": {
+                "templates_url": " https://gitlab.example.com/dtaas/templates ",
+                "common_branch": "shared",
+                "user_branch": "personal",
+            }
+        },
+        None,
+    )
+    cfg = config.Config()
+    templates, err = cfg.get_gitlab_templates()
+    assert err is None
+    assert templates == {
+        "templates_url": "https://gitlab.example.com/dtaas/templates",
+        "common_branch": "shared",
+        "user_branch": "personal",
+    }
+
+
+def test_get_gitlab_templates_rejects_a_half_configured_template(mock_utils):
+    """Some keys but not all is a mistake, not an opt out, so it is an error
+    naming the ones still missing."""
+    mock_utils.return_value = (
+        {"gitlab": {"templates_url": "https://x.io/y", "common_branch": "  "}},
+        None,
+    )
+    cfg = config.Config()
+    templates, err = cfg.get_gitlab_templates()
+    assert templates is None
+    assert "gitlab.common_branch" in str(err)
+    assert "gitlab.user_branch" in str(err)
+
+
+def test_get_gitlab_templates_propagates_section_error(mock_utils):
+    """get_gitlab_templates returns the error from get_gitlab_section."""
+    mock_utils.return_value = ({"gitlab": "not-a-dict"}, None)
+    cfg = config.Config()
+    templates, err = cfg.get_gitlab_templates()
+    assert templates is None
+    assert err is not None
+
+
 def test_get_gitlab_section_when_data_is_none():
     """get_gitlab_section propagates the 'Config not initialised' error."""
     cfg = Config.__new__(Config)

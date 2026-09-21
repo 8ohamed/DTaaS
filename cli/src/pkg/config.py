@@ -2,6 +2,38 @@
 
 from . import utils
 
+# The [gitlab] keys describing the GitLab project template a new user's two
+# repositories are seeded from. They have no built-in default: the values
+# ship in the generated dtaas.toml, which is their single source of truth.
+GITLAB_TEMPLATE_KEYS = ("templates_url", "common_branch", "user_branch")
+
+
+def _trimmed_template(section):
+    """The [gitlab] template keys, trimmed, keyed by their dtaas.toml names."""
+    return {key: str(section.get(key, "") or "").strip() for key in GITLAB_TEMPLATE_KEYS}
+
+
+def gitlab_template_values(section):
+    """Read the project template keys out of a [gitlab] *section*.
+
+    Shared with config_validate_gitlab.py so "all three keys, or none at all"
+    has a single definition.
+
+    Returns:
+        Tuple of (values, problem). *values* is None when the section sets
+        none of the keys, which is not a problem: project creation is simply
+        not configured. *problem* is a message naming the missing keys when
+        only some of them are set, which is a mistake rather than an opt out.
+    """
+    values = _trimmed_template(section)
+    missing = [key for key, value in values.items() if not value]
+    if len(missing) == len(GITLAB_TEMPLATE_KEYS):
+        return None, None
+    if missing:
+        listed = ", ".join(f"gitlab.{key}" for key in missing)
+        return None, f"gitlab project template is incomplete; also set {listed}"
+    return values, None
+
 
 class Config:
     """The Config class for DTaaS"""
@@ -169,6 +201,24 @@ class Config:
         if err is not None or section is None:
             return "", err
         return str(section.get("pat", "")).strip(), None
+
+    def get_gitlab_templates(self):
+        """Gets the GitLab project template new users' repositories are
+        seeded from: [gitlab].templates_url and the common_branch/user_branch
+        of that template.
+
+        There is no built-in template: a dtaas.toml that sets none of the
+        keys gets (None, None), and the caller skips project creation rather
+        than inventing a repository to clone.
+
+        Returns:
+            Tuple of (values keyed by their dtaas.toml names, err).
+        """
+        section, err = self.get_gitlab_section()
+        if err is not None or section is None:
+            return None, err
+        values, problem = gitlab_template_values(section)
+        return values, Exception(f"Config file error: {problem}") if problem else None
 
     def get_gitlab_ssl_verify(self):
         """Gets [gitlab].ssl_verify (default True): True/False, or the path
