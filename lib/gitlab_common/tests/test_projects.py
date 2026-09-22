@@ -96,12 +96,14 @@ def test_create_user_project_unprotects_before_deleting():
 
 def test_create_user_project_seeded_project_is_untouched():
     """A project already seeded from the template is reported, never
-    re-imported, so a repeated run keeps the user's work."""
+    re-imported, so a repeated run keeps the user's work; being on the
+    template branch, it carries no warning."""
     gl, user, project = _client(project=_owned(), existing=True)
     result = create_user_project(gl, USER_ID, SPEC)
     assert result.already_exists is True
     assert result.ok is True
     assert result.project_id == PROJECT_ID
+    assert not result.warnings
     user.projects.create.assert_not_called()
     project.branches.delete.assert_not_called()
 

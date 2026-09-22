@@ -73,8 +73,9 @@ def _is_empty(project) -> bool:
     return empty or not getattr(project, "default_branch", "")
 
 
-def _off_template_warning(project, branch: str) -> tuple[str, ...]:
-    """A warning when an adopted project's default branch is not *branch*.
+def _off_template_warning(project, branch: str) -> str:
+    """A warning when an adopted project's default branch is not *branch*;
+    empty string when it is.
 
     That is either the user's own choice or a run that died between the
     import and the branch switch; the two look the same from here, so the
@@ -82,10 +83,10 @@ def _off_template_warning(project, branch: str) -> tuple[str, ...]:
     """
     default = getattr(project, "default_branch", "")
     if default == branch:
-        return ()
+        return ""
     return (
         f"its default branch is '{default}', not the template branch "
-        f"'{branch}'; delete the project in GitLab and re-run to reseed it",
+        f"'{branch}'; delete the project in GitLab and re-run to reseed it"
     )
 
 
@@ -155,11 +156,12 @@ def _adopt_existing(gl: gitlab.Gitlab, project, spec: ProjectSpec) -> ProjectRes
     """
     if not _is_empty(project):
         logger.info("GitLab project exists: %s", project.path_with_namespace)
+        warning = _off_template_warning(project, spec.branch)
         return ProjectResult(
             True,
             project_id=project.id,
             already_exists=True,
-            warnings=_off_template_warning(project, spec.branch),
+            warnings=(warning,) if warning else (),
         )
     logger.info("Resuming the seeding of %s", project.path_with_namespace)
     return _seed_project(gl, project.id, spec)
