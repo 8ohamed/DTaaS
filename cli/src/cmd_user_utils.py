@@ -85,18 +85,22 @@ def _register_users(new_users):
     return added
 
 
-def _passwords_to_add(user_input):
-    """Collect GitLab-provisioning passwords to use, keyed by username.
+def _passwords_to_add(user_input, named):
+    """Collect GitLab-provisioning passwords, keyed by every user in *named*.
 
-    Kept independent of _users_to_add's registry-details dict: a password is
-    transient, used only for GitLab account creation, and must never reach
+    A user named without a password maps to None: they are still a GitLab
+    target, so an already-registered user named again has their projects
+    retried, and only their account half is skipped. Kept independent of
+    _users_to_add's registry-details dict: a password is transient, used
+    only for GitLab account creation, and must never reach
     dtaas.users.registry.json.
     """
+    passwords = dict.fromkeys(named)
     if user_input.csv_file:
-        return _read_csv_passwords(user_input.csv_file)
-    if user_input.username and user_input.password:
-        return {user_input.username: user_input.password}
-    return {}
+        passwords.update(_read_csv_passwords(user_input.csv_file))
+    elif user_input.password:
+        passwords[user_input.username] = user_input.password
+    return passwords
 
 
 def _read_csv_passwords(csv_file):
@@ -113,8 +117,9 @@ def stage_users_for_add(user_input):
     Rejects malformed usernames and skips (with a warning) any already
     registered. Raises ClickException on bad input (a USERNAME or --file is
     required, not both). Returns (added, passwords): newly-added usernames,
-    and every named user's password -- including an already-registered
-    one, which retries just their GitLab step (see add_users).
+    and a password (or None) for every named user, including an
+    already-registered one, whose GitLab step is then retried (see
+    add_users).
     """
     if user_input.username and user_input.csv_file:
         raise click.ClickException("Pass either a USERNAME or --file, not both.")
@@ -123,9 +128,9 @@ def stage_users_for_add(user_input):
             "Provide a USERNAME (e.g. 'dtaas user add alice --email "
             "a@x.io') or --file <users.csv> to add users."
         )
-    added = _register_users(_users_to_add(user_input))
-    passwords = _passwords_to_add(user_input)
-    return added, passwords
+    named = _users_to_add(user_input)
+    added = _register_users(named)
+    return added, _passwords_to_add(user_input, named)
 
 
 def resolve_usernames(

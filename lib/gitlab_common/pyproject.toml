@@ -10,6 +10,7 @@ packages = [{include = "gitlab_common"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 python-gitlab = "^8.3.0"
+requests = "^2.32.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"

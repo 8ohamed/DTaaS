@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
 from gitlab.exceptions import GitlabCreateError, GitlabDeleteError, GitlabGetError
+from gitlab_common.project_import import IMPORT_RETRY_HINT
 from gitlab_common.projects import ProjectSpec, create_user_project
 
 PROJECT_ID = 42
@@ -105,16 +106,19 @@ def test_create_user_project_seeded_project_is_untouched():
     project.branches.delete.assert_not_called()
 
 
-def test_create_user_project_leaves_a_project_of_the_users_own_alone():
-    """Content that is not the template (no template branch in it) belongs to
-    the user, whatever its default branch is, and is never touched."""
-    project = _owned(default_branch="main")
-    project.branches.get.side_effect = GitlabGetError("404", response_code=404)
+def test_create_user_project_never_touches_a_project_with_content():
+    """A project with content whose default branch is not the template branch
+    may hold the user's work on it (they pushed a branch and made it the
+    default, the template branch still present), so it is neither switched
+    nor pruned: it is reported with the way to reseed it instead."""
+    project = _owned(default_branch="my-work")
     gl, _, _ = _client(project=project, existing=True)
     result = create_user_project(gl, USER_ID, SPEC)
-    assert result.already_exists is True
-    assert result.ok is True
+    assert (result.ok, result.already_exists) == (True, True)
+    assert project.default_branch == "my-work"
+    project.save.assert_not_called()
     project.branches.delete.assert_not_called()
+    assert "delete the project in GitLab and re-run" in result.warnings[0]
 
 
 def test_create_user_project_resumes_an_empty_project_from_a_failed_run():
@@ -132,15 +136,15 @@ def test_create_user_project_resumes_an_empty_project_from_a_failed_run():
     assert sorted(_deleted_branches(project)) == sorted(OTHER_BRANCHES)
 
 
-def test_create_user_project_resumes_a_project_left_on_the_wrong_branch():
-    """An import that finished before the run died leaves the template
-    branches in place but the default branch unset, which is also finished
-    here rather than reported as a ready project."""
-    gl, _, project = _client(project=_owned(default_branch="main"), existing=True)
+def test_create_user_project_names_the_retry_for_a_dead_import():
+    """GitLab never reruns a failed import, so an empty project left by one
+    fails on every run; the error says how to get past it."""
+    project = _owned(default_branch=None, empty_repo=True)
+    project.import_status = "failed"
+    gl, _, _ = _client(project=project, existing=True)
     result = create_user_project(gl, USER_ID, SPEC)
-    assert result.ok is True
-    assert result.already_exists is False
-    assert project.default_branch == BRANCH
+    assert result.ok is False
+    assert IMPORT_RETRY_HINT in result.error
 
 
 def test_create_user_project_reports_an_unscheduled_import():

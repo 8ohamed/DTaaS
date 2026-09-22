@@ -13,11 +13,6 @@ STATE_FILE = ".dtaas.state.json"
 # For pkg/users.py: GitLab provisioning token storage
 GITLAB_USER_TOKENS_FILE = "gitlab_user_tokens.json"
 
-# The two repositories every provisioned user gets are named by
-# gitlab_common.user_projects, which creates them. The template they are
-# seeded from is per installation and lives in dtaas.toml ([gitlab]
-# templates_url / common_branch / user_branch), not in code.
-
 # For utils.py
 LOCALHOST_SERVER = "localhost"
 

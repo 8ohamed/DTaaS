@@ -70,15 +70,23 @@ def test_ensure_user_projects_attempts_both_after_a_failure(mock_create):
     assert mock_create.call_count == 2
 
 
-def test_ensure_user_projects_passes_warnings_through(mock_create):
-    """A leftover template branch is reported without failing the project."""
+@pytest.mark.parametrize(
+    "already_exists,lead",
+    [(False, ()), (True, ("project 'common' already exists and was left unchanged",))],
+)
+def test_ensure_user_projects_passes_warnings_through(mock_create, already_exists, lead):
+    """A warning is reported without failing the project, for a new project
+    (a leftover template branch) and an existing one (left off the template
+    branch) alike."""
     mock_create.side_effect = [
-        ProjectResult(True, project_id=1, warnings=("branch stayed",)),
+        ProjectResult(
+            True, project_id=1, already_exists=already_exists, warnings=("w",)
+        ),
         CREATED,
     ]
     ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
     assert ok is True
-    assert messages == ("project 'common': branch stayed",)
+    assert messages == lead + ("project 'common': w",)
 
 
 def test_ensure_user_projects_prints_nothing(mock_create, capsys):

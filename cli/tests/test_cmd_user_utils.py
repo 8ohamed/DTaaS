@@ -48,7 +48,9 @@ def test_stage_single_user_password_returned_for_added_user(tmp_path, monkeypatc
 
 
 def test_stage_returns_only_newly_added(tmp_path, monkeypatch):
-    """stage_users_for_add returns just the new users, not skipped duplicates."""
+    """stage_users_for_add returns just the new users, not skipped duplicates,
+    but still names the skipped user for GitLab with no password: that is
+    the project-only retry, which needs none."""
     monkeypatch.chdir(tmp_path)
     stage_users_for_add(UserAddInput("alice", None, "a@intocps.org", (), True))
 
@@ -57,7 +59,7 @@ def test_stage_returns_only_newly_added(tmp_path, monkeypatch):
     )
 
     assert not added
-    assert not passwords
+    assert passwords == {"alice": None}
 
 
 def test_stage_returns_password_for_already_registered_retry(tmp_path, monkeypatch):
@@ -108,18 +110,27 @@ def test_users_to_add_returns_empty_without_username_or_file():
     assert not _users_to_add(UserAddInput(None, None, None, (), True))
 
 
-def test_passwords_to_add_reads_from_csv(tmp_path):
+@pytest.mark.parametrize(
+    "header,row,expected",
+    [
+        (",password", ",S3cur3-p4ss", {"alice": "S3cur3-p4ss"}),
+        ("", "", {"alice": None}),
+    ],
+)
+def test_passwords_to_add_reads_from_csv(tmp_path, header, row, expected):
     """_passwords_to_add reads the password column via _read_csv_passwords for
-    CSV imports (the username-argument path is covered separately)."""
+    CSV imports (the username-argument path is covered separately). A row
+    with no password still names its user, so the GitLab step runs for them
+    and retries the projects of an account that already exists."""
     csv_file = tmp_path / "users.csv"
     csv_file.write_text(
-        "username,email,groups,load_balance,password\n"
-        "alice,a@x.io,g,true,S3cur3-p4ss\n"
+        f"username,email,groups,load_balance{header}\nalice,a@x.io,g,true{row}\n"
     )
 
-    passwords = _passwords_to_add(UserAddInput(None, str(csv_file), None, (), True))
+    user_input = UserAddInput(None, str(csv_file), None, (), True)
+    passwords = _passwords_to_add(user_input, _users_to_add(user_input))
 
-    assert passwords == {"alice": "S3cur3-p4ss"}
+    assert passwords == expected
 
 
 def test_read_csv_passwords_missing_file_raises_click_exception():

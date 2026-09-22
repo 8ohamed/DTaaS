@@ -164,13 +164,14 @@ def add_users(config_obj, start_only=None, passwords=None):
 
     *start_only* restricts which users' containers are started (None = all;
     a list = just those); the registry is always fully written to compose.
-    *passwords* ({username: password}) drives GitLab provisioning when
-    enabled, targeting every named user regardless of start_only; omit it
-    (None, not an empty map) to skip GitLab entirely, as 'config reconcile
-    --fix' does. An empty map still runs the GitLab step, because only the
-    account half needs a password: it is how the projects of an account that
-    already exists are retried. A GitLab failure is returned as an error
-    (non-zero exit) without undoing container work.
+    *passwords* ({username: password or None}) drives GitLab provisioning
+    when enabled, targeting every key (every user named this run) regardless
+    of start_only; omit it (None, not an empty map) to skip GitLab entirely,
+    as 'config reconcile --fix' does. A user mapped to None still gets the
+    GitLab step, because only the account half needs a password: it is how
+    the projects of an account that already exists are retried. A GitLab
+    failure is returned as an error (non-zero exit) without undoing
+    container work.
     """
     try:
         return _add_users(config_obj, start_only, passwords)

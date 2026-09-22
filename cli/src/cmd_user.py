@@ -37,17 +37,29 @@ def user_group():
     """
 
 
+def _pat_issued(username):
+    """True when the registry marks *username*'s token as already issued.
+
+    Their account step is then skipped, so a password would go unused; a
+    re-run for such a user only retries their projects.
+    """
+    details = registryPkg.load_registry().get(username) or {}
+    return bool(details.get("gitlab_pat_issued"))
+
+
 def _should_prompt_password(user_input, provision):
     """True when a single-user 'user add' needs an interactive GitLab password.
 
-    Only a single-USERNAME add with GitLab provisioning enabled and no
-    --password given; a --file import supplies passwords via the CSV instead.
+    Only a single-USERNAME add with GitLab provisioning enabled, no
+    --password given and no token issued yet; a --file import supplies
+    passwords via the CSV instead.
     """
     return bool(
         provision
         and user_input.username
         and not user_input.csv_file
         and not user_input.password
+        and not _pat_issued(user_input.username)
     )
 
 

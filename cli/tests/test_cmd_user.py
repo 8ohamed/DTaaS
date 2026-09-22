@@ -75,23 +75,60 @@ def test_add_users_gitlab_provision_check_error(runner, mock_user_pkg):
     assert "Error while adding users: bad gitlab section" in result.output
 
 
-def test_add_single_user_prompts_for_password_when_provisioning(runner, mock_user_pkg):
-    """A single-user add with GitLab provisioning enabled and no --password prompts
-    for one interactively (hidden input, confirmed)."""
+def _add_with_provisioning(runner, mock_user_pkg, registry):
+    """Run a single-user add with GitLab provisioning on, *registry* as the
+    registry contents and one password typed at any prompt; returns the
+    result and the input that was staged."""
     mock_user_pkg["add"].return_value = None
     mock_user_pkg["config"].return_value.get_gitlab_provision.return_value = (True, None)
-
-    with patch("src.cmd_user.stage_users_for_add") as mock_stage:
-        mock_stage.return_value = (["alice"], {"alice": "S3cur3-p4ss"})
+    with patch("src.cmd_user.stage_users_for_add") as mock_stage, patch(
+        "src.cmd_user.registryPkg.load_registry", return_value=registry
+    ):
+        mock_stage.return_value = (["alice"], {})
         result = runner.invoke(
             dtaas,
             ["user", "add", "alice", "--email", "a@x.io"],
             input="S3cur3-p4ss\nS3cur3-p4ss\n",
         )
+    return result, mock_stage.call_args[0][0]
 
+
+def test_add_single_user_prompts_for_password_when_provisioning(runner, mock_user_pkg):
+    """A single-user add with GitLab provisioning enabled and no --password prompts
+    for one interactively (hidden input, confirmed)."""
+    result, staged_input = _add_with_provisioning(runner, mock_user_pkg, {})
     assert result.exit_code == 0
-    staged_input = mock_stage.call_args[0][0]
     assert staged_input.password == "S3cur3-p4ss"
+
+
+def test_add_does_not_prompt_once_the_token_was_issued(runner, mock_user_pkg):
+    """A user whose token was already issued only has their projects retried,
+    which needs no password, so none is asked for."""
+    registry = {"alice": {"gitlab_pat_issued": True}}
+    result, staged_input = _add_with_provisioning(runner, mock_user_pkg, registry)
+    assert result.exit_code == 0
+    assert "GitLab password" not in result.output
+    assert staged_input.password is None
+
+
+def test_add_names_a_registered_user_for_the_project_retry(
+    runner, mock_user_pkg, tmp_path, monkeypatch
+):
+    """The real staging hands add_users an already-registered user named
+    with no password: nothing to start, but a GitLab target, which is what
+    makes 'dtaas user add alice --email ...' retry their projects."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "dtaas.users.registry.json").write_text(
+        '{"users": {"alice": {"email": "a@x.io", "gitlab_pat_issued": true}}}'
+    )
+    mock_user_pkg["add"].return_value = None
+    config_obj = mock_user_pkg["config"].return_value
+    config_obj.get_gitlab_provision.return_value = (True, None)
+    config_obj.get_starting_users.return_value = ([], None)
+    result = runner.invoke(dtaas, ["user", "add", "alice", "--email", "a@x.io"])
+    assert result.exit_code == 0
+    kwargs = mock_user_pkg["add"].call_args.kwargs
+    assert (kwargs["start_only"], kwargs["passwords"]) == ([], {"alice": None})
 
 
 _STATUS_ROWS = [

@@ -73,27 +73,20 @@ def _is_empty(project) -> bool:
     return empty or not getattr(project, "default_branch", "")
 
 
-def _has_branch(project, branch: str) -> bool:
-    """True when *branch* is one of *project*'s branches."""
-    try:
-        project.branches.get(branch)
-    except gitlab.exceptions.GitlabError:
-        return False
-    return True
+def _off_template_warning(project, branch: str) -> tuple[str, ...]:
+    """A warning when an adopted project's default branch is not *branch*.
 
-
-def _needs_seeding(project, branch: str) -> bool:
-    """True when an existing project is one a previous run left half seeded.
-
-    That is either a project with no repository at all, or one holding the
-    template branch without having been switched over to it. A project whose
-    content is not the template is the user's own and is never touched.
+    That is either the user's own choice or a run that died between the
+    import and the branch switch; the two look the same from here, so the
+    project is left alone and the way to reseed it is named instead.
     """
-    if _is_empty(project):
-        return True
-    if getattr(project, "default_branch", "") == branch:
-        return False
-    return _has_branch(project, branch)
+    default = getattr(project, "default_branch", "")
+    if default == branch:
+        return ()
+    return (
+        f"its default branch is '{default}', not the template branch "
+        f"'{branch}'; delete the project in GitLab and re-run to reseed it",
+    )
 
 
 def _set_default_branch(project, branch: str) -> str:
@@ -154,13 +147,20 @@ def _seed_project(gl: gitlab.Gitlab, project_id: int, spec: ProjectSpec):
 def _adopt_existing(gl: gitlab.Gitlab, project, spec: ProjectSpec) -> ProjectResult:
     """Report a project the user already owns, or finish seeding it.
 
-    A run that created the project and then failed (a broken or timed out
-    import) leaves it behind. Reporting that project as ready would mark the
-    user done with an empty repository, so its seeding is resumed instead.
+    Only a project with no repository is seeded: that is what a run leaves
+    when it stopped waiting on an import, and reporting it as ready would
+    mark the user done with an empty repository. A project with any content
+    is never touched, since pruning branches could delete the user's work;
+    one left off the template branch is reported with a warning instead.
     """
-    if not _needs_seeding(project, spec.branch):
+    if not _is_empty(project):
         logger.info("GitLab project exists: %s", project.path_with_namespace)
-        return ProjectResult(True, project_id=project.id, already_exists=True)
+        return ProjectResult(
+            True,
+            project_id=project.id,
+            already_exists=True,
+            warnings=_off_template_warning(project, spec.branch),
+        )
     logger.info("Resuming the seeding of %s", project.path_with_namespace)
     return _seed_project(gl, project.id, spec)
 
@@ -197,9 +197,10 @@ def create_user_project(
     """Create *spec*'s project in *user_id*'s namespace, seeded from its branch.
 
     Idempotent: a project of that name already in the user's namespace keeps
-    its contents, so a repeated run never overwrites a user's work. One that
-    an earlier run created but did not finish seeding is finished here rather
-    than reported as ready.
+    its contents, so a repeated run never overwrites a user's work. An empty
+    one, left by an earlier run whose import had not finished, is waited on
+    and seeded here rather than reported as ready; an import that failed is
+    reported with the way to retry it, since GitLab does not rerun it.
 
     Args:
         gl: Authenticated gitlab.Gitlab client with admin rights.

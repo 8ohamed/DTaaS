@@ -42,19 +42,19 @@ def _describe(spec, result):
     says nothing here, since the caller summarises those."""
     if not result.ok:
         return (f"project '{spec.name}' failed: {result.error}",)
-    if result.already_exists:
-        return (f"project '{spec.name}' already exists and was left unchanged",)
-    return tuple(f"project '{spec.name}': {warning}" for warning in result.warnings)
+    left = f"project '{spec.name}' already exists and was left unchanged"
+    head = (left,) if result.already_exists else ()
+    return head + tuple(f"project '{spec.name}': {w}" for w in result.warnings)
 
 
 def ensure_user_projects(gl, user_id: int, templates: ProjectTemplates):
     """Create the common and user projects for the account *user_id*.
 
     Idempotent through projects.create_user_project: a project the user
-    already owns keeps its contents and is never re-imported, and one an
-    earlier run left half seeded is finished. Both projects are attempted
-    even when the first one fails, so a single bad branch name does not hide
-    a second problem.
+    already owns keeps its contents and is never re-imported, and an empty
+    one an earlier run left waiting on its import is finished. Both projects
+    are attempted even when the first one fails, so a single bad branch name
+    does not hide a second problem.
 
     Args:
         gl: Authenticated gitlab.Gitlab client with admin rights.

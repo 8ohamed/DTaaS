@@ -1,6 +1,7 @@
 """Tests for the GitLab provisioning target selection (users_gitlab_targets.py)."""
 
 from unittest.mock import MagicMock
+import pytest
 from src.pkg.users_gitlab_targets import gitlab_candidates, target_usernames
 
 
@@ -15,11 +16,14 @@ def test_target_usernames_start_only_none_means_all_registry_users():
     assert target_usernames(ctx, None, {}) == ["alice", "bob"]
 
 
-def test_target_usernames_adds_a_retry_for_a_user_not_being_started():
-    """Supplying a password again is the explicit retry path for a user whose
-    container is not being restarted, and picks up nobody else."""
+@pytest.mark.parametrize("password", ["pw", None])
+def test_target_usernames_adds_a_retry_for_a_user_not_being_started(password):
+    """Naming a registered user again, with or without a password, is the
+    explicit retry path for a user whose container is not being restarted,
+    and picks up nobody else."""
     ctx = MagicMock(user_list=["alice", "bob"])
-    assert target_usernames(ctx, [], {"alice": "pw", "carol": "pw"}) == ["alice"]
+    named = {"alice": password, "carol": password}
+    assert target_usernames(ctx, [], named) == ["alice"]
 
 
 def test_gitlab_candidates_carry_what_the_registry_records():

@@ -9,6 +9,8 @@ from src.pkg.gitlab.projects import (
     resolve_templates,
 )
 
+# pylint: disable=redefined-outer-name
+
 USERNAME = "alice"
 USER_ID = 7
 TEMPLATES = ProjectTemplates(
@@ -101,5 +103,3 @@ def test_resolve_templates_reports_a_half_configured_block(capsys):
     assert templates is None
     assert "also set gitlab.x" in err
     assert "failed" in capsys.readouterr().out
-
-

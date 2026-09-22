@@ -25,9 +25,10 @@ def target_usernames(ctx, start_only, passwords):
     """Registry users to attempt GitLab provisioning for this run.
 
     Mirrors _provision_users' start_only scoping, plus any already-registered
-    user who supplied a password again this run even though their container
-    isn't being (re)started the explicit retry path after a prior PAT-
-    issuance failure, without touching anyone else.
+    user named again this run (a key of *passwords*, with or without a
+    password) even though their container isn't being (re)started: the
+    explicit retry path after a prior GitLab failure, without touching
+    anyone else.
     """
     if start_only is None:
         started = ctx.user_list

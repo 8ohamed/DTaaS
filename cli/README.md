@@ -683,17 +683,25 @@ branch that cannot be deleted (a protected branch, say) is reported as a
 warning and leaves the project in place. The import runs on the server and
 can take minutes, so each project is announced before the wait.
 
-A project that already holds content of its own is left exactly as it is and
-reported as already existing. A project an earlier run created but did not
-finish seeding (its import broke, timed out, or the run was interrupted) is
-finished on the next run instead of being reported as ready, so a failed run
-never marks a user done with an empty repository.
+A project that already holds any content is left exactly as it is and
+reported as already existing; if its default branch is not the template
+branch, the report says so and how to reseed it (delete the project in
+GitLab and re-run). An empty project left by a run that stopped waiting on
+its import (the wait timed out or the run was interrupted) is finished on the
+next run instead of being reported as ready, so a failed run never marks a
+user done with an empty repository. An import that GitLab reports as failed,
+or never scheduled, is not rerun by GitLab: the error says to delete the
+empty project in GitLab and re-run `dtaas user add`. A GitLab that briefly
+cannot be reached while an import is awaited is retried a few times before
+the user is failed, and other users in the same run are still provisioned.
 
 Once both projects exist the user is marked `gitlab_projects_created` in the
 registry and later runs skip the step. That marker is separate from
 `gitlab_pat_issued`, so a user whose token was issued but whose projects
-failed is retried for the projects alone on the next `dtaas user add`. That
-retry needs no password: only the account half uses one. A failure to create
+failed is retried for the projects alone by naming them again, with
+`dtaas user add alice --email alice@example.org` or by re-running the same
+CSV with `--file`. That retry needs no password: only the account half uses
+one, so no password is prompted for a user whose token was already issued. A failure to create
 either project makes the command exit non-zero, like any other GitLab
 failure.
 

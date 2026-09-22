@@ -48,9 +48,9 @@ dependency on the other, only a shared source location during development.
 | `create_user(gl, *, username, email, password)` | Create a user; returns a `CreateUserResult` with an explicit `CreateOutcome` (CREATED / ALREADY_EXISTS / FAILED) rather than encoding "already exists" as a nullable id. |
 | `create_user_pat(gl, user_id, username, options=None)` | Issue a Personal Access Token. `PatOptions` (name/scopes/expiry) defaults to least-privilege repository scopes; widen explicitly per call site. |
 | `find_user_id(gl, username)` | Resolve an existing account's numeric id, for the accounts `create_user` reports as ALREADY_EXISTS without one. |
-| `create_user_project(gl, user_id, spec)` | Create one project in a user's namespace, seeded from one branch of a template repository (`ProjectSpec`), and report a `ProjectResult`. Imports by URL, then makes that branch the default and deletes the rest. |
+| `create_user_project(gl, user_id, spec)` | Create one project in a user's namespace, seeded from one branch of a template repository (`ProjectSpec`), and report a `ProjectResult`. Imports by URL, then makes that branch the default and deletes the rest. An existing project is seeded only when it is empty; one with content is never changed. |
 | `ensure_user_projects(gl, user_id, templates)` | Create the two projects every DTaaS user gets, `common` and `user`, from one `ProjectTemplates`. Returns `(ok, messages)`; nothing is printed, so each consumer decides what reaches its console. |
-| `await_import(gl, project_id)` | Wait for a project's repository import to finish, used by `create_user_project`. |
+| `await_import(gl, project_id)` | Wait for a project's repository import to finish, used by `create_user_project`. Retries failed reads and returns `(project, error)` instead of raising once `IMPORT_POLL_MAX_ERRORS` fail in a row. |
 
 The project calls need the GitLab instance to have the **Repository by URL**
 import source enabled and to be able to reach the template URL itself. Where

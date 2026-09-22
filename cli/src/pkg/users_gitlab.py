@@ -115,19 +115,21 @@ def _account_skipped(candidate, reason, has_account=True):
 def _account_step(run, candidate):
     """Create one candidate's GitLab account and Personal Access Token.
 
-    Skipped without a password (there is nothing to create an account with)
-    and skipped when the PAT was already issued, since a second token would
-    be live on GitLab with no record of it. Both are skips, not failures, so
-    the projects of an account that already exists can still be created.
+    Skipped when the PAT was already issued, since a second token would be
+    live on GitLab with no record of it, and skipped without a password
+    (there is nothing to create an account with). The PAT check comes first
+    so a finished account is reported as that, not as missing a password.
+    Both are skips, not failures, so the projects of an account that already
+    exists can still be created.
     """
+    if candidate.pat_issued:
+        return _account_skipped(candidate, PAT_ISSUED_NOTICE)
     if not candidate.password:
         return _account_skipped(
             candidate,
             "no password supplied.",
-            has_account=bool(candidate.pat_issued or candidate.existing_user_id),
+            has_account=bool(candidate.existing_user_id),
         )
-    if candidate.pat_issued:
-        return _account_skipped(candidate, PAT_ISSUED_NOTICE)
     result = gitlabPkg.ensure_user_resources(
         run.gl,
         gitlabPkg.GitlabUser(

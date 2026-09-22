@@ -1,15 +1,8 @@
-"""Provisions one user's GitLab account and Personal Access Token, and looks
-up an account this CLI did not create."""
+"""Provisions one user's GitLab account and Personal Access Token."""
 
-import logging
 from dataclasses import dataclass
 
-import gitlab
-import gitlab.exceptions
-
 from ...gitlab_common import CreateOutcome, create_user, create_user_pat
-
-logger = logging.getLogger(__name__)
 
 _ALREADY_EXISTS_MESSAGE = (
     "account already exists on GitLab; it was not created by this "
