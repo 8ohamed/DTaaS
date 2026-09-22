@@ -32,3 +32,9 @@ addopts = "--strict-markers"
 include = ["gitlab_common", "tests"]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
+
+[tool.coverage.run]
+# Report paths relative to this folder (gitlab_common/projects.py rather than
+# a bare projects.py), so Codecov can match them to lib/gitlab_common and not
+# to another projects.py or users.py elsewhere in the repository.
+relative_files = true
