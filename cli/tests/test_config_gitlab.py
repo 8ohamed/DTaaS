@@ -32,7 +32,8 @@ def test_a_partial_template_names_the_missing_keys():
     """Some keys set is a typo, so the problem says which ones are absent."""
     values, problem = gitlab_template_values({"templates_url": "https://x.io/y"})
     assert values is None
-    assert "gitlab.common_branch" in problem and "gitlab.user_branch" in problem
+    assert "gitlab.common_branch" in problem
+    assert "gitlab.user_branch" in problem
 
 
 @pytest.mark.parametrize("key", MINUTE_KEYS)
