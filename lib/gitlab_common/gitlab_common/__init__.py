@@ -13,7 +13,7 @@ template out of a deployment's own configuration is each consumer's.
 """
 
 from .client import get_gitlab_client
-from .project_import import await_import, import_state
+from .project_import import IMPORT_TIMEOUT_MINUTES, await_import, import_state
 from .projects import ProjectResult, ProjectSpec, create_user_project
 from .user_projects import (
     COMMON_PROJECT_NAME,
@@ -44,6 +44,7 @@ __all__ = [
     "create_user_project",
     "ProjectSpec",
     "ProjectResult",
+    "IMPORT_TIMEOUT_MINUTES",
     "await_import",
     "import_state",
     "ensure_user_projects",

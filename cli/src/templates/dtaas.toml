@@ -91,6 +91,15 @@ ssl_verify=true
 templates_url="https://github.com/into-cps-association/DTaaS-Examples"
 common_branch="common-template"
 user_branch="user-template"
+# Minutes to wait for one repository import before giving up on it and
+# failing that project. Optional, independent of the three keys above, and
+# 10 when left out. Lower it when a slow template would otherwise hold a
+# bulk 'user add' for ten minutes per project.
+import_timeout=10
+# Minutes a whole 'dtaas user add' run may spend waiting on imports before
+# it stops starting new users, reporting the rest as not attempted (re-run
+# for them). Optional, 60 when left out.
+import_deadline=60
 
 # Installation-specific configuration
 # For non-localhost deployments, the starting usernames (USERNAME1,

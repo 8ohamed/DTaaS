@@ -1,12 +1,44 @@
 """Picks the users a 'user add' run attempts GitLab provisioning for.
 
 The selection half of users_gitlab.py, which does the provisioning itself:
-which registry users are in scope this run, and what the registry already
-records about each of them. Kept apart so each module stays within a
-reasonable line count, mirroring the users.py / users_compose.py split.
+which registry users are in scope this run, what the registry already
+records about each of them, and how long the run may go on starting new
+ones. Kept apart so each module stays within a reasonable line count,
+mirroring the users.py / users_compose.py split.
 """
 
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
+
+# How long a run may spend before it stops starting new users, unless
+# [gitlab].import_deadline says otherwise. Each project waits on a server
+# side import, so without a budget a bulk add on an instance whose imports
+# hang would hold the command for hours.
+RUN_DEADLINE_MINUTES = 60
+
+
+@dataclass
+class RunDeadline:
+    """The clock a GitLab run stops starting new users by.
+
+    Started when the run does, so the budget covers the whole run rather
+    than any single import; users not reached are left for the next run.
+    """
+
+    minutes: int = RUN_DEADLINE_MINUTES
+    started: float = field(default_factory=time.monotonic)
+
+    def passed(self):
+        """True once the run has been going longer than its budget."""
+        return time.monotonic() - self.started > self.minutes * 60
+
+
+def not_attempted_notice(usernames):
+    """The line reporting the users a run stopped short of."""
+    return (
+        "GitLab provisioning stopped after the run's import deadline; not "
+        f"attempted: {', '.join(usernames)}. Re-run 'dtaas user add' for them."
+    )
 
 
 @dataclass
@@ -19,6 +51,23 @@ class GitlabCandidate:
     password: object
     pat_issued: bool = False
     projects_created: bool = False
+
+
+def has_gitlab_work(candidate, wants_projects):
+    """True when this candidate has GitLab work left to attempt.
+
+    A password means an account to create; without one there is still the
+    project half to retry, but only for a user who has an account already
+    and only where a template is configured at all. Neither leaves nothing
+    to do, so a client that cannot be built is not their failure to carry:
+    a deployment that provisions accounts without repositories never fails
+    a user whose token was issued long ago.
+    """
+    if candidate.password:
+        return True
+    if not wants_projects or candidate.projects_created:
+        return False
+    return bool(candidate.pat_issued or candidate.existing_user_id)
 
 
 def target_usernames(ctx, start_only, passwords):

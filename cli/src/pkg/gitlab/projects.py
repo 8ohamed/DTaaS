@@ -14,6 +14,7 @@ import click
 
 from ...gitlab_common import (
     COMMON_PROJECT_NAME,
+    IMPORT_TIMEOUT_MINUTES,
     USER_PROJECT_NAME,
     ProjectTemplates,
     ensure_user_projects,
@@ -33,6 +34,9 @@ def resolve_templates(config_obj):
     Mirrors client.resolve_client: the one place the deployment's config is
     turned into what the project calls below need.
 
+    [gitlab].import_timeout rides along here: it is optional and independent
+    of the template keys, so a missing one keeps gitlab_common's default.
+
     Returns:
         Tuple of (templates, error). Both are empty when dtaas.toml
         configures no template at all, a supported opt out reported here as
@@ -41,6 +45,8 @@ def resolve_templates(config_obj):
         yields the error text and the caller fails the users it affects.
     """
     values, err = config_obj.get_gitlab_templates()
+    timeout, timeout_err = config_obj.get_gitlab_import_timeout()
+    err = err or timeout_err
     if err is not None:
         click.echo(f"GitLab project creation failed: {err}")
         return None, str(err)
@@ -48,7 +54,10 @@ def resolve_templates(config_obj):
         click.echo(NO_TEMPLATE_NOTICE)
         return None, ""
     templates = ProjectTemplates(
-        values["templates_url"], values["common_branch"], values["user_branch"]
+        values["templates_url"],
+        values["common_branch"],
+        values["user_branch"],
+        timeout or IMPORT_TIMEOUT_MINUTES,
     )
     return templates, ""
 
@@ -66,18 +75,18 @@ class ProjectTarget:
 def _resolve_user_id(gl, target):
     """*target*'s GitLab id, looked up by username when it is not known.
 
-    The lookup is reported without saying whose account it is: an id missing
-    from the registry means an account this CLI did not create, but also one
-    it created before the id reached the registry, and the two are not
-    distinguishable from here.
+    Only accounts this CLI created reach here (an account that already
+    existed is reported and left alone, projects included), so the lookup
+    covers the one case its caller cannot supply an id for: an account
+    created before its id reached the registry.
     """
     if target.user_id is not None:
         return target.user_id
     user_id = find_user_id(gl, target.username)
     if user_id is not None:
         click.echo(
-            f"Note: the GitLab id for '{target.username}' was resolved by "
-            "username; the projects are created in that account's namespace."
+            f"Note: the GitLab id for '{target.username}' was not in the "
+            "registry and was resolved by username."
         )
     return user_id
 

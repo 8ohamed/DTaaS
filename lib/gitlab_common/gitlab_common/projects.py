@@ -21,7 +21,8 @@ from dataclasses import dataclass
 import gitlab
 import gitlab.exceptions
 
-from .project_import import await_import
+from .errors import API_ERRORS
+from .project_import import IMPORT_TIMEOUT_MINUTES, await_import
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +30,22 @@ logger = logging.getLogger(__name__)
 # template's own visibility is not inherited by an import.
 PROJECT_VISIBILITY = "private"
 
+NO_IMPORT_TO_AWAIT = (
+    "project exists but is empty and has no import to wait for; delete it in "
+    "GitLab and re-run to create it from the template"
+)
+
 
 @dataclass(frozen=True)
 class ProjectSpec:
     """One project to create: its name, the template repository to import,
-    and the single branch of that template to keep."""
+    the single branch of that template to keep, and how long its import may
+    take before the wait is given up on."""
 
     name: str
     import_url: str
     branch: str
+    import_timeout: int = IMPORT_TIMEOUT_MINUTES
 
 
 @dataclass(frozen=True)
@@ -102,7 +110,7 @@ def _set_default_branch(project, branch: str) -> str:
         project.save()
     except gitlab.exceptions.GitlabGetError:
         return f"branch '{branch}' is not in the imported template"
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return f"could not set the default branch to '{branch}': {exc}"
     return ""
 
@@ -115,11 +123,11 @@ def _delete_branch(project, name: str) -> str:
     """
     try:
         project.protectedbranches.delete(name)
-    except gitlab.exceptions.GitlabError:
+    except API_ERRORS:
         logger.debug("Branch '%s' was not protected", name)
     try:
         project.branches.delete(name)
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return f"could not delete template branch '{name}': {exc}"
     return ""
 
@@ -128,14 +136,14 @@ def _prune_branches(project, keep: str) -> tuple[str, ...]:
     """Delete every branch except *keep*, returning one warning per failure."""
     try:
         names = [b.name for b in project.branches.list(iterator=True) if b.name != keep]
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return (f"could not list the imported branches: {exc}",)
     return tuple(w for w in (_delete_branch(project, n) for n in names) if w)
 
 
 def _seed_project(gl: gitlab.Gitlab, project_id: int, spec: ProjectSpec):
     """Reduce the freshly imported *project_id* to *spec*'s single branch."""
-    project, error = await_import(gl, project_id)
+    project, error = await_import(gl, project_id, spec.import_timeout)
     if not error:
         error = _set_default_branch(project, spec.branch)
     if error:
@@ -163,6 +171,8 @@ def _adopt_existing(gl: gitlab.Gitlab, project, spec: ProjectSpec) -> ProjectRes
             already_exists=True,
             warnings=(warning,) if warning else (),
         )
+    if getattr(project, "import_status", "none") == "none":
+        return ProjectResult(False, project_id=project.id, error=NO_IMPORT_TO_AWAIT)
     logger.info("Resuming the seeding of %s", project.path_with_namespace)
     return _seed_project(gl, project.id, spec)
 
@@ -188,7 +198,7 @@ def _user_project(gl: gitlab.Gitlab, user_id: int, spec: ProjectSpec):
                 "visibility": PROJECT_VISIBILITY,
             }
         )
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return None, False, f"could not create project '{spec.name}': {exc}"
     return created, True, ""
 

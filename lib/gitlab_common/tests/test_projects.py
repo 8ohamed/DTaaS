@@ -3,9 +3,12 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 
+import pytest
+import requests
 from gitlab.exceptions import GitlabCreateError, GitlabDeleteError, GitlabGetError
+from gitlab_common import project_import
 from gitlab_common.project_import import IMPORT_RETRY_HINT
-from gitlab_common.projects import ProjectSpec, create_user_project
+from gitlab_common.projects import NO_IMPORT_TO_AWAIT, ProjectSpec, create_user_project
 
 PROJECT_ID = 42
 USER_ID = 7
@@ -147,6 +150,60 @@ def test_create_user_project_names_the_retry_for_a_dead_import():
     result = create_user_project(gl, USER_ID, SPEC)
     assert result.ok is False
     assert IMPORT_RETRY_HINT in result.error
+
+
+def test_create_user_project_reports_an_empty_project_of_nobodys_making():
+    """An empty project that was never imported from anywhere (a user made it
+    themselves) is not an import this run can wait on, so it is reported as
+    what it is rather than as a disabled import source on the instance."""
+    project = _owned(default_branch=None, empty_repo=True)
+    project.import_status = "none"
+    gl, _, _ = _client(project=project, existing=True)
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is False
+    assert result.error == NO_IMPORT_TO_AWAIT
+    assert "Repository by URL" not in result.error
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        requests.ConnectionError("connection reset"),
+        GitlabCreateError("500 Internal Server Error", response_code=500),
+    ],
+)
+def test_create_user_project_reports_a_dropped_connection(failure):
+    """A network failure while creating is this project's error, not an
+    exception: the caller's remaining users are still provisioned."""
+    gl, user, _ = _client()
+    user.projects.create.side_effect = failure
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is False
+    assert "could not create project 'user'" in result.error
+
+
+def test_create_user_project_reports_a_dropped_connection_while_pruning():
+    """The same holds for the branch work after the import, which runs
+    against the same unreachable GitLab."""
+    gl, _, project = _client()
+    project.branches.list.side_effect = requests.ConnectionError("connection reset")
+    result = create_user_project(gl, USER_ID, SPEC)
+    assert result.ok is True
+    assert "could not list the imported branches" in result.warnings[0]
+
+
+def test_create_user_project_waits_only_as_long_as_the_spec_allows(monkeypatch):
+    """The budget on the spec is the one the import wait uses, so an operator
+    who caps it is not held for the default ten minutes per project."""
+    monkeypatch.setattr(project_import, "IMPORT_POLL_SECONDS", 60)
+    gl, _, project = _client(project=_project(import_status="started"))
+    spec = ProjectSpec("user", TEMPLATE_URL, BRANCH, import_timeout=2)
+    result = create_user_project(gl, USER_ID, spec)
+    assert result.ok is False
+    assert "timed out" in result.error
+    polls = gl.projects.get.call_count - 1  # the first read is the namespace lookup
+    assert polls == 2
+    project.branches.delete.assert_not_called()
 
 
 def test_create_user_project_reports_an_unscheduled_import():

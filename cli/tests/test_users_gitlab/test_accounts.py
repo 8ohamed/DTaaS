@@ -194,6 +194,60 @@ def test_add_users_gitlab_already_exists_warns_but_is_not_a_command_failure(
 
 
 @pytest.mark.usefixtures("mock_utils", "mock_user_operations")
+def test_add_users_stops_at_the_run_deadline(mock_config, mock_registry, capsys):
+    """Each user's projects wait on a server side import, so a run that has
+    spent its budget stops starting new ones. Those it did not reach are
+    named and left for the next run, not reported as failures."""
+    mock_config.get_gitlab_provision.return_value = (True, None)
+    mock_registry["load"].return_value = {
+        "alice": {"email": "a@x.io"},
+        "bob": {"email": "b@x.io"},
+    }
+    passwords = {"alice": "S3cur3-p4ss", "bob": "S3cur3-p4ss"}
+    with patch("src.pkg.users_gitlab.RunDeadline") as deadline, patch(
+        "src.pkg.users_gitlab.gitlabPkg.resolve_client", return_value=(MagicMock(), None)
+    ), patch(
+        "src.pkg.users_gitlab.gitlabPkg.ensure_user_resources",
+        return_value=ProvisionResult("alice", True, "created", "glpat-token", user_id=1),
+    ) as ensure, patch(
+        "src.pkg.users_gitlab_records.utils.write_secret_file"
+    ), patch("src.pkg.users_gitlab_records.set_gitlab_pat_issued"), patch(
+        "src.pkg.users_gitlab_records.set_gitlab_user_ids"
+    ):
+        deadline.return_value.passed.side_effect = [False, True]
+        err = users.add_users(
+            mock_config, start_only=["alice", "bob"], passwords=passwords
+        )
+
+    assert err is None
+    assert ensure.call_count == 1
+    out = capsys.readouterr().out
+    assert "not attempted: bob" in out
+    assert "Re-run" in out
+
+
+@pytest.mark.usefixtures("mock_utils", "mock_user_operations")
+def test_add_users_without_a_template_does_not_fail_a_finished_user(
+    mock_config, mock_registry, capsys
+):
+    """A deployment that provisions accounts without repositories never sets
+    gitlab_projects_created, so a user whose token was issued long ago has
+    nothing left to do. An unusable client must not fail them for it."""
+    mock_config.get_gitlab_provision.return_value = (True, None)
+    mock_config.get_gitlab_templates.return_value = (None, None)
+    mock_registry["load"].return_value = {
+        "alice": {"email": "a@x.io", "gitlab_user_id": 42, "gitlab_pat_issued": True}
+    }
+    with patch(
+        "src.pkg.users_gitlab.gitlabPkg.resolve_client",
+        return_value=(None, Exception("no PAT configured")),
+    ):
+        err = users.add_users(mock_config, start_only=[], passwords={"alice": None})
+    assert err is None
+    assert "skipped" in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("mock_utils", "mock_user_operations")
 @pytest.mark.parametrize("details,fails", [({}, False), ({"gitlab_user_id": 42}, True)])
 def test_add_users_without_passwords_client_error_fails_only_pending_work(
     mock_config, mock_registry, capsys, details, fails

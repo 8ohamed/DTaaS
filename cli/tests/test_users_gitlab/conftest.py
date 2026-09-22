@@ -33,6 +33,8 @@ def mock_config():
     mock.get_set_limits.return_value = (True, None)
     mock.get_gitlab_provision.return_value = (False, None)
     mock.get_gitlab_templates.return_value = (dict(TEMPLATE_KEYS), None)
+    mock.get_gitlab_import_timeout.return_value = (None, None)
+    mock.get_gitlab_import_deadline.return_value = (None, None)
     return mock
 
 

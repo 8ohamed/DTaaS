@@ -6,7 +6,7 @@ problems and an acceptable value returns an empty list, so 'dtaas config
 validate' can report all of them at once.
 """
 
-from .config import gitlab_template_values
+from .config_gitlab import MINUTE_KEYS, gitlab_minutes, gitlab_template_values
 from .validators import get_nested, is_url, optional, required
 
 
@@ -44,7 +44,7 @@ def _gitlab_template_errors(data, gitlab):
     Leaving the whole template out is a valid choice (project creation is
     then skipped), but setting only part of it is a mistake worth catching
     before 'user add' runs. The completeness rule itself lives in
-    config.gitlab_template_values, which reads the same keys at run time.
+    config_gitlab.gitlab_template_values, which reads the keys at run time.
     """
     message = "gitlab.templates_url must be a valid URL"
     errors = optional(data, ("gitlab", "templates_url"), (is_url, message))
@@ -52,6 +52,13 @@ def _gitlab_template_errors(data, gitlab):
     if problem:
         errors.append(problem)
     return errors
+
+
+def _gitlab_minutes_errors(gitlab):
+    """Check the [gitlab] keys given in minutes: the per import wait and the
+    whole run's budget for waiting on imports."""
+    problems = (gitlab_minutes(gitlab, key)[1] for key in MINUTE_KEYS)
+    return [problem for problem in problems if problem]
 
 
 def check_gitlab(data):
@@ -74,4 +81,5 @@ def check_gitlab(data):
     errors += _gitlab_pat_errors(gitlab)
     errors += _gitlab_ssl_verify_errors(gitlab)
     errors += _gitlab_template_errors(data, gitlab)
+    errors += _gitlab_minutes_errors(gitlab)
     return errors

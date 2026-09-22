@@ -13,6 +13,7 @@ caller to print, log or ignore.
 
 from dataclasses import dataclass
 
+from .project_import import IMPORT_TIMEOUT_MINUTES
 from .projects import ProjectSpec, create_user_project
 
 COMMON_PROJECT_NAME = "common"
@@ -21,19 +22,23 @@ USER_PROJECT_NAME = "user"
 
 @dataclass(frozen=True)
 class ProjectTemplates:
-    """One template repository, and the branch of it each of the two projects
-    is seeded from."""
+    """One template repository, the branch of it each of the two projects is
+    seeded from, and how long one import may take before it is given up on."""
 
     url: str
     common_branch: str
     user_branch: str
+    import_timeout: int = IMPORT_TIMEOUT_MINUTES
 
 
 def project_specs(templates: ProjectTemplates):
     """The two projects every provisioned user gets, in creation order."""
+    timeout = templates.import_timeout
     return [
-        ProjectSpec(COMMON_PROJECT_NAME, templates.url, templates.common_branch),
-        ProjectSpec(USER_PROJECT_NAME, templates.url, templates.user_branch),
+        ProjectSpec(
+            COMMON_PROJECT_NAME, templates.url, templates.common_branch, timeout
+        ),
+        ProjectSpec(USER_PROJECT_NAME, templates.url, templates.user_branch, timeout),
     ]
 
 

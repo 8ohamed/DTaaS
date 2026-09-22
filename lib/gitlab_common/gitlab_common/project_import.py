@@ -17,21 +17,21 @@ from dataclasses import dataclass
 from typing import Any
 
 import gitlab
-import gitlab.exceptions
-import requests
+
+from .errors import API_ERRORS
 
 logger = logging.getLogger(__name__)
 
-# Poll budget for the asynchronous repository import: 300 attempts, 2 seconds
-# apart, so a slow template clone has 10 minutes before it is given up on.
+# The repository import is polled every IMPORT_POLL_SECONDS until the caller's
+# budget in minutes runs out. A slow template clone can take minutes, so the
+# default is generous; a caller that cannot afford the wait passes its own.
 IMPORT_POLL_SECONDS = 2
-IMPORT_POLL_ATTEMPTS = 300
+IMPORT_TIMEOUT_MINUTES = 10
 
-# A poll that cannot reach GitLab is retried, so one transient error in a
-# long wait does not fail the user; this many in a row ends the wait. A
-# dropped connection is a requests error, which python-gitlab does not wrap.
+# A call that cannot reach GitLab is retried, so one transient error in a
+# long wait does not fail the user; this many in a row ends the wait. Which
+# failures count is errors.API_ERRORS, the same set every call here catches.
 IMPORT_POLL_MAX_ERRORS = 3
-POLL_ERRORS = (gitlab.exceptions.GitlabError, requests.RequestException)
 
 # GitLab never reruns an import that failed or never started, so the empty
 # project it leaves behind has to go before a new import can be made.
@@ -78,7 +78,7 @@ def _poll_once(gl: gitlab.Gitlab, project_id: int, poll: _Poll) -> str | None:
     """
     try:
         poll.project = gl.projects.get(project_id)
-    except POLL_ERRORS as exc:
+    except API_ERRORS as exc:
         poll.errors += 1
         logger.warning("Could not read the import status: %s", exc)
         if poll.errors < IMPORT_POLL_MAX_ERRORS:
@@ -88,8 +88,20 @@ def _poll_once(gl: gitlab.Gitlab, project_id: int, poll: _Poll) -> str | None:
     return import_state(poll.project)
 
 
-def await_import(gl: gitlab.Gitlab, project_id: int):
+def _attempts(timeout_minutes: int) -> int:
+    """How many polls fit in *timeout_minutes*, at least one."""
+    return max(1, int(timeout_minutes * 60 / IMPORT_POLL_SECONDS))
+
+
+def await_import(
+    gl: gitlab.Gitlab, project_id: int, timeout_minutes: int = IMPORT_TIMEOUT_MINUTES
+):
     """Poll *project_id* until its repository import finishes.
+
+    Args:
+        gl: Authenticated gitlab.Gitlab client.
+        project_id: The project whose import is awaited.
+        timeout_minutes: How long to wait before giving up on this import.
 
     Returns:
         Tuple of (project, error); *error* is empty when the repository is
@@ -99,7 +111,7 @@ def await_import(gl: gitlab.Gitlab, project_id: int):
         this project, not for the rest of the caller's users.
     """
     poll = _Poll()
-    for _ in range(IMPORT_POLL_ATTEMPTS):
+    for _ in range(_attempts(timeout_minutes)):
         state = _poll_once(gl, project_id, poll)
         if state is not None:
             return poll.project, state

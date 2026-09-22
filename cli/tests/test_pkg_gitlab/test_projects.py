@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 import pytest
-from src.gitlab_common import ProjectTemplates
+from src.gitlab_common import IMPORT_TIMEOUT_MINUTES, ProjectTemplates
 from src.pkg.gitlab.projects import (
     ProjectTarget,
     provision_user_projects,
@@ -13,10 +13,15 @@ from src.pkg.gitlab.projects import (
 
 USERNAME = "alice"
 USER_ID = 7
+TEMPLATE_VALUES = {
+    "templates_url": "https://github.com/into-cps-association/DTaaS-Examples",
+    "common_branch": "common-template",
+    "user_branch": "user-template",
+}
 TEMPLATES = ProjectTemplates(
-    "https://github.com/into-cps-association/DTaaS-Examples",
-    "common-template",
-    "user-template",
+    TEMPLATE_VALUES["templates_url"],
+    TEMPLATE_VALUES["common_branch"],
+    TEMPLATE_VALUES["user_branch"],
 )
 
 
@@ -67,26 +72,47 @@ def test_provision_user_projects_without_an_id_fails(mock_pair, capsys):
     assert "could not be resolved" in capsys.readouterr().out
 
 
-def _config(values=None, err=None):
-    """A config object returning one get_gitlab_templates outcome."""
+def _config(values=None, err=None, timeout=(None, None)):
+    """A config object returning one get_gitlab_templates outcome, and the
+    optional import_timeout that rides along with it."""
     config_obj = MagicMock()
     config_obj.get_gitlab_templates.return_value = (values, err)
+    config_obj.get_gitlab_import_timeout.return_value = timeout
     return config_obj
 
 
 def test_resolve_templates_reads_the_three_keys():
     """The [gitlab] template keys become the settings the project calls take."""
-    templates, err = resolve_templates(
-        _config(
-            {
-                "templates_url": TEMPLATES.url,
-                "common_branch": "common-template",
-                "user_branch": "user-template",
-            }
-        )
-    )
+    templates, err = resolve_templates(_config(dict(TEMPLATE_VALUES)))
     assert err == ""
     assert templates == TEMPLATES
+
+
+def test_resolve_templates_carries_the_import_budget():
+    """[gitlab].import_timeout rides along with the template, so an operator
+    can cap a wait that would otherwise hold the run for ten minutes."""
+    config_obj = _config(dict(TEMPLATE_VALUES), timeout=(3, None))
+    templates, err = resolve_templates(config_obj)
+    assert err == ""
+    assert templates.import_timeout == 3
+
+
+def test_resolve_templates_without_a_budget_keeps_the_default():
+    """The key is optional: unset leaves gitlab_common's own default."""
+    templates, _err = resolve_templates(_config(dict(TEMPLATE_VALUES)))
+    assert templates.import_timeout == IMPORT_TIMEOUT_MINUTES
+
+
+def test_resolve_templates_reports_a_bad_import_budget(capsys):
+    """A template that is fine but a budget that is not still fails the
+    users it affects, the same way a half configured template does."""
+    config_obj = _config(
+        dict(TEMPLATE_VALUES), timeout=(None, Exception("import_timeout must be"))
+    )
+    templates, err = resolve_templates(config_obj)
+    assert templates is None
+    assert "import_timeout" in err
+    assert "failed" in capsys.readouterr().out
 
 
 def test_resolve_templates_treats_no_template_as_an_opt_out(capsys):

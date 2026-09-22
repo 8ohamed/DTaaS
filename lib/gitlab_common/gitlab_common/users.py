@@ -9,6 +9,8 @@ from typing import Sequence, Tuple
 import gitlab
 import gitlab.exceptions
 
+from .errors import API_ERRORS
+
 from .validators import validate_user_row
 
 logger = logging.getLogger(__name__)
@@ -76,8 +78,10 @@ def create_user(
         outcome is :attr:`CreateOutcome.ALREADY_EXISTS`: the account belongs to
         whoever registered it, **the supplied password is not applied**, and no
         credentials are changed. Do not treat that outcome as "these
-        credentials are now live"; ``user_id`` is None and callers should not
-        issue a token against an account they did not create.
+        credentials are now live"; ``user_id`` is None and callers should
+        neither issue a token against, nor create projects in, an account
+        they did not create: both act on a namespace whose owner is unknown
+        to this run.
 
     Args:
         gl: Authenticated gitlab.Gitlab client.
@@ -110,7 +114,7 @@ def create_user(
         return CreateUserResult(
             CreateOutcome.FAILED, error=f"Failed to create user '{username}': {exc}"
         )
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return CreateUserResult(
             CreateOutcome.FAILED, error=f"Failed to create user '{username}': {exc}"
         )
@@ -153,7 +157,7 @@ def create_user_pat(
         if not token:
             return False, f"Empty token in PAT response for '{username}'"
         return True, token
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         return False, f"Failed to create PAT for '{username}': {exc}"
 
 
@@ -171,7 +175,7 @@ def find_user_id(gl: gitlab.Gitlab, username: str) -> int | None:
     """
     try:
         users = gl.users.list(username=username)
-    except gitlab.exceptions.GitlabError as exc:
+    except API_ERRORS as exc:
         logger.warning("Failed to look up GitLab user '%s': %s", username, exc)
         return None
     return users[0].id if users else None

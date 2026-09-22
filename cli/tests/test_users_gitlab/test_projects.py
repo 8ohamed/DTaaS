@@ -56,18 +56,21 @@ def test_add_users_creates_projects_although_the_pat_was_issued(
     assert mock_gitlab_projects.call_args.args[1].user_id == 42
 
 
-def test_add_users_creates_projects_for_a_pre_existing_account(
-    mock_config, mock_registry, gitlab_env, mock_gitlab_projects
+def test_add_users_skips_projects_for_an_account_it_did_not_create(
+    mock_config, mock_registry, gitlab_env, mock_gitlab_projects, capsys
 ):
-    """An account this run did not create still gets its projects; with no id
-    to hand, the project step is left to resolve it by username."""
+    """An account that already existed belongs to whoever registered it, so
+    no repositories are written into its namespace, for the same reason no
+    token is issued for it. It is a warning, not a command failure."""
     gitlab_env["ensure"].return_value = ProvisionResult(
         "alice", True, "account already exists", already_exists=True
     )
     err = _run_add(mock_config, mock_registry, {"email": "a@x.io"})
 
     assert err is None
-    assert mock_gitlab_projects.call_args.args[1].user_id is None
+    mock_gitlab_projects.assert_not_called()
+    gitlab_env["projects_created"].assert_not_called()
+    assert "Warning" in capsys.readouterr().out
 
 
 def test_add_users_project_failure_fails_the_command(

@@ -5,6 +5,7 @@ every problem at once, so these cover the section as a user meets it.
 """
 
 import copy
+import pytest
 from src.pkg.config_validate import collect_errors
 
 
@@ -99,6 +100,23 @@ def test_gitlab_template_rejects_a_blank_value(base):
         "user_branch": "u",
     }
     assert [e for e in collect_errors(bad) if "gitlab.common_branch" in e]
+
+
+@pytest.mark.parametrize("key", ["import_timeout", "import_deadline"])
+def test_gitlab_minute_keys_must_be_whole_minutes(base, key):
+    """A bad wait budget is caught by 'config validate', like the template
+    keys, rather than at 'user add'."""
+    bad = copy.deepcopy(base)
+    bad["gitlab"] = {key: "ten"}
+    assert [e for e in collect_errors(bad) if f"gitlab.{key}" in e]
+
+
+def test_gitlab_minute_keys_accept_minutes(base):
+    """Positive whole minutes validate cleanly on their own: both keys are
+    independent of the template keys."""
+    ok = copy.deepcopy(base)
+    ok["gitlab"] = {"import_timeout": 20, "import_deadline": 90}
+    assert collect_errors(ok) == []
 
 
 def test_gitlab_template_values_accepted(base):

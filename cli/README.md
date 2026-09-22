@@ -672,6 +672,16 @@ them quietly without repositories (their accounts and tokens are still
 provisioned and kept). Point the keys at your own repository and branches to
 hand new users a different starting point.
 
+Each import is waited on for `[gitlab].import_timeout` minutes (10 by
+default) and a whole run stops starting new users once it has spent
+`[gitlab].import_deadline` minutes (60 by default). Both keys are optional
+and independent of the three template keys. Two projects per user are
+created one after another, so without the deadline a bulk `--file` add of
+many users on a GitLab whose imports hang would hold the command for hours.
+Users the run does not reach are named on the console and left for the next
+run: nothing was attempted for them, so the command still exits 0 and a
+plain re-run picks them up.
+
 GitLab imports the template repository itself, which has two consequences for
 a self-hosted instance: the **Repository by URL** import source must be
 enabled (Admin Area, Settings, General, Import and export settings) and the
@@ -689,9 +699,14 @@ branch, the report says so and how to reseed it (delete the project in
 GitLab and re-run). An empty project left by a run that stopped waiting on
 its import (the wait timed out or the run was interrupted) is finished on the
 next run instead of being reported as ready, so a failed run never marks a
-user done with an empty repository. An import that GitLab reports as failed,
+user done with an empty repository. A GitLab that cannot be reached at all
+fails only the user being provisioned at the time, whether the connection
+drops during the account half or the project half, and the run carries on
+with the others. An import that GitLab reports as failed,
 or never scheduled, is not rerun by GitLab: the error says to delete the
-empty project in GitLab and re-run `dtaas user add`. A GitLab that briefly
+empty project in GitLab and re-run `dtaas user add`. An empty project that
+was never imported from anywhere (one a user created themselves) is reported
+as exactly that, rather than as a disabled import source. A GitLab that briefly
 cannot be reached while an import is awaited is retried a few times before
 the user is failed, and other users in the same run are still provisioned.
 
@@ -745,11 +760,12 @@ a password when provisioning is enabled has their account step skipped with
 a warning; if they already have an account, their projects are still
 attempted, which is what makes a project-only retry work without
 credentials. An already-existing GitLab account is left with its current
-password and issued no new token, and is reported with an explicit warning
-(its credentials were not created by this run and are unknown to it) rather
-than as an unremarkable success. Its `common` and `user` projects are still
-created: the account is looked up by username, and the CLI says so before
-creating them.
+password, issued no new token and given no projects, and is reported with an
+explicit warning (its credentials were not created by this run and are
+unknown to it) rather than as an unremarkable success. Its namespace belongs
+to whoever registered the account, so this run writes nothing into it: to
+give such a user the standard repositories, create them in GitLab or hand
+the account over to an account this CLI creates.
 Container provisioning is unaffected by any
 GitLab outcome containers are already up by the time GitLab provisioning
 runs but a GitLab failure (a missing/skipped password does not count) now

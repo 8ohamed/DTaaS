@@ -68,14 +68,24 @@ def test_await_import_polls_until_the_import_finishes():
     assert gl.projects.get.call_count == 3
 
 
-def test_await_import_gives_up_on_a_stuck_import(monkeypatch):
-    """An import that never finishes fails instead of hanging forever."""
-    monkeypatch.setattr(project_import, "IMPORT_POLL_ATTEMPTS", 2)
+def test_await_import_gives_up_when_the_budget_runs_out(monkeypatch):
+    """An import that never finishes fails instead of hanging forever, after
+    as many polls as the caller's budget in minutes allows."""
+    monkeypatch.setattr(project_import, "IMPORT_POLL_SECONDS", 60)
     gl = MagicMock()
     gl.projects.get.return_value = _project("started")
-    _project_obj, error = await_import(gl, PROJECT_ID)
+    _project_obj, error = await_import(gl, PROJECT_ID, timeout_minutes=2)
     assert "timed out" in error
     assert gl.projects.get.call_count == 2
+
+
+def test_await_import_polls_at_least_once(monkeypatch):
+    """A budget smaller than one interval still reads the status once, so a
+    finished import is never missed for want of time."""
+    monkeypatch.setattr(project_import, "IMPORT_POLL_SECONDS", 60)
+    gl = MagicMock()
+    gl.projects.get.return_value = _project("finished")
+    assert await_import(gl, PROJECT_ID, timeout_minutes=0)[1] == ""
 
 
 def _reads(*outcomes):

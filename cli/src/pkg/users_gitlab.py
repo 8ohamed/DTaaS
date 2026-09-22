@@ -14,12 +14,18 @@ decided in users_gitlab_targets.py, and the disk writes live in
 users_gitlab_records.py.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 import click
 from . import gitlab as gitlabPkg
 from . import utils
 from .constants import GITLAB_USER_TOKENS_FILE
 from .users_gitlab_records import persist_account_result, persist_projects_result
+from .users_gitlab_targets import (
+    RUN_DEADLINE_MINUTES,
+    RunDeadline,
+    has_gitlab_work,
+    not_attempted_notice,
+)
 
 PAT_ISSUED_NOTICE = (
     "a Personal Access Token was already issued on an earlier run (see "
@@ -31,9 +37,10 @@ PAT_ISSUED_NOTICE = (
 class _GitlabUserResult:
     """Outcome of provisioning one GitlabCandidate.
 
-    *has_account* is False only when the account step was skipped for want of
-    a password and the candidate has no account from an earlier run: there is
-    then no namespace for the projects to be created in.
+    *has_account* is False when this run has no account of its own to create
+    projects in: the account step was skipped for want of a password and no
+    earlier run left one, or the account turned out to exist already and so
+    belongs to whoever registered it.
     """
 
     username: str
@@ -63,27 +70,13 @@ class _GitlabRun:
     gl: object
     templates: object
     template_error: str = ""
+    deadline: RunDeadline = field(default_factory=RunDeadline)
 
     @property
     def wants_projects(self):
         """False only when dtaas.toml configures no template at all, the one
         case in which skipping the project step is what the admin asked for."""
         return self.templates is not None or bool(self.template_error)
-
-
-def _has_gitlab_work(candidate):
-    """True when this candidate has GitLab work left to attempt.
-
-    A password means an account to create; without one there is still the
-    project half to retry, but only for a user who has an account already.
-    Neither leaves nothing to do, so a client that cannot be built is not
-    their failure to carry.
-    """
-    if candidate.password:
-        return True
-    if candidate.projects_created:
-        return False
-    return bool(candidate.pat_issued or candidate.existing_user_id)
 
 
 def _report_account(username, result):
@@ -144,14 +137,16 @@ def _account_step(run, candidate):
         _changed_user_id(result, candidate.existing_user_id),
         _report_account(candidate.username, result),
         not result.ok,
+        has_account=not result.already_exists,
     )
 
 
 def _skip_projects(run, candidate, account):
     """True when the project step has nothing to do for this candidate.
 
-    No template configured, no account for the projects to belong to, an
-    account step that failed, or projects an earlier run already created.
+    No template configured, no account of this CLI's own for the projects to
+    belong to, an account step that failed, or projects an earlier run
+    already created.
     """
     return (
         not run.wants_projects
@@ -201,8 +196,19 @@ def _provision_one_gitlab_user(run, candidate):
 
 
 def _issue_gitlab_resources(run, candidates):
-    """Provision every candidate and return the usernames that failed."""
-    results = [_provision_one_gitlab_user(run, candidate) for candidate in candidates]
+    """Provision candidates until the run's deadline, returning who failed.
+
+    Each user's projects wait on a server side import, so a long list on an
+    instance whose imports hang would hold the command for hours. Users the
+    run does not reach are reported and left for the next one rather than
+    failed: nothing was attempted for them.
+    """
+    results = []
+    for index, candidate in enumerate(candidates):
+        if run.deadline.passed():
+            click.echo(not_attempted_notice([c.username for c in candidates[index:]]))
+            break
+        results.append(_provision_one_gitlab_user(run, candidate))
     return [r.username for r in results if r.failed]
 
 
@@ -225,13 +231,17 @@ def provision_gitlab_users(config_obj, candidates):
     utils.check_error(err)
     if not provision or not candidates:
         return []
+    minutes, err = config_obj.get_gitlab_import_deadline()
+    utils.check_error(err)
+    templates, template_error = gitlabPkg.resolve_templates(config_obj)
+    deadline = RunDeadline(minutes or RUN_DEADLINE_MINUTES)
+    run = _GitlabRun(None, templates, template_error, deadline)
     gl, err = gitlabPkg.resolve_client(config_obj)
     if err is not None:
         click.echo(f"GitLab provisioning skipped: {err}")
-        return [c.username for c in candidates if _has_gitlab_work(c)]
-    templates, template_error = gitlabPkg.resolve_templates(config_obj)
-    run = _GitlabRun(gl, templates, template_error)
-    return _issue_gitlab_resources(run, candidates)
+        wants = run.wants_projects
+        return [c.username for c in candidates if has_gitlab_work(c, wants)]
+    return _issue_gitlab_resources(replace(run, gl=gl), candidates)
 
 
 def gitlab_failure_exc(failed):

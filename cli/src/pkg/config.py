@@ -1,38 +1,7 @@
 """This file supports the DTaaS config class"""
 
 from . import utils
-
-# The [gitlab] keys describing the GitLab project template a new user's two
-# repositories are seeded from. They have no built-in default: the values
-# ship in the generated dtaas.toml, which is their single source of truth.
-GITLAB_TEMPLATE_KEYS = ("templates_url", "common_branch", "user_branch")
-
-
-def _trimmed_template(section):
-    """The [gitlab] template keys, trimmed, keyed by their dtaas.toml names."""
-    return {key: str(section.get(key, "") or "").strip() for key in GITLAB_TEMPLATE_KEYS}
-
-
-def gitlab_template_values(section):
-    """Read the project template keys out of a [gitlab] *section*.
-
-    Shared with config_validate_gitlab.py so "all three keys, or none at all"
-    has a single definition.
-
-    Returns:
-        Tuple of (values, problem). *values* is None when the section sets
-        none of the keys, which is not a problem: project creation is simply
-        not configured. *problem* is a message naming the missing keys when
-        only some of them are set, which is a mistake rather than an opt out.
-    """
-    values = _trimmed_template(section)
-    missing = [key for key, value in values.items() if not value]
-    if len(missing) == len(GITLAB_TEMPLATE_KEYS):
-        return None, None
-    if missing:
-        listed = ", ".join(f"gitlab.{key}" for key in missing)
-        return None, f"gitlab project template is incomplete; also set {listed}"
-    return values, None
+from .config_gitlab import gitlab_minutes, gitlab_template_values
 
 
 class Config:
@@ -219,6 +188,29 @@ class Config:
             return None, err
         values, problem = gitlab_template_values(section)
         return values, Exception(f"Config file error: {problem}") if problem else None
+
+    def _gitlab_minutes(self, key):
+        """Gets one [gitlab] setting given in minutes, or None when the key
+        is absent so the caller keeps its own default.
+
+        Returns:
+            Tuple of (minutes or None, err).
+        """
+        section, err = self.get_gitlab_section()
+        if err is not None or section is None:
+            return None, err
+        value, problem = gitlab_minutes(section, key)
+        return value, Exception(f"Config file error: {problem}") if problem else None
+
+    def get_gitlab_import_timeout(self):
+        """Gets [gitlab].import_timeout: the minutes one repository import
+        may take before the wait on it is given up on."""
+        return self._gitlab_minutes("import_timeout")
+
+    def get_gitlab_import_deadline(self):
+        """Gets [gitlab].import_deadline: the minutes a whole 'user add' run
+        may spend waiting on imports before it stops starting new users."""
+        return self._gitlab_minutes("import_deadline")
 
     def get_gitlab_ssl_verify(self):
         """Gets [gitlab].ssl_verify (default True): True/False, or the path

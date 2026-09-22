@@ -656,12 +656,16 @@ docker compose --env-file config/.env up -d --force-recreate traefik-forward-aut
 #### 🦊 GitLab provisioning (optional)
 
 When `[gitlab].provision = true` in `dtaas.toml` (off by default), `admin user
-add` also creates each new user's GitLab account and a Personal Access Token:
+add` also creates each new user's GitLab account, a Personal Access Token and
+the two repositories their workspace starts from:
 
 ```toml
 [gitlab]
 provision = true
 api_url = "https://gitlab.example.com"
+templates_url = "https://github.com/into-cps-association/DTaaS-Examples"
+common_branch = "common-template"
+user_branch = "user-template"
 ```
 
 The provisioning token must be able to create users (an admin token). It is
@@ -688,11 +692,46 @@ saved to `gitlab_user_tokens.json` (mode `0600`) treat it as a credential
 store. Re-running `admin user add` for an already-provisioned user retries
 only the parts that failed before; once a token has been issued for a user it
 is not reissued on a later run. An already-existing GitLab account is left
-untouched and reported with a warning. A GitLab failure does not affect
+untouched, is given neither a token nor repositories (its owner is unknown to
+this run, so nothing is written into its namespace), and is reported with a
+warning. A GitLab failure does not affect
 container provisioning (containers are already up by then) but does make the
 command exit non-zero. For a self-hosted GitLab behind an internal CA, set
 `[gitlab].ssl_verify` to the CA bundle's path; `false` disables verification
 entirely and prints a warning.
+
+##### The `common` and `user` repositories
+
+Every provisioned user also gets two private projects in their own GitLab
+namespace, `<username>/common` and `<username>/user`, each seeded from one
+branch of the template repository named by the three keys above. Those keys
+are the only place the template is defined; there is no built-in fallback.
+`admin config generate` writes them with the DTaaS values, so a fresh
+installation gets the standard template. A `dtaas.toml` that sets none of
+them provisions accounts and tokens as before and prints a one-line notice
+that project creation was skipped. Setting only some of them is a typo
+rather than an opt out, so `admin config validate` reports it as an error and
+`admin user add` fails the users it affects, keeping their accounts and
+tokens.
+
+GitLab imports the template itself, so the instance needs the **Repository by
+URL** import source enabled (Admin Area, Settings, General, Import and export
+settings) and the GitLab server, not the machine running the CLI, must be able
+to reach `templates_url`. The import copies every branch, so the CLI then
+makes the configured branch the default and deletes the others. It runs on
+the server and can take minutes; each import is waited on for
+`[gitlab].import_timeout` minutes (10 by default), and a whole run stops
+starting new users after `[gitlab].import_deadline` minutes (60 by default),
+naming the users it did not reach so a re-run can pick them up.
+
+A project that already holds content is left exactly as it is. An empty one
+left behind by an interrupted run is finished on the next run. An import that
+GitLab reports as failed, or never scheduled, is never rerun by GitLab, so
+the error says to delete that empty project and run `admin user add` again.
+Once both projects exist the user is marked as done and later runs skip the
+step, independently of the token marker, so a user whose token was issued but
+whose projects failed is retried for the projects alone. That retry needs no
+password.
 
 #### ⚖️ Resource limits (optional)
 

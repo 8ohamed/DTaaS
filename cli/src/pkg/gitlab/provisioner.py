@@ -6,7 +6,8 @@ from ...gitlab_common import CreateOutcome, create_user, create_user_pat
 
 _ALREADY_EXISTS_MESSAGE = (
     "account already exists on GitLab; it was not created by this "
-    "run, its credentials are unknown, and no token was issued."
+    "run, its credentials are unknown, so no token was issued and no "
+    "projects were created in its namespace."
 )
 
 

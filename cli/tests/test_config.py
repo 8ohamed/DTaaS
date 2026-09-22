@@ -313,6 +313,34 @@ def test_get_gitlab_ssl_verify_reads_ca_bundle_path_unchanged(mock_utils):
     assert err is None
 
 
+@pytest.mark.parametrize("key", ["import_timeout", "import_deadline"])
+def test_get_gitlab_minutes_defaults_to_unset(mock_utils, key):
+    """Without the key the caller keeps its own default."""
+    mock_utils.return_value = ({"gitlab": {"provision": True}}, None)
+    assert _gitlab_minutes_getter(key)() == (None, None)
+
+
+@pytest.mark.parametrize("key", ["import_timeout", "import_deadline"])
+def test_get_gitlab_minutes_reads_the_configured_value(mock_utils, key):
+    """A configured budget is read as whole minutes."""
+    mock_utils.return_value = ({"gitlab": {key: 3}}, None)
+    assert _gitlab_minutes_getter(key)() == (3, None)
+
+
+@pytest.mark.parametrize("key", ["import_timeout", "import_deadline"])
+def test_get_gitlab_minutes_reports_a_bad_value(mock_utils, key):
+    """A budget that cannot be waited out is a config error, not a default."""
+    mock_utils.return_value = ({"gitlab": {key: 0}}, None)
+    minutes, err = _gitlab_minutes_getter(key)()
+    assert minutes is None
+    assert key in str(err)
+
+
+def _gitlab_minutes_getter(key):
+    """The Config getter for one of the [gitlab] settings read in minutes."""
+    return getattr(config.Config(), f"get_gitlab_{key}")
+
+
 def test_get_gitlab_templates_unset_is_not_an_error(mock_utils):
     """No template keys means project creation is not configured, which the
     caller skips; there is no built-in repository to fall back on."""

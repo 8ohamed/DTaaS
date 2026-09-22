@@ -193,12 +193,17 @@ this package means `dtaas.toml`.
   configured branch: that branch becomes the default
   branch and the other imported branches are deleted, since an import copies
   all of them and GitLab offers no per branch import. The import is
-  asynchronous, so `project_import.await_import` polls `import_status` (10
-  minutes at most) before the branches are touched. A read that fails (a
+  asynchronous, so `project_import.await_import` polls `import_status`
+  (`[gitlab].import_timeout` minutes at most, 10 by default, carried there
+  on `ProjectTemplates`) before the branches are touched. A read that fails (a
   GitLab error or a dropped connection) is retried, and only
   `IMPORT_POLL_MAX_ERRORS` failures in a row end the wait, as that user's
   error: nothing is raised, so one unreachable moment never aborts the
-  users after it in the same run. Status `none` is an
+  users after it in the same run. The same tuple, `errors.API_ERRORS` (a
+  GitLab error or a `requests` one, which python-gitlab does not wrap),
+  guards every other call the package makes, the account half included, so
+  a dropped connection is always one user's failure and never the run's.
+  Status `none` is an
   error there rather than "nothing to wait for": every project polled was
   created with an `import_url`, so it means the instance never scheduled the
   import, and the message names the two prerequisites (the "Repository by
@@ -208,7 +213,10 @@ this package means `dtaas.toml`.
   job, and it does not equate "present" with "ready". A run that stopped
   waiting on an import leaves an empty project behind, so reporting it as
   ready would mark the user `gitlab_projects_created` over an empty
-  repository; an empty project is therefore waited on and seeded again. A
+  repository; an empty project is therefore waited on and seeded again,
+  unless its `import_status` is `none`, which means no import was ever
+  scheduled for it: waiting would report a disabled import source, so the
+  empty project is reported as itself instead. A
   project with any content is never touched, whatever its branches: from
   branch names alone a half seeded project cannot be told from one the user
   has pushed to, and pruning the second would delete their work. One whose
@@ -220,14 +228,20 @@ this package means `dtaas.toml`.
   with `IMPORT_RETRY_HINT` (delete the empty project and re-run), because
   deleting it automatically is not safe everywhere: with delayed deletion
   the path can stay taken for days.
+- An account that already exists on GitLab (the 409 path) gets no projects,
+  for the same reason it gets no token: `create_user` reports
+  ALREADY_EXISTS with no id, the account belongs to whoever registered it,
+  and both a token and a repository act on a namespace this run cannot
+  vouch for. `_account_step` therefore returns `has_account=False` for that
+  outcome and `_skip_projects` stops there.
 - `ProjectTarget.user_id` is the account id when it is known (created this
   run, or stored in the registry); with neither,
   `gitlab_common.users.find_user_id`, called from `pkg/gitlab/projects.py`'s
-  `_resolve_user_id`, resolves it by username, which is the only way
-  a pre-existing account (the 409 path above, which carries no id) gets its
-  projects. The note about it says the id was resolved by username and no
-  more: an account created by this CLI before its id reached the registry
-  looks the same from there.
+  `_resolve_user_id`, resolves it by username. Only accounts this CLI
+  created reach that step now, so the lookup covers the one case its caller
+  cannot supply an id for: an account created before its id reached the
+  registry. The note it prints says only that, and claims nothing about
+  whose account it is.
 
 This is wired into `dtaas user add` (`pkg/users_gitlab.py`'s `provision_gitlab_users`)
 behind the `[gitlab].provision` flag (default `false`, so existing
@@ -266,13 +280,27 @@ password. A client that cannot be built then
 fails only the users who had GitLab work waiting (`_has_gitlab_work`),
 which includes an account with projects still to create: with
 `provision = true` that is a failure even where tokens are issued out of
-band, since the projects cannot be made without a client. Two visible
+band, since the projects cannot be made without a client. The template is
+therefore resolved before the client, and `wants_projects` is passed in: a
+deployment that configures no template never records
+`gitlab_projects_created`, so without that flag every user who ever had a
+token would count as unfinished work forever and an unusable client would
+fail a command with nothing left to do. Two visible
 consequences follow. A `--file` import whose CSV has no password column now
 reaches the GitLab step and prints one skip line per row (still exit 0):
 "no password supplied" for a user with no account, the issued token notice
 for one who has it. And `cmd_user` does not prompt for a password for a user
 already marked `gitlab_pat_issued` (`_pat_issued`), since `_account_step`
 would discard it.
+A run also has a budget: `[gitlab].import_deadline` minutes (60 by
+default), kept by `users_gitlab_targets.RunDeadline` from the moment GitLab
+provisioning starts. `_issue_gitlab_resources` checks it before each user
+rather than interrupting one, since a project half way through an import
+would be left behind; the users it stops short of are named as not
+attempted and the command still exits 0, because nothing was tried for them
+and a plain re-run picks them up. Without it a bulk add on an instance whose
+imports hang (they stay `scheduled`, so nothing reports them as broken)
+would wait `import_timeout` twice per user, hours for a large CSV.
 `users_gitlab.py` holds that flow (`_account_step`, `_projects_step`),
 `users_gitlab_targets.py` decides who is in it, and
 `users_gitlab_records.py` is the disk half: the 0600 token file and the

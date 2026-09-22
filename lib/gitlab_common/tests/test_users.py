@@ -3,6 +3,8 @@
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, Mock
 
+import pytest
+import requests
 from gitlab.exceptions import GitlabCreateError, GitlabError
 from gitlab_common import (
     CreateOutcome,
@@ -148,6 +150,40 @@ def test_create_user_pat_empty_token():
     assert "Empty token" in error
 
 
+DROPPED = requests.ConnectionError("connection reset")
+
+
+def test_create_user_reports_a_dropped_connection():
+    """A connection that never reached GitLab is a requests error, which
+    python-gitlab does not wrap. It is this user's failure, reported in the
+    result, so a caller creating many users is not aborted by it."""
+    gl = MagicMock()
+    gl.users.create.side_effect = DROPPED
+    result = create_user(
+        gl, username=TEST_USERNAME, email=TEST_EMAIL, password=TEST_PASSWORD
+    )
+    assert result.outcome is CreateOutcome.FAILED
+    assert "connection reset" in result.error
+
+
+def test_create_user_pat_reports_a_dropped_connection():
+    """The same holds for the token half, against the same instance."""
+    gl = MagicMock()
+    gl.users.get.side_effect = DROPPED
+    ok, error = create_user_pat(gl, 42, TEST_USERNAME)
+    assert ok is False
+    assert "connection reset" in error
+
+
+@pytest.mark.parametrize("failure", [DROPPED, GitlabError("500 Server Error")])
+def test_find_user_id_swallows_any_api_failure(failure):
+    """A failed lookup is None, whatever failed, so a caller reports it as an
+    unresolved user rather than crashing the run."""
+    gl = MagicMock()
+    gl.users.list.side_effect = failure
+    assert find_user_id(gl, TEST_USERNAME) is None
+
+
 def test_find_user_id_returns_the_matching_account():
     """An existing account is resolved to its numeric id."""
     gl = MagicMock()
@@ -160,11 +196,4 @@ def test_find_user_id_without_a_match_is_none():
     """No account of that name resolves to None rather than an error."""
     gl = MagicMock()
     gl.users.list.return_value = []
-    assert find_user_id(gl, TEST_USERNAME) is None
-
-
-def test_find_user_id_swallows_a_lookup_failure():
-    """A failed lookup is None, so a caller reports it as an unresolved user."""
-    gl = MagicMock()
-    gl.users.list.side_effect = GitlabError("500 Server Error")
     assert find_user_id(gl, TEST_USERNAME) is None
