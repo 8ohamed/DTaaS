@@ -39,14 +39,14 @@ def project_specs(templates: ProjectTemplates):
     ]
 
 
-def _describe(spec, result):
-    """The report line for one project's outcome: a cleanly created project
-    says nothing here, since the caller summarises those."""
+def _describe(spec, result) -> str:
+    """The report line for one project's outcome, empty when there is nothing
+    to report: a cleanly created project is summarised by the caller."""
     if not result.ok:
-        return (f"project '{spec.name}' failed: {result.error}",)
+        return f"project '{spec.name}' failed: {result.error}"
     if result.already_exists:
-        return (f"project '{spec.name}' already exists and was left unchanged",)
-    return ()
+        return f"project '{spec.name}' already exists and was left unchanged"
+    return ""
 
 
 def ensure_user_projects(gl, user_id: int, templates: ProjectTemplates):
@@ -71,5 +71,6 @@ def ensure_user_projects(gl, user_id: int, templates: ProjectTemplates):
         (spec, create_user_project(gl, user_id, spec))
         for spec in project_specs(templates)
     ]
-    messages = tuple(m for spec, result in outcomes for m in _describe(spec, result))
+    lines = (_describe(spec, result) for spec, result in outcomes)
+    messages = tuple(line for line in lines if line)
     return all(result.ok for _, result in outcomes), messages
