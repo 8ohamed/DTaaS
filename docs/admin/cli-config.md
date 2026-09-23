@@ -116,9 +116,9 @@ react-app-oauth-url = "https://gitlab.example.com"
 # set. ssl_verify may be a CA-bundle path for a GitLab behind an internal CA;
 # false disables verification (a warning is printed) and true (default) uses
 # the system trust store.
-# templates_url/common_branch/user_branch name the template each new user's
-# "common" and "user" repositories are seeded from: one repository, one
-# branch per project. All three or none; with none, accounts and tokens are
+# common_template/user_template name the repository each new user's "common"
+# and "user" project is imported from: one template repository per project,
+# copied as it stands. Both or neither; with neither, accounts and tokens are
 # still provisioned and project creation is skipped. import_timeout caps the
 # wait on one import in minutes (10 when left out) and import_deadline caps
 # what a whole "user add" run spends waiting on imports (60 when left out).
@@ -127,9 +127,8 @@ provision  = false
 api_url    = "https://gitlab.example.com"
 # pat      = "glpat-xxxxxxxxxxxxxxxxxxxx"   # prefer DTAAS_GITLAB_PAT
 # ssl_verify = "/etc/ssl/certs/corp-ca.pem" # or true (default) / false
-templates_url = "https://github.com/into-cps-association/DTaaS-Examples"
-common_branch = "common-template"
-user_branch   = "user-template"
+common_template = "https://gitlab.com/dtaas/common.git"
+user_template   = "https://gitlab.com/dtaas/user1.git"
 # import_timeout = 10
 # import_deadline = 60
 
@@ -208,8 +207,8 @@ first, then the current directory) and reports all problems at once:
 | `[gitlab].api_url` | Must be an `http(s)` URL; **required** when `provision` is `true`, optional otherwise |
 | `[gitlab].pat` | When present, must be non-empty (remove the key to use `DTAAS_GITLAB_PAT`) |
 | `[gitlab].ssl_verify` | When present, `true`, `false`, or a CA-bundle path string |
-| `[gitlab].templates_url` | When present, must be an `http(s)` URL |
-| `[gitlab].templates_url`, `common_branch`, `user_branch` | All three or none; setting only some is reported as an incomplete project template |
+| `[gitlab].common_template`, `[gitlab].user_template` | When present, must be `http(s)` URLs |
+| `[gitlab].common_template`, `user_template` | Both or neither; setting only one is reported as an incomplete project template |
 | `[gitlab].import_timeout`, `[gitlab].import_deadline` | When present, a whole number of minutes, 1 or more |
 | Deployment-section URLs | When present, must be `http(s)` URLs |
 | Deployment-section `default-user` | When present, must be a valid username |

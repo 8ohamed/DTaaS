@@ -10,14 +10,13 @@ from src.pkg.config_gitlab import (
 )
 
 TEMPLATE = {
-    "templates_url": "https://github.com/into-cps-association/DTaaS-Examples",
-    "common_branch": "common-template",
-    "user_branch": "user-template",
+    "common_template": "https://gitlab.com/dtaas/common.git",
+    "user_template": "https://gitlab.com/dtaas/user1.git",
 }
 
 
 def test_template_values_are_trimmed():
-    """The three keys are read together, with surrounding spaces removed."""
+    """Both keys are read together, with surrounding spaces removed."""
     padded = {key: f"  {value} " for key, value in TEMPLATE.items()}
     assert gitlab_template_values(padded) == (TEMPLATE, None)
 
@@ -29,11 +28,10 @@ def test_no_template_key_is_an_opt_out():
 
 
 def test_a_partial_template_names_the_missing_keys():
-    """Some keys set is a typo, so the problem says which ones are absent."""
-    values, problem = gitlab_template_values({"templates_url": "https://x.io/y"})
+    """One key set is a typo, so the problem says which one is absent."""
+    values, problem = gitlab_template_values({"common_template": "https://x.io/y"})
     assert values is None
-    assert "gitlab.common_branch" in problem
-    assert "gitlab.user_branch" in problem
+    assert "gitlab.user_template" in problem
 
 
 @pytest.mark.parametrize("key", MINUTE_KEYS)

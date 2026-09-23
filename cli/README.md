@@ -650,54 +650,57 @@ password, the CLI prints a warning whenever it is disabled.
 ##### The `common` and `user` repositories
 
 Every provisioned user gets two private projects in their own GitLab
-namespace, `<username>/common` and `<username>/user`, each seeded from one
-branch of a template repository:
+namespace, `<username>/common` and `<username>/user`, each imported from its
+own template repository:
 
 ```toml
 [gitlab]
-templates_url = "https://github.com/into-cps-association/DTaaS-Examples"
-common_branch = "common-template"
-user_branch   = "user-template"
+common_template = "https://gitlab.com/dtaas/common.git"
+user_template   = "https://gitlab.com/dtaas/user1.git"
 ```
 
-These three keys are the only place the template is defined; the CLI has no
+Creating them on `api_url` needs the admin provisioning PAT described above
+(`DTAAS_GITLAB_PAT`, or `[gitlab].pat`); without it no account, token or
+repository is created.
+
+These two keys are the only place the templates are defined; the CLI has no
 built-in fallback. `dtaas config generate` writes them with the values above,
-so a fresh installation gets the standard DTaaS template. A `dtaas.toml`
+so a fresh installation gets the standard DTaaS templates. A `dtaas.toml`
 predating them (one written before this feature) provisions accounts and
 tokens as before and prints a one-line notice that project creation was
-skipped: add the three keys to turn it on. Setting only some of them is a
+skipped: add the two keys to turn it on. Setting only one of them is a
 typo rather than an opt out, so `dtaas config validate` reports it as an
 error and `dtaas user add` fails the users it affects rather than leaving
 them quietly without repositories (their accounts and tokens are still
-provisioned and kept). Point the keys at your own repository and branches to
-hand new users a different starting point.
+provisioned and kept). Point the keys at your own repositories to hand new
+users a different starting point.
 
 Each import is waited on for `[gitlab].import_timeout` minutes (10 by
 default) and a whole run stops starting new users once it has spent
 `[gitlab].import_deadline` minutes (60 by default). Both keys are optional
-and independent of the three template keys. Two projects per user are
+and independent of the two template keys. Two projects per user are
 created one after another, so without the deadline a bulk `--file` add of
 many users on a GitLab whose imports hang would hold the command for hours.
 Users the run does not reach are named on the console and left for the next
 run: nothing was attempted for them, so the command still exits 0 and a
 plain re-run picks them up.
 
-GitLab imports the template repository itself, which has two consequences for
-a self-hosted instance: the **Repository by URL** import source must be
+GitLab imports each template repository itself, which has two consequences
+for a self-hosted instance: the **Repository by URL** import source must be
 enabled (Admin Area, Settings, General, Import and export settings) and the
-GitLab server, not the machine running the CLI, must be able to reach
-`templates_url`. An import GitLab never starts is reported against those two
-prerequisites by name. The import copies every branch, so the CLI then makes
-the configured branch the project's default branch and deletes the others; a
-branch that cannot be deleted (a protected branch, say) is reported as a
-warning and leaves the project in place. The import runs on the server and
-can take minutes, so each project is announced before the wait.
+GitLab server, not the machine running the CLI, must be able to reach both
+template URLs. An import GitLab never starts is reported against those two
+prerequisites by name. The import is the whole of the seeding: each project
+is a copy of its template as the template stands, every branch and the
+template's own default branch included, with nothing added or pruned
+afterwards. The import runs on the server and can take minutes, so each
+project is announced before the wait.
 
 A project that already holds any content is left exactly as it is and
-reported as already existing; if its default branch is not the template
-branch, the report says so and how to reseed it (delete the project in
-GitLab and re-run). An empty project left by a run that stopped waiting on
-its import (the wait timed out or the run was interrupted) is finished on the
+reported as already existing, whatever its branches look like, since they
+may hold the user's own work. An empty project left by a run that stopped
+waiting on its import (the wait timed out or the run was interrupted) is
+finished on the
 next run instead of being reported as ready, so a failed run never marks a
 user done with an empty repository. A GitLab that cannot be reached at all
 fails only the user being provisioned at the time, whether the connection

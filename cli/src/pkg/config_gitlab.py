@@ -1,15 +1,15 @@
 """The value rules of dtaas.toml's [gitlab] project settings.
 
 Read at run time through Config's getters and checked ahead of time by
-config_validate_gitlab.py, so each rule ("all three template keys or none",
+config_validate_gitlab.py, so each rule ("both template keys or neither",
 "a whole number of minutes") has one definition that both share. Kept out of
 config.py, which is at its line limit.
 """
 
-# The [gitlab] keys describing the GitLab project template a new user's two
-# repositories are seeded from. They have no built-in default: the values
-# ship in the generated dtaas.toml, which is their single source of truth.
-GITLAB_TEMPLATE_KEYS = ("templates_url", "common_branch", "user_branch")
+# The [gitlab] keys naming the repository each of a new user's two projects
+# is imported from, one template per project. They have no built-in default:
+# the values ship in the generated dtaas.toml, their single source of truth.
+GITLAB_TEMPLATE_KEYS = ("common_template", "user_template")
 
 # The [gitlab] keys given in whole minutes: how long one repository import
 # may take, and how long a whole 'user add' run may spend waiting on imports
@@ -25,7 +25,7 @@ def _trimmed_template(section):
 def gitlab_template_values(section):
     """Read the project template keys out of a [gitlab] *section*.
 
-    Shared with config_validate_gitlab.py so "all three keys, or none at all"
+    Shared with config_validate_gitlab.py so "both keys, or neither of them"
     has a single definition.
 
     Returns:

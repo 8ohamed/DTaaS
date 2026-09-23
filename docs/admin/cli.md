@@ -663,9 +663,8 @@ the two repositories their workspace starts from:
 [gitlab]
 provision = true
 api_url = "https://gitlab.example.com"
-templates_url = "https://github.com/into-cps-association/DTaaS-Examples"
-common_branch = "common-template"
-user_branch = "user-template"
+common_template = "https://gitlab.com/dtaas/common.git"
+user_template = "https://gitlab.com/dtaas/user1.git"
 ```
 
 The provisioning token must be able to create users (an admin token). It is
@@ -703,22 +702,23 @@ entirely and prints a warning.
 ##### The `common` and `user` repositories
 
 Every provisioned user also gets two private projects in their own GitLab
-namespace, `<username>/common` and `<username>/user`, each seeded from one
-branch of the template repository named by the three keys above. Those keys
-are the only place the template is defined; there is no built-in fallback.
+namespace, `<username>/common` and `<username>/user`, each imported from the
+template repository named by the two keys above. Those keys are the only
+place the templates are defined; there is no built-in fallback.
 `admin config generate` writes them with the DTaaS values, so a fresh
-installation gets the standard template. A `dtaas.toml` that sets none of
+installation gets the standard templates. A `dtaas.toml` that sets neither of
 them provisions accounts and tokens as before and prints a one-line notice
-that project creation was skipped. Setting only some of them is a typo
+that project creation was skipped. Setting only one of them is a typo
 rather than an opt out, so `admin config validate` reports it as an error and
 `admin user add` fails the users it affects, keeping their accounts and
 tokens.
 
-GitLab imports the template itself, so the instance needs the **Repository by
-URL** import source enabled (Admin Area, Settings, General, Import and export
-settings) and the GitLab server, not the machine running the CLI, must be able
-to reach `templates_url`. The import copies every branch, so the CLI then
-makes the configured branch the default and deletes the others. It runs on
+GitLab imports each template itself, so the instance needs the **Repository
+by URL** import source enabled (Admin Area, Settings, General, Import and
+export settings) and the GitLab server, not the machine running the CLI, must
+be able to reach both template URLs. Each project is a copy of its template
+as the template stands, every branch included, with nothing pruned
+afterwards. The import runs on
 the server and can take minutes; each import is waited on for
 `[gitlab].import_timeout` minutes (10 by default), and a whole run stops
 starting new users after `[gitlab].import_deadline` minutes (60 by default),

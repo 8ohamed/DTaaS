@@ -171,9 +171,10 @@ this package means `dtaas.toml`.
   new PAT.
 - `projects.py`'s `provision_user_projects(gl, target, templates)` creates
   the user's two repositories, `common` and `user`, from the `[gitlab]`
-  template settings (`ProjectTemplates`: one `templates_url`, one branch per
-  project). Those keys have no built-in default:
-  `config.gitlab_template_values` returns None when none of them is set, and
+  template settings (`ProjectTemplates`: one template repository per
+  project, `common_template` and `user_template`). Those keys have no
+  built-in default:
+  `config.gitlab_template_values` returns None when neither is set, and
   `projects.resolve_templates` (the template counterpart of
   `client.resolve_client`) then skips only the project step, with one notice
   per run, leaving account and token provisioning untouched. A partly
@@ -189,14 +190,14 @@ this package means `dtaas.toml`.
   module's. Each one is `projects.create_user_project`, the project
   counterpart of `users.create_user` and shaped like it (explicit arguments,
   no console output or config), which creates the project in the user's own
-  namespace with GitLab's import by URL and then reduces it to the
-  configured branch: that branch becomes the default
-  branch and the other imported branches are deleted, since an import copies
-  all of them and GitLab offers no per branch import. The import is
+  namespace with GitLab's import by URL and leaves it at that: one template
+  repository per project means the copy is already what the user should
+  start from, every branch and the template's own default branch included,
+  so nothing is switched or pruned afterwards. The import is
   asynchronous, so `project_import.await_import` polls `import_status`
   (`[gitlab].import_timeout` minutes at most, 10 by default, carried there
-  on `ProjectTemplates`) before the branches are touched. A read that fails (a
-  GitLab error or a dropped connection) is retried, and only
+  on `ProjectTemplates`) before the project is reported ready. A read that
+  fails (a GitLab error or a dropped connection) is retried, and only
   `IMPORT_POLL_MAX_ERRORS` failures in a row end the wait, as that user's
   error: nothing is raised, so one unreachable moment never aborts the
   users after it in the same run. The same tuple, `errors.API_ERRORS` (a

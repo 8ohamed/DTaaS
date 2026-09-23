@@ -75,31 +75,32 @@ def test_gitlab_template_keys_may_all_be_omitted(base):
     assert collect_errors(ok) == []
 
 
-def test_gitlab_templates_url_must_be_a_url(base):
-    """A malformed template URL is caught before 'user add' imports from it."""
+@pytest.mark.parametrize("key", ["common_template", "user_template"])
+def test_gitlab_template_urls_must_be_urls(base, key):
+    """A malformed template URL is caught before 'user add' imports from it,
+    for either project's template."""
     bad = copy.deepcopy(base)
-    bad["gitlab"] = {"templates_url": "github.com/into-cps-association"}
-    assert "gitlab.templates_url must be a valid URL" in collect_errors(bad)
+    bad["gitlab"] = {key: "gitlab.com/dtaas/common"}
+    assert f"gitlab.{key} must be a valid URL" in collect_errors(bad)
 
 
 def test_gitlab_template_must_be_complete(base):
     """Part of a template is a mistake: it is caught here rather than at
     'user add', and the message names the keys still missing."""
     bad = copy.deepcopy(base)
-    bad["gitlab"] = {"templates_url": "https://github.com/x/y", "common_branch": "c"}
+    bad["gitlab"] = {"common_template": "https://gitlab.com/x/y.git"}
     errors = collect_errors(bad)
-    assert [e for e in errors if "gitlab.user_branch" in e]
+    assert [e for e in errors if "gitlab.user_template" in e]
 
 
 def test_gitlab_template_rejects_a_blank_value(base):
     """A blank value counts as missing, not as an empty override."""
     bad = copy.deepcopy(base)
     bad["gitlab"] = {
-        "templates_url": "https://github.com/x/y",
-        "common_branch": "  ",
-        "user_branch": "u",
+        "common_template": "  ",
+        "user_template": "https://gitlab.com/x/y.git",
     }
-    assert [e for e in collect_errors(bad) if "gitlab.common_branch" in e]
+    assert [e for e in collect_errors(bad) if "gitlab.common_template" in e]
 
 
 @pytest.mark.parametrize("key", ["import_timeout", "import_deadline"])
@@ -120,11 +121,10 @@ def test_gitlab_minute_keys_accept_minutes(base):
 
 
 def test_gitlab_template_values_accepted(base):
-    """A configured template repository and branch pair validates cleanly."""
+    """A template repository for each of the two projects validates cleanly."""
     ok = copy.deepcopy(base)
     ok["gitlab"] = {
-        "templates_url": "https://gitlab.example.com/dtaas/templates",
-        "common_branch": "shared",
-        "user_branch": "personal",
+        "common_template": "https://gitlab.example.com/dtaas/common.git",
+        "user_template": "https://gitlab.example.com/dtaas/user.git",
     }
     assert collect_errors(ok) == []

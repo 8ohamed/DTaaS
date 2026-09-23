@@ -112,7 +112,7 @@ def test_add_users_without_a_template_still_provisions_accounts(
     assert err is None
     gitlab_env["ensure"].assert_called_once()
     mock_gitlab_projects.assert_not_called()
-    assert "no project template in dtaas.toml" in capsys.readouterr().out
+    assert "no project templates in dtaas.toml" in capsys.readouterr().out
 
 
 def test_add_users_with_a_half_configured_template_fails_the_user(

@@ -4,7 +4,6 @@ from unittest.mock import patch, MagicMock
 import pytest
 from click.testing import CliRunner
 from src.cmd import dtaas
-from src.cmd_user_utils import UserAddInput
 # pylint: disable=redefined-outer-name
 
 

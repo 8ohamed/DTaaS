@@ -14,14 +14,12 @@ from src.pkg.gitlab.projects import (
 USERNAME = "alice"
 USER_ID = 7
 TEMPLATE_VALUES = {
-    "templates_url": "https://github.com/into-cps-association/DTaaS-Examples",
-    "common_branch": "common-template",
-    "user_branch": "user-template",
+    "common_template": "https://gitlab.com/dtaas/common.git",
+    "user_template": "https://gitlab.com/dtaas/user1.git",
 }
 TEMPLATES = ProjectTemplates(
-    TEMPLATE_VALUES["templates_url"],
-    TEMPLATE_VALUES["common_branch"],
-    TEMPLATE_VALUES["user_branch"],
+    TEMPLATE_VALUES["common_template"],
+    TEMPLATE_VALUES["user_template"],
 )
 
 
@@ -81,7 +79,7 @@ def _config(values=None, err=None, timeout=(None, None)):
     return config_obj
 
 
-def test_resolve_templates_reads_the_three_keys():
+def test_resolve_templates_reads_both_keys():
     """The [gitlab] template keys become the settings the project calls take."""
     templates, err = resolve_templates(_config(dict(TEMPLATE_VALUES)))
     assert err == ""

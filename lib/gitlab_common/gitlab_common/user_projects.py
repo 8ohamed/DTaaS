@@ -1,10 +1,10 @@
 """The two repositories every DTaaS user's workspace starts from.
 
 A DTaaS user gets a ``common`` project and a ``user`` project in their own
-GitLab namespace, each seeded from one branch of a single template
-repository. That pairing is the same wherever users are provisioned from, so
-it lives here rather than in one consumer, while where the template comes
-from stays with each consumer: the CLI reads it from dtaas.toml.
+GitLab namespace, each imported from its own template repository. That
+pairing is the same wherever users are provisioned from, so it lives here
+rather than in one consumer, while where the templates come from stays with
+each consumer: the CLI reads them from dtaas.toml.
 
 Like the rest of this package the work is done through explicit arguments
 and reported back as values: outcomes come out as message strings for the
@@ -22,12 +22,11 @@ USER_PROJECT_NAME = "user"
 
 @dataclass(frozen=True)
 class ProjectTemplates:
-    """One template repository, the branch of it each of the two projects is
-    seeded from, and how long one import may take before it is given up on."""
+    """The repository each of the two projects is imported from, and how long
+    one import may take before it is given up on."""
 
-    url: str
-    common_branch: str
-    user_branch: str
+    common_url: str
+    user_url: str
     import_timeout: int = IMPORT_TIMEOUT_MINUTES
 
 
@@ -35,21 +34,19 @@ def project_specs(templates: ProjectTemplates):
     """The two projects every provisioned user gets, in creation order."""
     timeout = templates.import_timeout
     return [
-        ProjectSpec(
-            COMMON_PROJECT_NAME, templates.url, templates.common_branch, timeout
-        ),
-        ProjectSpec(USER_PROJECT_NAME, templates.url, templates.user_branch, timeout),
+        ProjectSpec(COMMON_PROJECT_NAME, templates.common_url, timeout),
+        ProjectSpec(USER_PROJECT_NAME, templates.user_url, timeout),
     ]
 
 
 def _describe(spec, result):
-    """The report lines for one project's outcome: a cleanly created project
+    """The report line for one project's outcome: a cleanly created project
     says nothing here, since the caller summarises those."""
     if not result.ok:
         return (f"project '{spec.name}' failed: {result.error}",)
-    left = f"project '{spec.name}' already exists and was left unchanged"
-    head = (left,) if result.already_exists else ()
-    return head + tuple(f"project '{spec.name}': {w}" for w in result.warnings)
+    if result.already_exists:
+        return (f"project '{spec.name}' already exists and was left unchanged",)
+    return ()
 
 
 def ensure_user_projects(gl, user_id: int, templates: ProjectTemplates):
@@ -58,13 +55,13 @@ def ensure_user_projects(gl, user_id: int, templates: ProjectTemplates):
     Idempotent through projects.create_user_project: a project the user
     already owns keeps its contents and is never re-imported, and an empty
     one an earlier run left waiting on its import is finished. Both projects
-    are attempted even when the first one fails, so a single bad branch name
-    does not hide a second problem.
+    are attempted even when the first one fails, so a single unreachable
+    template does not hide a second problem.
 
     Args:
         gl: Authenticated gitlab.Gitlab client with admin rights.
         user_id: GitLab id of the account the projects are created for.
-        templates: The template repository and the branch for each project.
+        templates: The template repository for each of the two projects.
 
     Returns:
         Tuple of (ok, messages); *ok* is True when both projects exist

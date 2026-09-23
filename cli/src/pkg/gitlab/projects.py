@@ -1,11 +1,11 @@
 """Creates a provisioned user's GitLab projects from the configured template.
 
 Deployment specific glue over gitlab_common.ensure_user_projects: it turns
-the [gitlab] settings of dtaas.toml into the template every DTaaS user's two
-repositories are seeded from, resolves the GitLab account id to create them
-under, and reports each outcome on the console. The GitLab API work and the
-common/user pairing itself are gitlab_common's, the way users_gitlab.py
-stays out of provisioner.py.
+the [gitlab] settings of dtaas.toml into the two template repositories every
+DTaaS user's projects are imported from, resolves the GitLab account id to
+create them under, and reports each outcome on the console. The GitLab API
+work and the common/user pairing itself are gitlab_common's, the way
+users_gitlab.py stays out of provisioner.py.
 """
 
 from dataclasses import dataclass
@@ -22,9 +22,9 @@ from ...gitlab_common import (
 )
 
 NO_TEMPLATE_NOTICE = (
-    "GitLab project creation skipped: no project template in dtaas.toml. "
-    "Set [gitlab] templates_url, common_branch and user_branch (the "
-    "generated dtaas.toml ships the DTaaS values)."
+    "GitLab project creation skipped: no project templates in dtaas.toml. "
+    "Set [gitlab] common_template and user_template (the generated "
+    "dtaas.toml ships the DTaaS values)."
 )
 
 
@@ -54,9 +54,8 @@ def resolve_templates(config_obj):
         click.echo(NO_TEMPLATE_NOTICE)
         return None, ""
     templates = ProjectTemplates(
-        values["templates_url"],
-        values["common_branch"],
-        values["user_branch"],
+        values["common_template"],
+        values["user_template"],
         timeout or IMPORT_TIMEOUT_MINUTES,
     )
     return templates, ""

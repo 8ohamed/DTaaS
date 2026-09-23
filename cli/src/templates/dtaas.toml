@@ -1,7 +1,7 @@
 # This is the config for DTaaS CLI
 
 name="Digital Twin as a Service (DTaaS)"
-version="2.1.0"
+version="2.2.0"
 owner="The INTO-CPS-Association"
 git-repo="https://github.com/into-cps-association/DTaaS.git"
 
@@ -72,27 +72,32 @@ load_balance=true
 # Personal Access Token, and their two repositories, using an admin
 # provisioning PAT. Disabled by default; existing deployments are unaffected
 # unless this is set.
-# The provisioning PAT must be able to create users (an admin token), so it is
-# deliberately NOT a key here: export it as DTAAS_GITLAB_PAT instead and keep
-# the token off disk entirely. A [gitlab].pat key is still honoured if you add
-# one, this file is generated mode 0600 and gitignored, but the
-# environment variable is preferred.
+# The provisioning PAT must be able to create users (an admin token). Export
+# it as DTAAS_GITLAB_PAT to keep the token off disk entirely; the commented
+# out [gitlab].pat key below is honoured too, and this file is generated mode
+# 0600 and gitignored, but the environment variable is preferred.
 [gitlab]
 provision=false
 api_url="https://gitlab.com"
 ssl_verify=true
-# The template each new user's "common" and "user" repositories are seeded
-# from: one repository, one branch per project. The GitLab instance imports
-# the template itself, so it needs the "Repository by URL" import source
-# enabled and network access to templates_url. These three keys are the only
-# place the template is defined; the CLI has no built-in fallback. Drop all
-# three to provision accounts and tokens without any repositories, or point
-# them at your own repository and branches.
-templates_url="https://github.com/into-cps-association/DTaaS-Examples"
-common_branch="common-template"
-user_branch="user-template"
+# The admin provisioning PAT that creates the accounts, the tokens and these
+# repositories on api_url. Without it nothing below is provisioned. Prefer
+# the DTAAS_GITLAB_PAT environment variable, which keeps the token off disk;
+# uncomment this key only to keep it here instead. A value set here wins over
+# the environment variable, so leave the placeholder commented out.
+#pat="glpat-xxxxxxxxxxxxxxxxxxxx"
+# The template each new user's "common" and "user" repositories are imported
+# from: one repository per project, copied as it stands, every branch and the
+# template's own default branch included. The GitLab instance does the import
+# itself, so it needs the "Repository by URL" import source enabled and
+# network access to both URLs. These two keys are the only place the
+# templates are defined; the CLI has no built-in fallback. Drop both to
+# provision accounts and tokens without any repositories, or point them at
+# your own repositories.
+common_template="https://gitlab.com/dtaas/common.git"
+user_template="https://gitlab.com/dtaas/user1.git"
 # Minutes to wait for one repository import before giving up on it and
-# failing that project. Optional, independent of the three keys above, and
+# failing that project. Optional, independent of the two keys above, and
 # 10 when left out. Lower it when a slow template would otherwise hold a
 # bulk 'user add' for ten minutes per project.
 import_timeout=10

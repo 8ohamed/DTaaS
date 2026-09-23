@@ -172,13 +172,12 @@ class Config:
         return str(section.get("pat", "")).strip(), None
 
     def get_gitlab_templates(self):
-        """Gets the GitLab project template new users' repositories are
-        seeded from: [gitlab].templates_url and the common_branch/user_branch
-        of that template.
+        """Gets the GitLab template repositories new users' projects are
+        imported from: [gitlab].common_template and [gitlab].user_template.
 
-        There is no built-in template: a dtaas.toml that sets none of the
-        keys gets (None, None), and the caller skips project creation rather
-        than inventing a repository to clone.
+        There is no built-in template: a dtaas.toml that sets neither key
+        gets (None, None), and the caller skips project creation rather than
+        inventing a repository to clone.
 
         Returns:
             Tuple of (values keyed by their dtaas.toml names, err).

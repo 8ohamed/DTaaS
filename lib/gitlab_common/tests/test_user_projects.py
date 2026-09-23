@@ -12,9 +12,8 @@ from gitlab_common.user_projects import (
 
 USER_ID = 7
 TEMPLATES = ProjectTemplates(
-    "https://github.com/into-cps-association/DTaaS-Examples",
-    "common-template",
-    "user-template",
+    "https://gitlab.com/dtaas/common.git",
+    "https://gitlab.com/dtaas/user1.git",
 )
 CREATED = ProjectResult(True, project_id=1)
 
@@ -30,14 +29,13 @@ def mock_create():
         yield mock
 
 
-def test_project_specs_seed_each_project_from_its_branch():
-    """Both projects come from one template, each from its own branch."""
+def test_project_specs_import_each_project_from_its_own_template():
+    """Each project has its own template repository, imported as it stands."""
     specs = project_specs(TEMPLATES)
-    assert [(s.name, s.branch) for s in specs] == [
-        ("common", "common-template"),
-        ("user", "user-template"),
+    assert [(s.name, s.import_url) for s in specs] == [
+        ("common", TEMPLATES.common_url),
+        ("user", TEMPLATES.user_url),
     ]
-    assert {s.import_url for s in specs} == {TEMPLATES.url}
 
 
 def test_ensure_user_projects_creates_both(mock_create):
@@ -61,32 +59,13 @@ def test_ensure_user_projects_reports_an_existing_project(mock_create):
 
 
 def test_ensure_user_projects_attempts_both_after_a_failure(mock_create):
-    """One bad branch name must not hide a second problem."""
-    failed = ProjectResult(False, error="branch 'nope' is not there")
+    """One unreachable template must not hide a second problem."""
+    failed = ProjectResult(False, error="could not reach the template")
     mock_create.side_effect = [failed, failed]
     ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
     assert ok is False
     assert len(messages) == 2
     assert mock_create.call_count == 2
-
-
-@pytest.mark.parametrize(
-    "already_exists,lead",
-    [(False, ()), (True, ("project 'common' already exists and was left unchanged",))],
-)
-def test_ensure_user_projects_passes_warnings_through(mock_create, already_exists, lead):
-    """A warning is reported without failing the project, for a new project
-    (a leftover template branch) and an existing one (left off the template
-    branch) alike."""
-    mock_create.side_effect = [
-        ProjectResult(
-            True, project_id=1, already_exists=already_exists, warnings=("w",)
-        ),
-        CREATED,
-    ]
-    ok, messages = ensure_user_projects(MagicMock(), USER_ID, TEMPLATES)
-    assert ok is True
-    assert messages == lead + ("project 'common': w",)
 
 
 def test_ensure_user_projects_prints_nothing(mock_create, capsys):

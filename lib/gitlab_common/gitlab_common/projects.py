@@ -1,4 +1,4 @@
-"""Creates one GitLab project for a user, seeded from a template branch.
+"""Creates one GitLab project for a user, imported from a template repository.
 
 The project counterpart of users.py, and shaped like it: the GitLab API work
 for a single resource, taking explicit arguments and doing no console
@@ -6,13 +6,13 @@ output, config reading or persistence. Which projects a user gets is
 user_projects.py's answer; where the template comes from is each consumer's.
 
 The project is created in the user's own namespace with GitLab's import by
-URL feature, which copies every branch of the template repository, and is
-then reduced to the single branch the caller asked for: that branch becomes
-the default branch and the other imported branches are deleted.
+URL feature, which copies the template repository as it stands: every branch
+comes across and the template's own default branch stays the default. One
+template repository per project, so nothing has to be pruned afterwards.
 
 The import runs asynchronously and has instance side prerequisites, both of
 which project_import.py handles: the project exists before its repository
-does, so the import is awaited before the branches are touched.
+does, so the import is awaited before the project is reported as ready.
 """
 
 import logging
@@ -38,13 +38,11 @@ NO_IMPORT_TO_AWAIT = (
 
 @dataclass(frozen=True)
 class ProjectSpec:
-    """One project to create: its name, the template repository to import,
-    the single branch of that template to keep, and how long its import may
-    take before the wait is given up on."""
+    """One project to create: its name, the template repository to import it
+    from, and how long that import may take before the wait is given up on."""
 
     name: str
     import_url: str
-    branch: str
     import_timeout: int = IMPORT_TIMEOUT_MINUTES
 
 
@@ -53,17 +51,12 @@ class ProjectResult:
     """Outcome of :func:`create_user_project`, shaped like users.py's
     CreateUserResult: *ok* means the project is there now, whether or not
     this call created it, and *already_exists* tells the two apart.
-
-    ``warnings`` carries non fatal problems (a leftover template branch that
-    could not be deleted), so a caller can report them without treating the
-    project itself as failed.
     """
 
     ok: bool
     project_id: int | None = None
     error: str = ""
     already_exists: bool = False
-    warnings: tuple[str, ...] = ()
 
 
 def _existing_project(gl: gitlab.Gitlab, namespace: str, name: str):
@@ -81,76 +74,16 @@ def _is_empty(project) -> bool:
     return empty or not getattr(project, "default_branch", "")
 
 
-def _off_template_warning(project, branch: str) -> str:
-    """A warning when an adopted project's default branch is not *branch*;
-    empty string when it is.
-
-    That is either the user's own choice or a run that died between the
-    import and the branch switch; the two look the same from here, so the
-    project is left alone and the way to reseed it is named instead.
-    """
-    default = getattr(project, "default_branch", "")
-    if default == branch:
-        return ""
-    return (
-        f"its default branch is '{default}', not the template branch "
-        f"'{branch}'; delete the project in GitLab and re-run to reseed it"
-    )
-
-
-def _set_default_branch(project, branch: str) -> str:
-    """Point *project*'s default branch at *branch*; empty string on success.
-
-    The branch is read back first so a template that has no such branch (a
-    misconfigured branch name) is reported as that, not as a failed update.
-    """
-    try:
-        project.branches.get(branch)
-        project.default_branch = branch
-        project.save()
-    except gitlab.exceptions.GitlabGetError:
-        return f"branch '{branch}' is not in the imported template"
-    except API_ERRORS as exc:
-        return f"could not set the default branch to '{branch}': {exc}"
-    return ""
-
-
-def _delete_branch(project, name: str) -> str:
-    """Delete branch *name*; empty string when it is gone, else a warning.
-
-    Branch protection is dropped first: GitLab protects an imported
-    repository's default branch, and a protected branch cannot be deleted.
-    """
-    try:
-        project.protectedbranches.delete(name)
-    except API_ERRORS:
-        logger.debug("Branch '%s' was not protected", name)
-    try:
-        project.branches.delete(name)
-    except API_ERRORS as exc:
-        return f"could not delete template branch '{name}': {exc}"
-    return ""
-
-
-def _prune_branches(project, keep: str) -> tuple[str, ...]:
-    """Delete every branch except *keep*, returning one warning per failure."""
-    try:
-        names = [b.name for b in project.branches.list(iterator=True) if b.name != keep]
-    except API_ERRORS as exc:
-        return (f"could not list the imported branches: {exc}",)
-    return tuple(w for w in (_delete_branch(project, n) for n in names) if w)
-
-
 def _seed_project(gl: gitlab.Gitlab, project_id: int, spec: ProjectSpec):
-    """Reduce the freshly imported *project_id* to *spec*'s single branch."""
-    project, error = await_import(gl, project_id, spec.import_timeout)
-    if not error:
-        error = _set_default_branch(project, spec.branch)
+    """Wait for *project_id*'s import of *spec*'s template to finish.
+
+    Nothing else is done to the repository: it is a copy of the template as
+    the template stands, branches and default branch included.
+    """
+    _project, error = await_import(gl, project_id, spec.import_timeout)
     if error:
         return ProjectResult(False, project_id=project_id, error=error)
-    return ProjectResult(
-        True, project_id=project_id, warnings=_prune_branches(project, spec.branch)
-    )
+    return ProjectResult(True, project_id=project_id)
 
 
 def _adopt_existing(gl: gitlab.Gitlab, project, spec: ProjectSpec) -> ProjectResult:
@@ -159,18 +92,11 @@ def _adopt_existing(gl: gitlab.Gitlab, project, spec: ProjectSpec) -> ProjectRes
     Only a project with no repository is seeded: that is what a run leaves
     when it stopped waiting on an import, and reporting it as ready would
     mark the user done with an empty repository. A project with any content
-    is never touched, since pruning branches could delete the user's work;
-    one left off the template branch is reported with a warning instead.
+    is never touched, since its branches may hold the user's own work.
     """
     if not _is_empty(project):
         logger.info("GitLab project exists: %s", project.path_with_namespace)
-        warning = _off_template_warning(project, spec.branch)
-        return ProjectResult(
-            True,
-            project_id=project.id,
-            already_exists=True,
-            warnings=(warning,) if warning else (),
-        )
+        return ProjectResult(True, project_id=project.id, already_exists=True)
     if getattr(project, "import_status", "none") == "none":
         return ProjectResult(False, project_id=project.id, error=NO_IMPORT_TO_AWAIT)
     logger.info("Resuming the seeding of %s", project.path_with_namespace)
@@ -206,23 +132,23 @@ def _user_project(gl: gitlab.Gitlab, user_id: int, spec: ProjectSpec):
 def create_user_project(
     gl: gitlab.Gitlab, user_id: int, spec: ProjectSpec
 ) -> ProjectResult:
-    """Create *spec*'s project in *user_id*'s namespace, seeded from its branch.
+    """Create *spec*'s project in *user_id*'s namespace from its template.
 
     Idempotent: a project of that name already in the user's namespace keeps
     its contents, so a repeated run never overwrites a user's work. An empty
     one, left by an earlier run whose import had not finished, is waited on
-    and seeded here rather than reported as ready; an import that failed is
-    reported with the way to retry it, since GitLab does not rerun it.
+    here rather than reported as ready; an import that failed is reported
+    with the way to retry it, since GitLab does not rerun it.
 
     Args:
         gl: Authenticated gitlab.Gitlab client with admin rights.
         user_id: GitLab id of the account the project is created for.
-        spec: Project name, template URL, and template branch to keep.
+        spec: Project name and the template repository to import.
 
     Returns:
-        A :class:`ProjectResult`. A project whose repository imported but
-        could not be reduced to *spec.branch* is not ok, with its id set, so
-        the caller can report which project needs attention.
+        A :class:`ProjectResult`. A project whose import did not finish is
+        not ok, with its id set, so the caller can report which project
+        needs attention.
     """
     project, created, error = _user_project(gl, user_id, spec)
     if project is None:

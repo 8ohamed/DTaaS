@@ -7,14 +7,12 @@ from src.gitlab_common import ProjectTemplates
 from src.pkg.gitlab.provisioner import ProvisionResult
 
 TEMPLATE_KEYS = {
-    "templates_url": "https://github.com/into-cps-association/DTaaS-Examples",
-    "common_branch": "common-template",
-    "user_branch": "user-template",
+    "common_template": "https://gitlab.com/dtaas/common.git",
+    "user_template": "https://gitlab.com/dtaas/user1.git",
 }
 TEMPLATES = ProjectTemplates(
-    TEMPLATE_KEYS["templates_url"],
-    TEMPLATE_KEYS["common_branch"],
-    TEMPLATE_KEYS["user_branch"],
+    TEMPLATE_KEYS["common_template"],
+    TEMPLATE_KEYS["user_template"],
 )
 # pylint: disable=redefined-outer-name,unused-argument
 
